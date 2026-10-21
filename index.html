@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Farmhouse Walkthrough</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #111; overflow: hidden; font: 13px/1.4 system-ui, sans-serif; color: #f4efe6; }
+    #c { display: block; width: 100vw; height: 100vh; }
+    #hud { position: fixed; inset: 0; pointer-events: none; }
+    #hud.hidden { display: none; }
+    .panel { position: absolute; background: rgba(20, 18, 16, 0.62); backdrop-filter: blur(6px); border-radius: 8px; padding: 8px 12px; }
+    #where { top: 12px; left: 12px; }
+    #where b { display: block; font-size: 15px; }
+    #help { bottom: 12px; left: 12px; color: #d9d2c6; }
+    #views { top: 12px; right: 12px; display: flex; flex-direction: column; gap: 4px; pointer-events: auto; }
+    #views button { all: unset; cursor: pointer; padding: 4px 8px; border-radius: 5px; text-align: left; }
+    #views button:hover { background: rgba(255, 255, 255, 0.12); }
+    #status { position: fixed; inset: 0; display: grid; place-items: center; color: #bbb; pointer-events: none; }
+    #status:empty { display: none; }
+    .shot #hud, .shot #status { display: none !important; }
+    kbd { font: inherit; padding: 0 4px; border: 1px solid #777; border-radius: 3px; }
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="status">loading…</div>
+  <div id="hud">
+    <div id="where" class="panel"><b id="room">—</b>light: <span id="preset">view preset</span></div>
+    <div id="views" class="panel"></div>
+    <div id="help" class="panel">click to look · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>Shift</kbd> faster · <kbd>1</kbd>–<kbd>9</kbd> views · <kbd>L</kbd> lighting · <kbd>O</kbd> ambient occlusion · <kbd>H</kbd> hide</div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

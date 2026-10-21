@@ -1,0 +1,16 @@
+{
+  "name": "farmhouse-walkthrough",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "shot": "node tools/shot.mjs"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "^1.49.1",
+    "three": "^0.170.0"
+  }
+}

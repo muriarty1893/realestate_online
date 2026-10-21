@@ -1,0 +1,274 @@
+// Master bedroom furnishings: bed, nightstands, lamps, bench, rug, art, curtains, barn door, fan, lights.
+import * as THREE from 'three';
+import { box, rbox, mesh, metreUV, pillowGeo, drapeGeo, curtainGeo, lathe, merge, rng } from './util.js';
+
+export const R = { x0: -8.928, x1: -4.540, z0: -9.047, z1: -3.978 }; // mstr interior faces
+export const BED = { x: -6.735, head: -8.937, W: 2.06, L: 2.3, hbW: 2.22, hbH: 1.12 };
+
+export function buildBedroom(ctx, M, group, P) {
+  const g = new THREE.Group(); g.name = 'mstr:furniture'; group.add(g);
+  bed(ctx, M, g, P);
+  nightstands(ctx, M, g, P);
+  bench(ctx, M, g, P);
+  rug(ctx, M, g, P);
+  art(ctx, M, g, P);
+  curtains(ctx, M, g, P);
+  barnDoor(ctx, M, g, P);
+  entryDoor(ctx, M, g, P);
+  return g;
+}
+
+// ------------------------------------------------------------------ bed
+function bed(ctx, M, g, P) {
+  const b = new THREE.Group(); b.name = 'bed';
+  b.position.set(BED.x, 0, BED.head);
+  g.add(b);
+  const { W, L, hbW, hbH } = BED;
+  // headboard: tall plain upholstered panel standing on the floor
+  b.add(rbox(hbW, hbH, 0.11, 0.035, M.upholstery, 0, hbH / 2 + 0.02, -0.055, { segs: 4 }));
+  // platform base with recessed plinth
+  const baseH = 0.34, baseW = W + 0.06, baseL = L + 0.12;
+  b.add(rbox(baseW, baseH - 0.07, baseL, 0.03, M.upholstery, 0, 0.07 + (baseH - 0.07) / 2, baseL / 2, { segs: 3 }));
+  b.add(box(baseW - 0.12, 0.07, baseL - 0.12, M.blackMatte, 0, 0.035, baseL / 2, { cast: false }));
+  // mattress
+  const mT = 0.27, mTop = baseH + mT;
+  b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
+  // duvet: folded back near the pillows, hanging over sides and foot
+  const duvTop = mTop + 0.035;
+  const duv = mesh(drapeGeo({ W: W - 0.04, L: L - 0.05, z0: 0.62, top: duvTop, side: 0.36, foot: 0.33, r: 0.06, segX: 70, segZ: 60, wrinkle: 0.007, fold: 0.008, seed: 2, floorY: 0.06 }), M.duvet);
+  b.add(duv);
+  // turned-down duvet fold (thicker roll) at the top edge
+  const fold = rbox(W + 0.02, 0.07, 0.22, 0.035, M.duvet, 0, duvTop + 0.025, 0.62, { segs: 3 });
+  b.add(fold);
+  // cream throw blanket over the foot third, draped over the east (right) side
+  const tW = 1.25;
+  const thr = mesh(drapeGeo({ W: tW, L: L - 0.02, z0: 1.0, top: duvTop + 0.035, side: 0.44, foot: 0.3, r: 0.11, segX: 50, segZ: 40, wrinkle: 0.006, fold: 0.008, seed: 5, sideMask: [0, 1], floorY: 0.08, skew: -0.5 }), M.throwCream);
+  thr.position.x = W / 2 - tW / 2 + 0.01;
+  b.add(thr);
+  // pillows (euro shams, sleepers, decoratives)
+  const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0) => {
+    const m = mesh(pillowGeo(w, h, d, { seed, puff: 1 }), mat);
+    m.position.set(x, y, z); m.rotation.set(-tilt, yaw, 0, 'YXZ');
+    b.add(m); return m;
+  };
+  const yb = mTop + 0.02;
+  // back row euro shams against the headboard
+  pil(0.66, 0.64, 0.2, M.pillowA, -0.66, yb + 0.31, 0.12, 0.2, 0.03, 1);
+  pil(0.66, 0.64, 0.2, M.pillowA, 0.0, yb + 0.31, 0.12, 0.18, 0, 2);
+  pil(0.66, 0.64, 0.2, M.pillowA, 0.66, yb + 0.31, 0.12, 0.2, -0.04, 3);
+  // sleeping pillows
+  pil(0.88, 0.5, 0.18, M.pillowC, -0.46, yb + 0.22, 0.3, 0.42, 0.05, 4);
+  pil(0.88, 0.5, 0.18, M.pillowC, 0.46, yb + 0.22, 0.3, 0.42, -0.05, 5);
+  pil(0.7, 0.48, 0.16, M.pillowW, 0.82, yb + 0.2, 0.22, 0.35, -0.12, 9);
+  // decoratives
+  pil(0.48, 0.46, 0.16, M.pillowB, -0.55, yb + 0.19, 0.46, 0.5, 0.12, 6);
+  pil(0.48, 0.46, 0.16, M.pillowB, 0.55, yb + 0.19, 0.46, 0.5, -0.12, 7);
+  pil(0.58, 0.34, 0.14, M.pillowA, 0.0, yb + 0.15, 0.52, 0.55, 0, 8);
+  ctx.addCollider({ x0: BED.x - hbW / 2, z0: BED.head - 0.11, x1: BED.x + hbW / 2, z1: BED.head + baseL });
+}
+
+// ------------------------------------------------------------------ nightstands + lamps + decor
+function nightstands(ctx, M, g, P) {
+  const w = 0.58, d = 0.42, h = 0.42, top = 0.64;
+  const xs = [BED.x - BED.hbW / 2 - 0.07 - w / 2, BED.x + BED.hbW / 2 + 0.07 + w / 2];
+  const zc = R.z0 + d / 2 + 0.005;
+  xs.forEach((x, i) => {
+    const n = new THREE.Group(); n.position.set(x, top - h, zc); g.add(n);
+    const t = 0.022;
+    n.add(box(w, t, d, M.oakSoft, 0, h - t / 2, 0, { grain: 'x' }));          // top
+    n.add(box(w, t, d, M.oakSoft, 0, t / 2, 0, { grain: 'x' }));              // bottom
+    n.add(box(t, h - 2 * t, d, M.oakSoft, -w / 2 + t / 2, h / 2, 0, { grain: 'z' }));
+    n.add(box(t, h - 2 * t, d, M.oakSoft, w / 2 - t / 2, h / 2, 0, { grain: 'z' }));
+    n.add(box(w - 2 * t, h - 2 * t, 0.012, M.oak, 0, h / 2, -d / 2 + 0.006, { grain: 'x' })); // back
+    // drawer (top half) with slim reveal, open shelf below
+    const dh = 0.16;
+    n.add(box(w - 2 * t - 0.006, dh - 0.006, 0.02, M.oakSoft, 0, h - t - dh / 2, d / 2 - 0.012, { grain: 'x' }));
+    n.add(box(w - 2 * t, 0.016, d - 0.02, M.oak, 0, h - t - dh - 0.008, 0, { grain: 'x' }));
+    // books on the shelf
+    const bk = (bw, bh, bd, mat, bx, by, bz, ry = 0) => { const m = box(bw, bh, bd, mat, bx, by, bz); m.rotation.y = ry; n.add(m); };
+    if (i === 1) {
+      bk(0.26, 0.03, 0.2, M.books[0], -0.02, t + 0.015, 0.02, 0.05);
+      bk(0.24, 0.025, 0.18, M.books[3], -0.01, t + 0.043, 0.02, -0.04);
+      bk(0.22, 0.022, 0.17, M.books[2], -0.02, t + 0.066, 0.02, 0.08);
+    } else {
+      bk(0.24, 0.03, 0.18, M.books[1], 0.03, t + 0.015, 0.03, -0.06);
+      bk(0.22, 0.025, 0.16, M.books[2], 0.03, t + 0.043, 0.03, 0.03);
+    }
+    // lamp
+    lamp(ctx, M, g, x + (i === 1 ? -0.07 : 0.02), top, zc - 0.02);
+    ctx.addCollider({ x0: x - w / 2, z0: R.z0, x1: x + w / 2, z1: R.z0 + d });
+  });
+  // decor: book stack + small bowl on right, wood bowl on left, vase with eucalyptus on right
+  const xr = xs[1], xl = xs[0];
+  g.add(box(0.22, 0.025, 0.16, M.books[2], xr + 0.12, top + 0.0125, zc + 0.08));
+  g.add(box(0.2, 0.02, 0.15, M.books[4], xr + 0.12, top + 0.035, zc + 0.08));
+  P.vaseR = { x: xr + 0.17, y: top, z: zc - 0.07 };
+  P.bowlL = { x: xl - 0.17, y: top, z: zc + 0.06 };
+  P.bowlR = { x: xr + 0.12, y: top + 0.045, z: zc + 0.08 };
+}
+
+function lamp(ctx, M, g, x, y, z) {
+  const l = new THREE.Group(); l.position.set(x, y, z); g.add(l);
+  // gourd base (cream ceramic)
+  const pts = [[0.0, 0], [0.07, 0.0], [0.09, 0.02], [0.115, 0.08], [0.125, 0.13], [0.115, 0.19], [0.085, 0.24], [0.045, 0.27], [0.03, 0.29], [0.03, 0.31], [0.0, 0.31]];
+  l.add(mesh(lathe(pts, 40), M.ceramic, { cast: false }));
+  const neck = mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.12, 8), M.brass); neck.position.y = 0.36; l.add(neck);
+  // tapered linen shade
+  const sh = mesh(new THREE.CylinderGeometry(0.115, 0.18, 0.23, 48, 1, true), M.shade, { cast: false });
+  sh.position.y = 0.43; l.add(sh);
+  const bulb = mesh(new THREE.SphereGeometry(0.03, 12, 8), M.bulbGlow, { cast: false }); bulb.position.y = 0.42; l.add(bulb);
+  const pl = new THREE.PointLight(0xffb36a, 1.6, 4.5, 2);
+  pl.position.set(0, 0.42, 0); pl.castShadow = false;
+  l.add(pl); ctx.addInteriorLight(pl);
+}
+
+// ------------------------------------------------------------------ bench at the foot
+function bench(ctx, M, g, P) {
+  const Lb = 1.62, D = 0.42, H = 0.47, legT = 0.075, cushT = 0.12;
+  const zc = BED.head + BED.L + 0.12 + 0.13 + D / 2;
+  const b = new THREE.Group(); b.position.set(BED.x, 0, zc); g.add(b);
+  for (const s of [-1, 1]) b.add(rbox(legT, H - cushT + 0.01, D - 0.01, 0.006, M.oakSoft, s * (Lb / 2 - legT / 2), (H - cushT + 0.01) / 2, 0, { grain: 'y' }));
+  b.add(box(Lb - 2 * legT, 0.025, D - 0.08, M.oakSoft, 0, H - cushT - 0.0125, 0, { grain: 'x' }));
+  b.add(rbox(Lb, cushT, D, 0.03, M.benchFab, 0, H - cushT / 2, 0, { segs: 4 }));
+  // chunky knit throw draped over the east half, hanging toward the floor in front
+  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.03, side: 0.1, foot: 0.43, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.012, fold: 0.045, foldFreq: 13, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
+  th.position.set(0.12, 0, -D / 2 + 0.01); th.rotation.y = 0.14;
+  const th2 = mesh(drapeGeo({ W: 0.5, L: 0.2, z0: 0, top: H + 0.075, side: 0.05, foot: 0.1, r: 0.04, segX: 30, segZ: 20, wrinkle: 0.015, fold: 0.02, foldFreq: 18, seed: 13, floorY: H }), M.knit);
+  th2.position.set(0.1, 0, -0.08); th2.rotation.y = 0.3;
+  b.add(th2);
+  b.add(th);
+  P.bench = { z: zc, D };
+  ctx.addCollider({ x0: BED.x - Lb / 2, z0: zc - D / 2, x1: BED.x + Lb / 2, z1: zc + D / 2 });
+}
+
+// ------------------------------------------------------------------ rug
+function rug(ctx, M, g, P) {
+  const w = 3.66, d = 2.74, t = 0.018;
+  const x = BED.x + 0.03, z1 = -5.35, z0 = z1 - d;
+  const geo = new THREE.BoxGeometry(w, t, d, 1, 1, 1);
+  metreUV(geo, 'z');
+  const m = mesh(geo, M.rug, { cast: false });
+  m.position.set(x, t / 2 + 0.001, (z0 + z1) / 2);
+  g.add(m);
+}
+
+// ------------------------------------------------------------------ art over the bed
+function art(ctx, M, g, P) {
+  const w = 1.32, h = 1.04, fd = 0.035, fw = 0.025;
+  const a = new THREE.Group(); a.position.set(BED.x, 1.79, R.z0 + fd / 2 + 0.004); g.add(a);
+  a.add(box(w, fw, fd, M.artFrame, 0, h / 2 - fw / 2, 0));
+  a.add(box(w, fw, fd, M.artFrame, 0, -h / 2 + fw / 2, 0));
+  a.add(box(fw, h - 2 * fw, fd, M.artFrame, -w / 2 + fw / 2, 0, 0));
+  a.add(box(fw, h - 2 * fw, fd, M.artFrame, w / 2 - fw / 2, 0, 0));
+  a.add(box(w - 2 * fw, h - 2 * fw, 0.01, M.artMat, 0, 0, -fd / 2 + 0.006));
+  const pic = mesh(new THREE.PlaneGeometry(w - 0.2, h - 0.2), M.art, { cast: false });
+  pic.position.z = -fd / 2 + 0.0125; a.add(pic);
+}
+
+// ------------------------------------------------------------------ curtains + rods
+function rod(M, g, a, b, y, along, fixed, r = 0.013) {
+  // along = 'x' (north wall) or 'z' (east wall); fixed = the other coordinate
+  const len = Math.abs(b - a), mid = (a + b) / 2;
+  const geo = new THREE.CylinderGeometry(r, r, len, 12);
+  const m = mesh(geo, M.black, { cast: true });
+  if (along === 'x') { m.rotation.z = Math.PI / 2; m.position.set(mid, y, fixed); }
+  else { m.rotation.x = Math.PI / 2; m.position.set(fixed, y, mid); }
+  g.add(m);
+  for (const e of [a, b]) {
+    const f = mesh(new THREE.SphereGeometry(r * 1.9, 12, 8), M.black);
+    if (along === 'x') f.position.set(e + Math.sign(e - mid) * 0.015, y, fixed); else f.position.set(fixed, y, e + Math.sign(e - mid) * 0.015);
+    g.add(f);
+  }
+  // wall brackets
+  for (const e of [a + Math.sign(b - a) * 0.1, b - Math.sign(b - a) * 0.1]) {
+    const br = along === 'x' ? box(0.012, 0.012, 0.09, M.black, e, y, fixed - 0.045) : box(0.09, 0.012, 0.012, M.black, fixed + 0.045, y, e);
+    g.add(br);
+  }
+}
+
+function panel(M, mat, g, { width, height, top, at, along, fixed, folds = 7, depth = 0.07, seed = 0, flip = 1 }) {
+  const geo = curtainGeo(width, height, { folds, depth, seed, flare: 0.08 });
+  const m = mesh(geo, mat, { cast: true });
+  m.position.y = top;
+  if (along === 'x') { m.position.x = at; m.position.z = fixed; m.rotation.y = flip > 0 ? 0 : Math.PI; }
+  else { m.position.z = at; m.position.x = fixed; m.rotation.y = flip > 0 ? Math.PI / 2 : -Math.PI / 2; }
+  g.add(m);
+  // header rings
+  return m;
+}
+
+function curtains(ctx, M, g, P) {
+  const rodY = 2.66, zN = R.z0 + 0.1;
+  // west window (win_mstr_n1, x -8.604..-7.880): panel gathered on its west side
+  rod(M, g, -8.87, -7.68, rodY, 'x', zN);
+  panel(M, M.curtain, g, { width: 0.42, height: rodY - 0.02, top: rodY - 0.02, at: -8.66, along: 'x', fixed: zN + 0.01, folds: 6, seed: 1 });
+  // east window (win_mstr_n2, x -5.567..-4.842): rod spans from left of the window to the corner
+  rod(M, g, -5.86, -4.6, rodY, 'x', zN);
+  panel(M, M.curtainLit, g, { width: 0.32, height: rodY - 0.02, top: rodY - 0.02, at: -4.71, along: 'x', fixed: zN + 0.01, folds: 6, seed: 2 });
+  // slider on the east wall: sheer full-height panels on a rod just below the ceiling
+  const xE = R.x1 - 0.1, sY = 2.95;
+  rod(M, g, -3.99, -7.08, sY, 'z', xE, 0.014);
+  panel(M, M.sheer, g, { width: 0.98, height: sY - 0.02, top: sY - 0.02, at: -6.47, along: 'z', fixed: xE - 0.02, folds: 9, depth: 0.15, seed: 3 });
+  panel(M, M.sheer, g, { width: 0.42, height: sY - 0.02, top: sY - 0.02, at: -4.2, along: 'z', fixed: xE - 0.02, folds: 6, depth: 0.12, seed: 4 });
+}
+
+// ------------------------------------------------------------------ barn door + flat track
+function barnDoor(ctx, M, g, P) {
+  // opening door_barn: z -6.096..-5.199 on the wall x -9.036..-8.928; door slid open to the north
+  const wallX = R.x0, doorW = 1.08, doorH = 2.42, t = 0.04;
+  const zS = -6.096 - 0.012; // leading (south) edge overlaps the north casing like the photo
+  const zc = zS - doorW / 2;
+  const xb = wallX + 0.018 + 0.016; // back face clear of the casing
+  const d = new THREE.Group(); d.name = 'barnDoor';
+  d.position.set(xb + t / 2, 0.012, zc); g.add(d);
+  // slab core
+  d.add(box(t - 0.014, doorH, doorW, M.oakDoor, -0.007, doorH / 2, 0, { grain: 'y' }));
+  // frame on the room face: stiles + 6 rails -> 5 horizontal recessed panels
+  const st = 0.125, rail = 0.115, topR = 0.13, botR = 0.2, ft = 0.02, fx = t / 2 - ft / 2 + 0.006;
+  for (const s of [-1, 1]) d.add(box(ft, doorH, st, M.oakDoor, fx, doorH / 2, s * (doorW / 2 - st / 2), { grain: 'y' }));
+  const inner = doorH - topR - botR, pnl = (inner - 4 * rail) / 5;
+  const rails = [[botR / 2, botR]];
+  for (let k = 1; k <= 4; k++) rails.push([botR + k * pnl + (k - 0.5) * rail, rail]);
+  rails.push([doorH - topR / 2, topR]);
+  for (const [y, h] of rails) d.add(box(ft, h, doorW - 2 * st, M.oakDoor, fx, y, 0, { grain: 'z' }));
+  // pull: black bar on the leading edge
+  const pullZ = doorW / 2 - 0.07;
+  d.add(box(0.014, 0.34, 0.016, M.black, t / 2 + 0.045, 1.08, pullZ));
+  for (const y of [0.93, 1.23]) d.add(box(0.045, 0.016, 0.016, M.black, t / 2 + 0.022, y, pullZ));
+  // flat track rail with stops, hangers with wheels
+  const railY = doorH + 0.012 + 0.06, railX = xb + t / 2 + 0.005;
+  const z0 = -5.05, z1 = zS - doorW - 0.07;
+  g.add(box(0.008, 0.045, z0 - z1, M.black, railX, railY, (z0 + z1) / 2));
+  for (const z of [z0 - 0.12, (z0 + z1) / 2, z1 + 0.12]) g.add(box(0.03, 0.02, 0.02, M.black, railX - 0.015, railY, z));
+  for (const z of [z0 - 0.03, z1 + 0.03]) g.add(box(0.03, 0.05, 0.025, M.black, railX + 0.012, railY, z));
+  for (const s of [-1, 1]) {
+    const hz = zc + s * (doorW / 2 - 0.13);
+    g.add(box(0.008, 0.2, 0.04, M.black, railX + 0.016, doorH + 0.012 - 0.04, hz));
+    const wheel = mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.018, 20), M.black);
+    wheel.rotation.z = Math.PI / 2; wheel.position.set(railX + 0.016, railY + 0.045, hz); g.add(wheel);
+    for (const yy of [doorH - 0.09, doorH - 0.03]) g.add(box(0.012, 0.012, 0.012, M.black, railX + 0.024, yy, hz));
+  }
+}
+
+// ------------------------------------------------------------------ hall door (custom so it parks against the corner)
+function entryDoor(ctx, M, g, P) {
+  // door_mstr: x -5.588..-4.756 in the south wall (z -3.978..-3.858). Hinge at the east jamb.
+  const o = { x0: -5.588, x1: -4.756, z0: -3.978, z1: -3.858 };
+  const headH = ctx.ft(8), leg = 0.085, ct = 0.018, wd = o.x1 - o.x0;
+  const trim = ctx.getMat('trim');
+  for (const z of [o.z0 - ct / 2, o.z1 + ct / 2]) {
+    g.add(box(leg, headH + leg, ct, trim, o.x0 - leg / 2, (headH + leg) / 2, z));
+    g.add(box(leg, headH + leg, ct, trim, o.x1 + leg / 2, (headH + leg) / 2, z));
+    g.add(box(wd + 2 * leg, leg, ct, trim, (o.x0 + o.x1) / 2, headH + leg / 2, z));
+  }
+  const leaf = new THREE.Group();
+  // swung out into the rear hall against its east side, so it never sits in the bedroom view
+  leaf.position.set(o.x1 - 0.02, 0.006, o.z1);
+  leaf.rotation.y = Math.PI / 2 + 0.05;
+  const lw = wd - 0.02, lh = headH - 0.012, lt = 0.035;
+  leaf.add(box(lw, lh, lt, ctx.getMat('door.interior'), -lw / 2, lh / 2, -lt / 2));
+  const knob = mesh(new THREE.SphereGeometry(0.028, 12, 8), M.black);
+  knob.position.set(-lw + 0.07, 0.92, 0.02); leaf.add(knob);
+  const k2 = knob.clone(); k2.position.z = -lt - 0.02; leaf.add(k2);
+  g.add(leaf);
+}

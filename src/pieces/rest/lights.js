@@ -13,7 +13,7 @@ const NEIGHBOURS = {
   dress: ['bath_front', 'bed_mid', 'bed_front'], bath_front: ['dress'], wic_front: ['bed_front'], bed_front: ['wic_front', 'hall_e', 'dress'],
   util: ['hall_w'], hall_w: ['util', 'mud', 'stair'], mud: ['hall_w', 'stair', 'pdr', 'garage'], stair: ['hall_w', 'mud'], pdr: ['mud'], garage: ['mud'],
   // other pieces' rooms that open onto ours (one primary slot each, spill only)
-  great: ['vest', 'hall_e'], kitchen: ['hall_w', 'mud'], mstr: ['hall_w'], wic_mstr: ['util'],
+  great: ['vest', 'hall_e'],
 };
 // rooms whose windows read from outside at dusk
 const WINDOW_ROOMS = ['bed_front', 'bed_mid', 'bed_ne', 'garage', 'bath_front', 'bath_ne'];
@@ -50,7 +50,7 @@ export function lightPool(ctx, slots) {
       for (const n of NEIGHBOURS[here] || []) { const l = byRoom.get(n); if (l) push(l[0]); }
       for (const n of NEIGHBOURS[here] || []) { const l = byRoom.get(n); if (l && l[1]) push(l[1]); }
     } else if (here && NEIGHBOURS[here]) {
-      for (const n of NEIGHBOURS[here]) { const l = byRoom.get(n); if (l) push(l[0], 0.8); }
+      for (const n of NEIGHBOURS[here]) { const l = byRoom.get(n); if (l) push(l[0], 0.6); }
     } else if (!here) {
       // outside: nearest windowed rooms
       const c = cam.position;

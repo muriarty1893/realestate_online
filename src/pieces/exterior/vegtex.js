@@ -87,7 +87,7 @@ function cluster(g, ox, oy, S, R, kind) {
     let h, s, li;
     if (kind === 'oak') { h = 62 + R() * 18; s = 25 + R() * 22; li = 15 + R() * 12 + lift * 12; if (R() < 0.14) { h = 55 + R() * 10; li += 16; s += 15; } }
     else if (kind === 'bg') { h = 75 + R() * 25; s = 25 + R() * 25; li = 16 + R() * 12 + lift * 12; }
-    else if (kind === 'box') { h = 75 + R() * 22; s = 45 + R() * 25; li = 28 + R() * 18 + lift * 16; }
+    else if (kind === 'box') { h = 72 + R() * 25; s = 32 + R() * 22; li = 22 + R() * 16 + lift * 14; }
     else if (kind === 'dark') { h = 90 + R() * 30; s = 30 + R() * 20; li = 20 + R() * 14 + lift * 12; }
     else { h = 90 + R() * 25; s = 40 + R() * 20; li = 26 + R() * 14 + lift * 10; }
     g.fillStyle = hsl(h, s, li);

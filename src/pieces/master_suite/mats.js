@@ -94,7 +94,7 @@ export function makeMats(ctx) {
 
   // rug: chunky braided jute/wool (procedural loops + fibre flecks)
   const rm = rugMaps();
-  M.rug = std({ map: rm.map, normalMap: rm.normalMap, color: 0xf3ebdf, roughness: 1.0, normalScale: new THREE.Vector2(1.3, 1.3), name: 'ms.rug' });
+  M.rug = std({ map: rm.map, normalMap: rm.normalMap, color: 0xe6dccd, roughness: 1.0, normalScale: new THREE.Vector2(1.3, 1.3), name: 'ms.rug' });
 
   // ceramics
   M.ceramic = std({ color: 0xead9bd, roughness: 0.55, name: 'ms.ceramic' });

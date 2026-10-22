@@ -168,12 +168,16 @@ function wallOven(M, w, y0, y1, zf) {
   const hh = (y1 - y0) / 2;
   for (let i = 0; i < 2; i++) {
     const a = y0 + i * hh, b = a + hh;
-    g.add(boxMM(0.01, a + 0.004, zf - 0.01, w - 0.01, b - 0.004, zf + 0.02, M.steelBrushed));
-    g.add(boxMM(0.05, a + 0.06, zf + 0.02, w - 0.05, b - 0.12, zf + 0.026, M.ovenGlass));
-    g.add(boxMM(0.03, b - 0.11, zf + 0.02, w - 0.03, b - 0.03, zf + 0.024, M.black));
-    const h = mesh(new THREE.CylinderGeometry(0.011, 0.011, w - 0.12, 12), M.steel);
-    h.rotation.z = Math.PI / 2; h.position.set(w / 2, b - 0.135, zf + 0.07); g.add(h);
-    for (const s of [0.07, w - 0.07]) g.add(boxMM(s - 0.008, b - 0.145, zf + 0.02, s + 0.008, b - 0.125, zf + 0.07, M.steel));
+    // stainless frame + door
+    g.add(boxMM(0.015, a + 0.005, zf - 0.01, w - 0.015, b - 0.005, zf + 0.022, M.steelBrushed));
+    // black control strip (top oven only) / vent slot
+    g.add(boxMM(0.04, b - 0.075, zf + 0.022, w - 0.04, b - 0.025, zf + 0.025, i ? M.ovenGlass : M.black));
+    // window: dark glass, inset
+    g.add(boxMM(0.09, a + 0.11, zf + 0.022, w - 0.09, b - 0.19, zf + 0.026, M.ovenGlass));
+    // handle bar on stand-offs
+    const h = mesh(new THREE.CylinderGeometry(0.011, 0.011, w - 0.1, 12), M.steel);
+    h.rotation.z = Math.PI / 2; h.position.set(w / 2, b - 0.12, zf + 0.07); g.add(h);
+    for (const s of [0.06, w - 0.06]) g.add(boxMM(s - 0.008, b - 0.13, zf + 0.022, s + 0.008, b - 0.11, zf + 0.07, M.steel));
   }
   return g;
 }
@@ -380,6 +384,9 @@ export function buildKitchen(ctx, M, group) {
   const pz = [0.19, 1.11, 2.03];
   for (const z of pz) { const p = pendant(M, 3.048, 1.93); p.position.set(isl.cx, 0, z); group.add(p); }
 
+  // ---------- props
+  kitchenProps(ctx, M, group);
+
   // colliders: perimeter cabinets
   ctx.addCollider({ x0: KIT.x0, z0: zTallN, x1: KIT.x0 + 0.65, z1: KIT.z1 });
   ctx.addCollider({ x0: KIT.x0, z0: zHallS, x1: KIT.x0 + 0.7, z1: zTallN });
@@ -421,9 +428,36 @@ function buildIsland(ctx, M, isl) {
   // granite top
   g.add(boxMM(isl.x0, CTR - 0.04, isl.z0, isl.x1, CTR, isl.z1, M.granite, { grain: 'x', worldUV: true }));
   // sink basin + faucet (marks.islandSink)
-  const sk = ctx.rectM(ctx.plan.marks.islandSink);
-  const scx = (isl.x0 + bx1) / 2 + 0.05, scz = sk.cz - 0.2;
-  g.add(boxMM(scx - 0.23, CTR - 0.003, scz - 0.38, scx + 0.23, CTR + 0.0015, scz + 0.38, M.sinkDark));
-  const f = faucet(M, { h: 0.43, reach: 0.22 }); f.position.set(isl.x0 + 0.12, CTR, scz); f.rotation.y = Math.PI / 2; g.add(f);
+  // sink basin on the working (west) half, faucet on the centre line (where the photo shows it)
+  const fz = 1.44, fxc = -1.64;
+  g.add(boxMM(fxc - 0.62, CTR - 0.003, fz - 0.36, fxc - 0.1, CTR + 0.0015, fz + 0.36, M.sinkDark));
+  const f = faucet(M, { h: 0.43, reach: 0.24 }); f.position.set(fxc, CTR, fz); f.rotation.y = -Math.PI / 2; g.add(f);
   return g;
+}
+
+// --------------------------------------------------------------- props (as staged in the photo)
+async function kitchenProps(ctx, M, group) {
+  const g = new THREE.Group(); g.name = 'kitchen:props';
+  // large shallow bowl with a woven ball on the island
+  const pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12; pts.push(new THREE.Vector2(0.06 + 0.17 * Math.sin(t * Math.PI / 2), 0.075 * (1 - Math.cos(t * Math.PI / 2)))); }
+  const bowl = mesh(new THREE.LatheGeometry(pts, 32), M.ceramicSide); bowl.position.set(-1.46, CTR, 0.61); g.add(bowl);
+  for (const [dx, dz] of [[0.04, 0.02], [-0.06, -0.03]]) { const b = mesh(new THREE.SphereGeometry(0.07, 14, 10), M.wicker); b.position.set(-1.46 + dx, CTR + 0.08, 0.61 + dz); g.add(b); }
+  // open magazine
+  const mg = boxMM(-0.16, 0, -0.12, 0.16, 0.01, 0.12, M.paper); mg.position.set(-1.25, CTR, -0.15); mg.rotation.y = 0.3; g.add(mg);
+  // cookbook on a stand against the backsplash, utensil crock, boards by the range
+  const cb = boxMM(-0.012, 0, -0.12, 0.012, 0.3, 0.12, M.paper); cb.position.set(-4.33, CTR + 0.02, 1.6); cb.rotation.z = 0.25; g.add(cb);
+  g.add(cyl(0.06, 0.055, 0.16, M.ceramic, -4.25, CTR + 0.08, 0.05, { seg: 20 }));
+  for (let i = 0; i < 5; i++) { const u = cyl(0.006, 0.006, 0.3, M.tableWood, -4.25 + (i - 2) * 0.01, CTR + 0.26, 0.05 + ((i * 7) % 3 - 1) * 0.012); u.rotation.z = (i - 2) * 0.12; g.add(u); }
+  const board = cyl(0.2, 0.2, 0.02, M.tableWood, -4.38, CTR + 0.21, -0.32, { seg: 32 }); board.rotation.z = Math.PI / 2 - 0.2; g.add(board);
+  g.add(cyl(0.11, 0.12, 0.14, M.pumpkin, -4.15, CTR + 0.07, -0.5, { seg: 20 }));
+  group.add(g);
+  // potted herb on the island (Poly Haven potted_plant_02, white pot)
+  try {
+    const gl = await ctx.loadGLTF(new URL('../../../assets/great_room/models/potted_plant_02/potted_plant_02.gltf', import.meta.url).href);
+    const p = gl.scene;
+    p.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (/pot/i.test(o.material.name)) { o.material = o.material.clone(); o.material.map = null; o.material.color.set(0xf0ece4); o.material.roughness = 0.4; } } });
+    const bb = new THREE.Box3().setFromObject(p); const sz = bb.getSize(new THREE.Vector3());
+    const sc = 0.36 / sz.y; p.scale.setScalar(sc); p.position.set(-1.98, CTR - bb.min.y * sc, 0.0);
+    g.add(p);
+  } catch (e) { /* optional prop */ }
 }

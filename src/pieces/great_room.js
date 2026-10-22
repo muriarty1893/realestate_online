@@ -6,7 +6,7 @@ import { buildVault, buildBeams, buildFireplace } from './great_room/arch.js';
 import { buildKitchen } from './great_room/kitchen.js';
 import { buildLiving } from './great_room/living.js';
 import { buildDining } from './great_room/dining.js';
-import { buildLights } from './great_room/lights.js';
+import { buildLights, reflectionProbe } from './great_room/lights.js';
 
 // Camera matched to refs/inside_view_1.webp (solved from vanishing points + plan geometry).
 // shiftY: the photo is level (verticals vertical) with the horizon above centre, i.e. a shift lens;
@@ -50,6 +50,7 @@ export async function build(ctx) {
   await buildLiving(ctx, M, group);
   await buildDining(ctx, M, group);
   buildLights(ctx, M, group, { pendants: kit.pendants });
+  reflectionProbe(ctx, [M.steel, M.steelBrushed, M.glass, M.ovenGlass, M.mirror, M.sinkDark]);
   ctx.scene.add(group);
   installLensShift(ctx);
 }

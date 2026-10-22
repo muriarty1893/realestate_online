@@ -322,10 +322,10 @@ export async function buildVegetation(ctx, M, parent, site) {
     limbs: [
       { path: [[-5.3, 6.0, 16.6], [-3.0, 7.6, 16.0], [0.5, 8.6, 15.5], [4.5, 9.1, 15.0], [7.5, 9.5, 14.6]], r: 0.4, leafy: 0.7 },
       { path: [[-7.6, 6.2, 17.4], [-8.6, 8.2, 18.0], [-9.6, 10.2, 18.6]], r: 0.4 },
-      { path: [[-6.2, 6.4, 14.5], [-5.6, 7.9, 11.5], [-4.6, 8.8, 8.5], [-3.2, 9.3, 5.5]], r: 0.34 },
+      { path: [[-6.2, 6.4, 14.5], [-5.6, 7.9, 11.5], [-4.6, 8.8, 8.5], [-3.2, 9.3, 5.5]], r: 0.34, leafy: 0.6 },
       { path: [[-6.9, 5.6, 19.5], [-6.6, 6.8, 23], [-6.0, 7.4, 26]], r: 0.34 },
       { path: [[-8.5, 5.0, 15.0], [-10.5, 6.2, 12.5], [-12.5, 7.0, 10.5]], r: 0.3 },
-    ], leafScale: 1.25, leafDensity: 0.6, moss: 0.04, bare: 0.2,
+    ], leafScale: 1.25, leafDensity: 0.35, moss: 0.04, bare: 0.2,
   }), 'oakL', leafMat);
   // right live oak with Spanish moss beside the bedroom wing, limbs high over the east roof
   addTree(liveOak(202, V3(15.0, G - 0.3, 0.5), {
@@ -336,7 +336,7 @@ export async function buildVegetation(ctx, M, parent, site) {
       { path: [[16.5, 8, 2], [18.5, 10, 4], [20, 11, 7]], r: 0.32 },
       { path: [[16, 8, -2], [17.5, 10, -5], [18.5, 11, -8]], r: 0.3 },
       { path: [[14, 8.5, -2.5], [12.5, 10.5, -5], [11, 11.2, -7]], r: 0.3 },
-    ], leafScale: 1.05, leafDensity: 0.6, moss: 0.35, bare: 0.3,
+    ], leafScale: 1.15, leafDensity: 0.4, moss: 0.35, bare: 0.3,
   }), 'oakR', leafMat);
   // a tree just right of the frame whose limbs overhang the top-right corner
   addTree(liveOak(303, V3(18.0, G - 0.3, 21), {
@@ -350,8 +350,9 @@ export async function buildVegetation(ctx, M, parent, site) {
 
   // background trees behind and beside the house (sunlit from behind: warmer leaves)
   const bgList = [
-    [-15, -8, 15, 11], [-9, -17, 17, 12], [-3, -27, 18, 13], [-20, 0, 13, 10], [-19, 11, 12, 9], [-26, -14, 16, 12], [-14, -30, 19, 13],
-    [17, -10, 16, 11], [22, -1, 14, 10], [27, 9, 14, 10], [31, -16, 16, 12], [10, -26, 13, 12], [3, -22, 10, 10],
+    [-15, -8, 12.5, 11], [-9, -16, 12.5, 12], [-2, -24, 12, 13], [-20, 0, 13, 10], [-19, 11, 12, 9], [-27, -12, 16, 12], [-15, -28, 14, 13],
+    [-24, -8, 13, 10], [-30, -18, 14, 12], [-34, -30, 15, 13],
+    [16, -6, 13, 9], [18, -14, 15, 11], [14, -18, 13, 10], [17, -10, 14, 11], [31, -16, 16, 12], [9, -24, 11, 12], [3, -20, 9, 10],
   ];
   bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat));
 
@@ -378,11 +379,12 @@ export async function buildVegetation(ctx, M, parent, site) {
   });
   // foreground beds: left = ferns, shrubs, white/pink flowers, liriope; right = flowers + low shrubs
   const [bedF, bedL, bedR, bedE] = site.beds;
-  scatter(bedL, 26, R, (x, z) => flowers.push({ p: [x, G, z], s: [1.2 + R() * 0.4, 1 + R() * 0.3, 1.2 + R() * 0.4], rot: R() * 6.28 }), (x) => x > -4);
-  scatter(bedL, 14, R, (x, z) => (R() < 0.5 ? shrubsA : shrubsB).push({ p: [x, G, z], s: [1.2 + R() * 0.6, 0.9 + R() * 0.6, 1.2 + R() * 0.6], rot: R() * 6.28 }), (x) => x > -6);
-  scatter(bedL, 12, R, (x, z) => straps.push({ p: [x, G, z], s: [1 + R() * 0.6, 1 + R() * 0.6, 1 + R() * 0.6], rot: R() * 6.28 }), (x, z) => x > -2 && z > 18);
+  scatter(bedL, 16, R, (x, z) => flowers.push({ p: [x, G, z], s: [1.1 + R() * 0.4, 1 + R() * 0.3, 1.1 + R() * 0.4], rot: R() * 6.28 }), (x) => x > -2.2);
+  scatter(bedL, 6, R, (x, z) => shrubsB.push({ p: [x, G, z], s: [1.3 + R() * 0.5, 1.1 + R() * 0.5, 1.3 + R() * 0.5], rot: R() * 6.28 }), (x, z) => x > -2.6 && x < 0.6 && z < 18.5);
+  scatter(bedL, 9, R, (x, z) => straps.push({ p: [x, G, z], s: [1 + R() * 0.5, 1 + R() * 0.5, 1 + R() * 0.5], rot: R() * 6.28 }), (x, z) => x > -1.8 && x < 1.2 && z > 18.5);
   scatter(bedR, 34, R, (x, z) => (R() < 0.6 ? flowers : shrubsA).push({ p: [x, G, z], s: [1.1 + R() * 0.4, 0.8 + R() * 0.5, 1.1 + R() * 0.4], rot: R() * 6.28 }));
   scatter(bedE, 16, R, (x, z) => shrubsB.push({ p: [x, G, z], s: [1.6 + R() * 1.4, 1.4 + R() * 1.6, 1.6 + R() * 1.2], rot: R() * 6.28 }));
+  for (const [x, z, k] of [[13.4, 8.5, 3.2], [14.6, 6.5, 3.6], [12.8, 10.8, 2.4], [15.8, 9.5, 3.0], [16.6, 6, 3.4]]) shrubsB.push({ p: [x, G, z], s: [k, k * 0.9, k], rot: R() * 6.28 });
   // flowers bordering the walk near the steps
   for (const sx of [-1, 1]) for (let i = 0; i < 9; i++) {
     const x = 4.58 + sx * (1.5 + R() * 2.6), z = 9.2 + R() * 2.0;
@@ -404,13 +406,17 @@ export async function buildVegetation(ctx, M, parent, site) {
     gltf.scene.updateMatrixWorld(true);
     gltf.scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     const ferns = [];
-    scatter(site.beds[1], 24, R, (x, z) => ferns.push({ p: [x, G, z], s: [2.2 + R(), 2.0 + R(), 2.2 + R()], rot: R() * 6.28 }), (x) => x < 0.5);
-    for (let i = 0; i < 8; i++) { const x = -12 + R() * 9, z = 9.8 + R() * 2; ferns.push({ p: [x, G, z], s: [1.5 + R() * 0.6, 1.4 + R() * 0.6, 1.5 + R() * 0.6], rot: R() * 6.28 }); }
-    for (const m of meshes) {
-      const g = m.geometry.clone().applyMatrix4(m.matrixWorld);
+    scatter(site.beds[1], 44, R, (x, z) => ferns.push({ p: [x, G, z], s: [1.9 + R() * 0.8, 1.9 + R() * 1.0, 1.9 + R() * 0.8], rot: R() * 6.28 }), (x) => x < -1.2);
+    for (let i = 0; i < 10; i++) { const x = -12 + R() * 9, z = 10 + R() * 1.5; ferns.push({ p: [x, G, z], s: [1.5 + R() * 0.6, 1.4 + R() * 0.6, 1.5 + R() * 0.6], rot: R() * 6.28 }); }
+    // the file holds 4 fern variants laid out on a 1 m grid: instance each variant separately
+    const per = meshes.map(() => []);
+    ferns.forEach((f, i) => per[(i * 7 + Math.floor(R() * 4)) % meshes.length].push(f));
+    meshes.forEach((m, k) => {
+      if (!per[k].length) return;
       const mat = m.material; mat.side = THREE.DoubleSide; mat.alphaTest = 0.5;
-      const im = instanced(g, mat, ferns, 'ferns'); group.add(im); skipInOverride(im);
-    }
+      mat.color.setRGB(1.25, 1.3, 1.1);
+      const im = instanced(m.geometry.clone(), mat, per[k], 'ferns'); group.add(im); skipInOverride(im);
+    });
   } catch (e) { console.warn('fern load failed', e); }
 
   return group;

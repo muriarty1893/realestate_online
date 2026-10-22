@@ -8,7 +8,7 @@ import { framedArt } from './living.js';
 // --------------------------------------------------------------- dining chair (faces +z)
 function diningChair(M) {
   const g = new THREE.Group();
-  const W = 0.5, D = 0.58, seatH = 0.48, H = 0.98;
+  const W = 0.5, D = 0.58, seatH = 0.48, H = 0.92;
   for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const l = mesh(new THREE.CylinderGeometry(0.016, 0.012, seatH - 0.08, 8), M.legWood);
     l.position.set(x * (W / 2 - 0.04), (seatH - 0.08) / 2, z * (D / 2 - 0.05)); l.rotation.x = z < 0 ? -0.1 : 0; g.add(l);

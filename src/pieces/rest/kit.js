@@ -405,17 +405,21 @@ export function abstractArt({ w = 600, h = 450, palette = ['#e9e3d7', '#c9bfae',
   const g = c.getContext('2d');
   g.fillStyle = palette[0]; g.fillRect(0, 0, w, h);
   if (style === 'line') {
-    // sparse charcoal line drawing on paper
-    g.strokeStyle = 'rgba(70,64,58,0.55)'; g.lineCap = 'round';
-    for (let k = 0; k < 7; k++) {
-      g.lineWidth = 1 + r() * 3;
+    // minimal: one soft ochre disc and two long charcoal brush lines on warm paper
+    g.filter = 'blur(6px)';
+    g.fillStyle = 'rgba(184,150,108,0.55)';
+    g.beginPath(); g.arc(w * (0.35 + r() * 0.3), h * (0.3 + r() * 0.15), Math.min(w, h) * 0.17, 0, 7); g.fill();
+    g.filter = 'blur(1px)';
+    g.strokeStyle = 'rgba(58,54,50,0.8)'; g.lineCap = 'round';
+    for (let k = 0; k < 2; k++) {
+      g.lineWidth = 3 + k * 3;
       g.beginPath();
-      let x = w * (0.2 + r() * 0.6), y = h * (0.2 + r() * 0.6);
-      g.moveTo(x, y);
-      for (let s = 0; s < 4; s++) { const x2 = x + (r() - 0.5) * w * 0.5, y2 = y + (r() - 0.5) * h * 0.5; g.quadraticCurveTo(x + (r() - 0.5) * w * 0.4, y + (r() - 0.5) * h * 0.4, x2, y2); x = x2; y = y2; }
+      const y0 = h * (0.55 + k * 0.12);
+      g.moveTo(w * 0.15, y0);
+      g.bezierCurveTo(w * 0.4, y0 - h * (0.2 + r() * 0.1), w * 0.6, y0 + h * (0.15 + r() * 0.1), w * 0.85, y0 - h * 0.05);
       g.stroke();
     }
-    for (let k = 0; k < 3; k++) { g.fillStyle = `rgba(150,135,115,${0.08 + r() * 0.1})`; g.beginPath(); g.ellipse(w * r(), h * r(), w * (0.1 + r() * 0.2), h * (0.08 + r() * 0.2), r() * 3, 0, 7); g.fill(); }
+    g.filter = 'none';
     return c;
   }
   if (style === 'landscape') {

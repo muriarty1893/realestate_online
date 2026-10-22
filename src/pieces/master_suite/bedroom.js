@@ -36,20 +36,20 @@ function bed(ctx, M, g, P) {
   b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
   // duvet: folded back near the pillows, hanging over sides and foot
   const duvTop = mTop + 0.035;
-  const duv = mesh(drapeGeo({ W: W - 0.04, L: L - 0.05, z0: 0.62, top: duvTop, side: 0.36, foot: 0.33, r: 0.06, segX: 70, segZ: 60, wrinkle: 0.007, fold: 0.008, seed: 2, floorY: 0.06 }), M.duvet);
+  const duv = mesh(drapeGeo({ W: W - 0.04, L: L - 0.05, z0: 0.62, top: duvTop, side: 0.4, foot: 0.38, r: 0.06, segX: 90, segZ: 80, wrinkle: 0.006, fold: 0.014, foldFreq: 7, undul: 0.016, seed: 2, floorY: 0.06 }), M.duvet);
   b.add(duv);
   // turned-down duvet fold (thicker roll) at the top edge
   const fold = rbox(W + 0.02, 0.07, 0.22, 0.035, M.duvet, 0, duvTop + 0.025, 0.62, { segs: 3 });
   b.add(fold);
   // cream throw blanket over the foot third, draped over the east (right) side
   const tW = 1.3;
-  const thr = mesh(drapeGeo({ W: tW, L: L - 0.02, z0: 0.66, top: duvTop + 0.035, side: 0.44, foot: 0.3, r: 0.11, segX: 50, segZ: 40, wrinkle: 0.006, fold: 0.008, seed: 5, sideMask: [0, 1], floorY: 0.08, skew: 1.5 }), M.throwCream);
+  const thr = mesh(drapeGeo({ W: tW, L: L - 0.02, z0: 0.66, top: duvTop + 0.045, side: 0.44, foot: 0.3, r: 0.12, segX: 80, segZ: 70, wrinkle: 0.005, fold: 0.03, foldFreq: 8, undul: 0.03, seed: 5, sideMask: [0, 1], floorY: 0.08, skew: 1.5 }), M.throwCream);
   thr.position.x = W / 2 - tW / 2 + 0.01;
   {
     // soft rolled fold along the coverlet's diagonal edge
     const c = thr.position.x, x0 = c - tW / 2 - 0.75, x1 = c - tW / 2 + 0.75, z0 = 0.66, z1 = L + 0.29;
     const pts = [];
-    for (let k = 0; k <= 12; k++) { const t = k / 12; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t + 0.03 * Math.sin(t * 9), duvTop + 0.05, z0 + (z1 - z0) * t * 0.88)); }
+    for (let k = 0; k <= 12; k++) { const t = k / 12; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t + 0.03 * Math.sin(t * 9), duvTop + 0.06, z0 + (z1 - z0) * t * 0.88)); }
     const roll = mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.028, 8, false), M.throwCream);
     roll.scale.y = 0.8; b.add(roll);
   }
@@ -126,7 +126,7 @@ function lamp(ctx, M, g, x, y, z) {
   const sh = mesh(new THREE.CylinderGeometry(0.115, 0.18, 0.23, 48, 1, true), M.shade, { cast: false });
   sh.position.y = 0.43; l.add(sh);
   const bulb = mesh(new THREE.SphereGeometry(0.03, 12, 8), M.bulbGlow, { cast: false }); bulb.position.y = 0.42; l.add(bulb);
-  const pl = new THREE.PointLight(0xffb36a, 1.6, 4.5, 2);
+  const pl = new THREE.PointLight(0xffb36a, 1.2, 4.5, 2);
   pl.position.set(0, 0.42, 0); pl.castShadow = false;
   l.add(pl); ctx.addInteriorLight(pl);
 }
@@ -217,7 +217,7 @@ function curtains(ctx, M, g, P) {
   // slider on the east wall: sheer full-height panels on a rod just below the ceiling
   const xE = R.x1 - 0.1, sY = 2.95;
   rod(M, g, -3.99, -7.62, sY, 'z', xE, 0.014);
-  panel(M, M.sheer, g, { width: 1.42, height: sY - 0.02, top: sY - 0.02, at: -6.82, along: 'z', fixed: xE - 0.02, folds: 11, depth: 0.08, seed: 3 });
+  panel(M, M.sheer, g, { width: 1.42, height: sY - 0.02, top: sY - 0.02, at: -6.82, along: 'z', fixed: xE - 0.02, folds: 6, depth: 0.13, seed: 3 });
   panel(M, M.sheer, g, { width: 1.28, height: sY - 0.02, top: sY - 0.02, at: -4.66, along: 'z', fixed: xE - 0.02, folds: 10, depth: 0.1, seed: 4 });
 }
 

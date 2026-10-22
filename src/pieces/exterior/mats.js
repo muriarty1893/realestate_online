@@ -18,7 +18,7 @@ function glowTexture(seed, kind = 'room') {
   const R = rng(seed);
   return canvasTex(128, 256, (g, w, h) => {
     const grd = g.createLinearGradient(0, 0, 0, h);
-    if (kind === 'room') { grd.addColorStop(0, '#e08a10'); grd.addColorStop(0.35, '#ffbe2e'); grd.addColorStop(0.75, '#ffb421'); grd.addColorStop(1, '#d07a0c'); }
+    if (kind === 'room') { grd.addColorStop(0, '#d8780a'); grd.addColorStop(0.35, '#ffb020'); grd.addColorStop(0.75, '#f9a518'); grd.addColorStop(1, '#c86a08'); }
     else { grd.addColorStop(0, '#e8961e'); grd.addColorStop(0.5, '#ffc84a'); grd.addColorStop(1, '#d9862a'); }
     g.fillStyle = grd; g.fillRect(0, 0, w, h);
     // curtain folds at both sides
@@ -33,7 +33,7 @@ function glowTexture(seed, kind = 'room') {
     // a bright lamp blob and a darker piece of furniture
     const lx = w * (0.3 + R() * 0.4), ly = h * (0.3 + R() * 0.25);
     const rg = g.createRadialGradient(lx, ly, 2, lx, ly, w * 0.55);
-    rg.addColorStop(0, 'rgba(255,225,140,0.7)'); rg.addColorStop(1, 'rgba(255,210,120,0)');
+    rg.addColorStop(0, 'rgba(255,200,90,0.55)'); rg.addColorStop(1, 'rgba(255,190,80,0)');
     g.fillStyle = rg; g.fillRect(0, 0, w, h);
     g.fillStyle = 'rgba(120,70,25,0.16)';
     g.fillRect(w * R() * 0.5, h * (0.72 + R() * 0.1), w * (0.3 + R() * 0.4), h * 0.3);
@@ -99,14 +99,14 @@ function seamTextures() {
 
 export function makeMaterials(ctx) {
   const M = {};
-  M.stucco = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xd9cfc1, roughness: 1, normalScale: 0.8, name: 'ext.stucco' });
+  M.stucco = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xf2dfd2, roughness: 1, normalScale: 0.8, name: 'ext.stucco' });
   M.porchWall = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xeee4d2, roughness: 0.95, normalScale: 0.3, name: 'ext.porchwall' });
   const board = battenBoardTextures();
   M.board = new THREE.MeshStandardMaterial({ color: 0xe9e3d3, map: board, roughness: 0.82, name: 'ext.board' });
   M.batten = new THREE.MeshStandardMaterial({ color: 0xeae4d5, roughness: 0.8, name: 'ext.batten' });
   M.stone = pbr(ctx, 'castle_wall_slates', { repeat: 1.6, color: 0xc9bfb2, roughness: 1, normalScale: 1.2, name: 'ext.stone' });
   M.stoneCap = new THREE.MeshStandardMaterial({ color: 0x9d9184, roughness: 0.9, name: 'ext.stonecap' });
-  M.shingle = pbr(ctx, 'roof_slates_02', { repeat: 3.0, color: 0xc5ccd8, roughness: 0.95, normalScale: 1.0, name: 'ext.shingle' });
+  M.shingle = pbr(ctx, 'roof_slates_02', { repeat: 3.0, color: 0xc4c6ca, roughness: 0.95, normalScale: 1.0, name: 'ext.shingle' });
   M.shingle.envMapIntensity = 0.35;
   M.ridgeCap = pbr(ctx, 'roof_slates_02', { repeat: 3.0, color: 0x6f7886, roughness: 0.95, name: 'ext.ridgecap' });
   M.bronze = new THREE.MeshStandardMaterial({ color: 0x3b3128, roughness: 0.55, metalness: 0.25, name: 'ext.bronze' });
@@ -123,7 +123,7 @@ export function makeMaterials(ctx) {
   const pav = paverTextures();
   M.pavers = new THREE.MeshStandardMaterial({ map: pav.color, normalMap: pav.normal, roughness: 0.88, name: 'ext.pavers' });
   M.brickStep = new THREE.MeshStandardMaterial({ map: pav.color, normalMap: pav.normal, roughness: 0.85, color: 0xd8b8a0, name: 'ext.bricksteps' });
-  M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xd2e39a, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
+  M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xf4f070, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
   M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x4a382c, roughness: 1, rough: null, name: 'ext.mulch' });
   M.bark = pbr(ctx, 'bark_brown_02', { repeat: 1.2, color: 0xf0e6dc, roughness: 1, normalScale: 1.5, name: 'ext.bark' });
   M.concrete = pbr(ctx, 'white_stucco', { repeat: 1.5, color: 0xb9b1a4, roughness: 0.95, normalScale: 0.5, name: 'ext.walk' });

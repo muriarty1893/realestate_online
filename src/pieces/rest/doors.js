@@ -46,7 +46,7 @@ function casing(f, M, width, headH, depth, side) {
 }
 
 // o: resolved opening (after the shell ran, it carries M/base/horiz/sideA/sideB)
-export function doorUnit(B, ctx, M, o, { angle = 88, mat } = {}) {
+export function doorUnit(B, ctx, M, o, { angle = 88, mat, switchPlate = true } = {}) {
   const P = ctx.plan;
   const R = o.M, horiz = o.horiz;
   const width = horiz ? R.w : R.d, depth = horiz ? R.d : R.w;
@@ -70,6 +70,14 @@ export function doorUnit(B, ctx, M, o, { angle = 88, mat } = {}) {
   g.box(M.trimWhite, width, 0.016, depth, 0, headH - 0.016, 0, { cast: false });
   casing(g, M, width, headH, depth, 1);
   casing(g, M, width, headH, depth, -1);
+  // light switch beside the latch-side casing, on the side the door swings into
+  if (switchPlate) {
+    const lx = (hingeHigh ? -1 : 1) * (width / 2 + 0.09 + 0.1);
+    const zf = s * (depth / 2 + 0.004);
+    const sf = g.at(lx, 1.2, zf, s > 0 ? 0 : Math.PI);
+    sf.boxC(M.trimWhite, 0.07, 0.115, 0.008, 0, 0, 0, { cast: false });
+    sf.boxC(M.trimWhite, 0.018, 0.034, 0.012, 0, 0, 0.004, { cast: false });
+  }
 }
 
 // closed door on a wall face (stair shaft doors): origin floor, centred, local +z out of the wall

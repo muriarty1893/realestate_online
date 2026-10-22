@@ -143,7 +143,7 @@ export async function build(ctx) {
     for (const id of DOORS) {
       const o = ctx.opening(id);
       if (!o || !o.M) continue;
-      doorUnit(B, ctx, M, o, { angle: DOOR_ANGLE[id] ?? 88 });
+      doorUnit(B, ctx, M, o, { angle: DOOR_ANGLE[id] ?? 88, switchPlate: !/linen|wic|bath/.test(id) });
     }
   });
   root.traverse((o) => { if (o.isMesh) { o.updateMatrix(); o.matrixAutoUpdate = false; } });

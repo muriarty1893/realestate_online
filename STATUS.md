@@ -1,4 +1,4 @@
-# Status: paused 2026-10-21
+# Status: paused 2026-10-22 18:40 (5h usage hit 93%)
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -23,3 +23,8 @@
 3. Critic loop per photo piece: a fresh critic gets ours and the photo as blind A/B (random order, same size),
    picks the better one and names the biggest gap. The gap goes back to the builder. Log every round in
    `critiques/LOG.md` and repeat until ours wins.
+
+## 2026-10-22 notes
+- Vercel fix: three.js is vendored in vendor/three/ (Vercel never serves node_modules). `npm run vendor` refreshes it.
+- All 4 builders are still mid round 1, and no critic has run yet. Resume them with SendMessage; their transcripts persist.
+- Cost: 4 parallel Opus builders used ~90% of a 5-hour window in ~20 minutes. Run fewer in parallel or use a cheaper model for builders.

@@ -50,6 +50,11 @@ function wainscot(f, M, x0, x1, h = 1.07) {
   f.box(mat, x1 - x0, 0.14, 0.014, (x0 + x1) / 2, 0, 0.017, { cast: false });
 }
 
+// four recessed cans inset from the corners of a room rect
+function cans(B, M, x0, x1, z0, z1, y, inset = 0.75) {
+  for (const x of [x0 + inset, x1 - inset]) for (const z of [z0 + inset, z1 - inset]) F.recessed(new Frame(B).at(x, y, z), M);
+}
+
 // ================================================================ bedroom wing
 export function buildBedFront(ctx, M, B, slots, H) {
   const { X, Z, W, wp, col } = H;
@@ -95,6 +100,7 @@ export function buildBedFront(ctx, M, B, slots, H) {
   new Frame(B).at(x1 - 0.3, 0.4, z1 - 0.28).add(softBox(0.4, 0.12, 0.34, 0.05, { n: 4, noise: 0.012, seed: 9 }), M.knitBlue, 0, 0.03, 0);
   // fan + recessed
   const fp = F.ceilingFan(new Frame(B).at((x0 + x1) / 2, clg, 5.68), M, { phase: 0.4 });
+  cans(B, M, x0, x1, z0, z1, clg, 0.8);
   slots.push({ room: 'bed_front', p: [(x0 + x1) / 2, clg - 0.55, 5.68], i: 3.4, d: 5.2, pri: 2 });
   return { x0, x1, z0, z1, bx0, bx1, bz1, clg };
 }
@@ -133,6 +139,7 @@ export function buildBedMid(ctx, M, B, slots, H) {
   F.chair(fdk.at(0.12, 0, 0.78, PI + 0.15), M, { mat: M.oak });
   col(fdk, X(2411) - X(2297), 0.58);
   F.ceilingFan(new Frame(B).at((x0 + x1) / 2, clg, (z0 + z1) / 2), M, { phase: 0.1 });
+  cans(B, M, x0, x1, z0, z1, clg, 0.8);
   slots.push({ room: 'bed_mid', p: [(x0 + x1) / 2, clg - 0.55, (z0 + z1) / 2], i: 3.4, d: 5.4, pri: 2 });
   slots.push({ room: 'bed_mid', p: wp(fdk, 0.3, 1.1, 0.35), i: 0.35, d: 2.0, c: 0xffd8a8, pri: 0 });
   return { x0, x1, z0, z1, clg };
@@ -172,6 +179,7 @@ export function buildBedNE(ctx, M, B, slots, H) {
   F.chair(fdk.at(-0.1, 0, 0.8, PI - 0.2), M, { mat: M.oak });
   col(fdk, X(2411) - X(2297), 0.58);
   F.ceilingFan(new Frame(B).at((x0 + x1) / 2, clg, (z0 + z1) / 2), M, { phase: 0.7 });
+  cans(B, M, x0, x1, z0, z1, clg, 0.8);
   slots.push({ room: 'bed_ne', p: [(x0 + x1) / 2, clg - 0.55, (z0 + z1) / 2], i: 3.4, d: 5.2, pri: 2 });
   return { x0, x1, z0, z1, clg };
 }
@@ -414,7 +422,7 @@ export function buildPdr(ctx, M, B, slots, H) {
   col(fv, vw, 0.5);
   F.mirror(fv.at(0, 1.55, -0.016), M, { w: 0.56, shape: 'round', frame: M.black, t: 0.025 });
   F.sconce(fv.at(0, 2.02, -0.016), M, { shade: M.shade });
-  F.towelRing(W(B, 'e', x1, Z(1010)).at(0, 1.32, 0.02), M);
+  F.towelRing(W(B, 'e', x1, Z(1032)).at(0, 1.32, 0.02), M);
   F.tpHolder(W(B, 'w', x0, z1 - 0.55).at(0, 0.66, 0.02), M);
   F.art(W(B, 'n', z0, (x0 + x1) / 2 - 0.15).at(0, 1.62, 0), M, { w: 0.42, h: 0.56, art: M.art[2], frame: M.oakWarm, fw: 0.018 });
   slots.push({ room: 'pdr', p: wp(fv, 0, 1.9, 0.3), i: 0.9, d: 2.6, pri: 2 });

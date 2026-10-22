@@ -14,9 +14,9 @@ export const views = {
     preset: {
       base: 'golden',
       sun: { az: 70, el: 8, color: 0xffdcb4, intensity: 8.0 },
-      hemi: { sky: 0xffeedd, ground: 0xd2b698, intensity: 0.9 },
+      hemi: { sky: 0xffeedd, ground: 0xd2b698, intensity: 0.75 },
       env: { intensity: 0.25 },
-      exposure: 1.15, interior: 1.0,
+      exposure: 1.2, interior: 1.0,
     },
     lighting: { shadowFocus: { center: [-7.2, 1.2, -6.4], radius: 7.5 } },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.45 },

@@ -23,7 +23,7 @@ export const views = {
       hemi: { sky: 0xf0f2f2, ground: 0x8a8658, intensity: 2.0 },
       env: { intensity: 0.85 },
       sky: { top: 0x7fb4ea, horizon: 0xe2ecf0, bottom: 0x5a6040 },
-      exposure: 1.0, interior: 1.6,
+      exposure: 1.25, interior: 1.6,
     },
     lighting: { shadowFocus: { center: [2, 3, 6], radius: 30 } },
     post: { ao: true, aoIntensity: 0.9, aoRadius: 0.7, bloom: 0.25, bloomThreshold: 0.85, bloomRadius: 0.45 },

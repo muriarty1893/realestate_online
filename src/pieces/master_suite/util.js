@@ -69,7 +69,7 @@ export function pillowGeo(w, h, d, { segs = 24, puff = 1, seed = 0, pinch = 0.07
 
 // Draped cloth over a rectangular top (local: x across, z along from head (0) to foot (L)).
 // top: y of the top surface. hang: side overhang drop length, footHang: foot drop length.
-export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, segX = 60, segZ = 60, wrinkle = 0.012, seed = 1, sideMask = [1, 1], floorY = 0.02, footLift = 0, fold = 0.012, foldFreq = 9, skew = 0 }) {
+export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, segX = 60, segZ = 60, wrinkle = 0.012, seed = 1, sideMask = [1, 1], floorY = 0.02, footLift = 0, fold = 0.012, foldFreq = 9, skew = 0, undul = 0 }) {
   const sx0 = -W / 2 - side * sideMask[0], sx1 = W / 2 + side * sideMask[1];
   const tz1 = L + foot;
   const g = new THREE.PlaneGeometry(1, 1, segX, segZ);
@@ -101,6 +101,13 @@ export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, 
     if (es > 0) x += Math.sign(s) * (folds + wv * 0.5);
     if (et > 0) z += folds + wv * 0.5;
     y += (1 - hang) * wv;
+    if (undul) {
+      // soft diagonal ridges of a heavy linen layer (biased upward so lower layers stay hidden)
+      const r1 = Math.sin((s * 0.8 + t * 0.6) * 11 + seed), r2 = Math.sin((s * -0.5 + t * 0.9) * 7 + seed * 2.3), r3 = Math.sin((s + t * 0.2) * 17 + seed * 0.7);
+      const u = 0.5 * (r1 * r1) + 0.35 * (0.5 + 0.5 * r2) + 0.15 * (0.5 + 0.5 * r3);
+      y += (1 - hang) * undul * u;
+      if (es > 0) x += Math.sign(s) * hang * undul * 0.8 * (0.5 + 0.5 * r1);
+    }
     y = Math.max(y, floorY);
     p.setXYZ(i, x, y, z);
     uv.setXY(i, s, t);

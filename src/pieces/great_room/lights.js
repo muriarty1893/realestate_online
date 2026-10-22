@@ -59,3 +59,28 @@ export function buildLights(ctx, M, group, { pendants = [], chandelier = [0.79, 
   group.add(L);
   return L;
 }
+
+// Local reflection probe: render the kitchen once into a cube map and use it as the environment of
+// the reflective materials (stainless, glass, granite, oven glass), so they mirror the warm room
+// instead of the neutral studio environment.
+export function reflectionProbe(ctx, mats, pos = [-1.4, 1.5, 1.3]) {
+  const rt = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+  const cam = new THREE.CubeCamera(0.05, 60, rt);
+  cam.position.set(...pos);
+  ctx.scene.add(cam);
+  let n = 0;
+  ctx.onUpdate(() => {
+    n++;
+    if (n !== 2 && n !== 40) return;
+    const r = ctx.renderer;
+    const tm = r.toneMapping; r.toneMapping = THREE.NoToneMapping;
+    const hidden = [];
+    ctx.scene.traverse((o) => { if (o.userData.noProbe && o.visible) { o.visible = false; hidden.push(o); } });
+    cam.update(r, ctx.scene);
+    hidden.forEach((o) => (o.visible = true));
+    r.toneMapping = tm;
+    rt.texture.needsPMREMUpdate = true;
+    for (const m of mats) { m.envMap = rt.texture; m.needsUpdate = true; }
+  });
+  return rt;
+}

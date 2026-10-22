@@ -4,6 +4,9 @@ import * as THREE from 'three';
 import { makeMats } from './great_room/mats.js';
 import { buildVault, buildBeams, buildFireplace } from './great_room/arch.js';
 import { buildKitchen } from './great_room/kitchen.js';
+import { buildLiving } from './great_room/living.js';
+import { buildDining } from './great_room/dining.js';
+import { buildLights } from './great_room/lights.js';
 
 // Camera matched to refs/inside_view_1.webp (solved from vanishing points + plan geometry).
 // shiftY: the photo is level (verticals vertical) with the horizon above centre, i.e. a shift lens;
@@ -17,7 +20,7 @@ export const views = {
     pos: CAM.pos,
     target: [CAM.pos[0] + fwd[0] * 5, CAM.pos[1], CAM.pos[2] + fwd[2] * 5],
     fov: FOV, shiftY: (600 - CAM.cy) / 1200, pixelAspect: CAM.s, label: 'Great room',
-    preset: 'day',
+    preset: { base: 'day', hemi: { sky: 0xfff0dc, ground: 0x8c6f55, intensity: 0.55 }, env: { intensity: 0.5 } },
     lighting: { exposure: 1.0, interior: 1.0 },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.5 },
     toneMapping: 'agx',
@@ -43,7 +46,10 @@ export async function build(ctx) {
   buildVault(ctx, M, group);
   buildBeams(ctx, M, group);
   buildFireplace(ctx, M, group);
-  buildKitchen(ctx, M, group);
+  const kit = buildKitchen(ctx, M, group);
+  await buildLiving(ctx, M, group);
+  await buildDining(ctx, M, group);
+  buildLights(ctx, M, group, { pendants: kit.pendants });
   ctx.scene.add(group);
   installLensShift(ctx);
 }

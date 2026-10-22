@@ -16,7 +16,7 @@ export function floorMats(ctx) {
       map: T('wood_floor_diff.jpg', { srgb: true, repeatM: 1.7 }),
       normalMap: T('wood_floor_nor.jpg', { repeatM: 1.7 }),
       roughnessMap: T('wood_floor_rough.jpg', { repeatM: 1.7 }),
-      color: 0xe9dccd, roughness: 0.85, normalScale: new THREE.Vector2(0.6, 0.6),
+      color: 0xf2dcc2, roughness: 0.85, normalScale: new THREE.Vector2(0.6, 0.6),
     });
   }
   F.tile = std('floor.tile', {
@@ -55,7 +55,7 @@ export function makeMats(ctx, F) {
   M.porcelainIn = std('porcelain.in', { color: 0xf3f2ee, roughness: 0.12, side: THREE.BackSide });
   M.quartz = std('quartz', { color: 0xf0eee8, roughness: 0.2 });
   M.butcher = M.oakWarm;
-  M.mirror = std('mirror', { color: 0xd8dbdc, roughness: 0.02, metalness: 1, envMapIntensity: 1.0 });
+  M.mirror = std('mirror', { color: 0xe6e8e8, roughness: 0.04, metalness: 1, envMapIntensity: 2.4 });
   M.glass = new THREE.MeshPhysicalMaterial({ name: 'rest.glass', color: 0xffffff, roughness: 0.03, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide });
   M.darkGlass = std('darkGlass', { color: 0x1d2125, roughness: 0.05, metalness: 0.3 });
 
@@ -122,8 +122,10 @@ export function makeMats(ctx, F) {
 
   // book / clothing palette
   const pal = [0x6f6a63, 0xb9ab95, 0x8a9488, 0xd9d0c1, 0x51575f, 0xa48a6c, 0xe8e2d6, 0x7d6a58, 0x9aa3ad, 0xc4b8a5];
-  M.cloth = pal.map((c, i) => std('cloth' + i, { color: c, roughness: 1, ...lin(0.27), normalScale: new THREE.Vector2(0.6, 0.6) }));
-  M.books = [0xe6dfd2, 0x9b8b76, 0x50565c, 0xc9b9a0, 0x7c8577, 0x2f2f30, 0xb8a588].map((c, i) => std('book' + i, { color: c, roughness: 0.8 }));
+  const clothMat = std('cloth', { color: 0xffffff, vertexColors: true, roughness: 1, ...lin(0.27), normalScale: new THREE.Vector2(0.6, 0.6) });
+  const bookMat = std('books', { color: 0xffffff, vertexColors: true, roughness: 0.8 });
+  M.cloth = pal.map((c) => ({ isTint: true, mat: clothMat, color: c }));
+  M.books = [0xe6dfd2, 0x9b8b76, 0x50565c, 0xc9b9a0, 0x7c8577, 0x2f2f30, 0xb8a588].map((c) => ({ isTint: true, mat: bookMat, color: c }));
 
   // art
   const art = (seed, o, w = 600, h = 450) => std('art' + seed, { map: canvasTex(abstractArt({ seed, w, h, ...o }), { repeatM: 1 }), roughness: 0.85 });

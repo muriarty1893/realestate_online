@@ -334,7 +334,7 @@ export function buildUtil(ctx, M, B, slots, H) {
   const x0 = X(674), x1 = X(972), z0 = Z(643), z1 = Z(801), cx = (x0 + x1) / 2;
   const clg = 3.048, wdW = X(822) - X(752);
   const fc = W(B, 'n', z0, cx);
-  const run = x1 - x0, h = 0.99, d = 0.66;
+  const run = x1 - x0, h = 0.99, d = 0.73;
   const sinkW = X(752) - x0, eastW = x1 - X(895);
   // cabinets: sink base (west), W/D bay, drawer stack (east)
   F.baseCabinets(fc.at(-run / 2 + sinkW / 2, 0, 0), M, { w: sinkW, h, d, cab: M.paint, noTop: true, units: [{ w: sinkW, kind: 'door2' }] });
@@ -360,8 +360,7 @@ export function buildUtil(ctx, M, B, slots, H) {
   F.vase(fc.at(shX + 0.45, 2.05, 0.14), M, { h: 0.2, r: 0.06, n: 4, len: 0.3, seed: 101 });
   F.books(fc.at(shX - 0.5, 2.05, 0.14), M, { n: 6, seed: 102 });
   // hanging rod under the shelves
-  fc.rodX(M.black, 0.012, shW - 0.1, shX, 1.5, 0.22);
-  for (let i = 0; i < 4; i++) fc.box(M.cloth[(i * 3 + 1) % M.cloth.length], 0.02, 0.62, 0.42, shX - 0.25 + i * 0.07, 0.83, 0.22, { cast: false });
+  fc.rodX(M.black, 0.012, shW - 0.1, shX, 1.52, 0.2);
   // countertop items
   F.basketBox(fc.at(X(822) - cx + 0.2, h, 0.3), M, 0.4, 0.2, 0.3, M.basket);
   F.vase(fc.at(-run / 2 + 0.18, h, 0.2), M, { h: 0.14, r: 0.05, stems: false, mat: M.ceramicCharcoal });
@@ -406,15 +405,15 @@ export function buildPdr(ctx, M, B, slots, H) {
   wainscot(W(B, 's', z1, (x0 + x1) / 2), M, -(x1 - x0) / 2, (x1 - x0) / 2);
   wainscot(W(B, 'w', x0, (z0 + z1) / 2), M, -(z1 - z0) / 2, (z1 - z0) / 2);
   wainscot(W(B, 'e', x1, (Z(984) + z1) / 2), M, -(z1 - Z(984)) / 2 + 0.1, (z1 - Z(984)) / 2);
-  const fto = W(B, 's', z1 + 0.017, (X(782) + X(827)) / 2);
+  const fto = W(B, 's', z1 - 0.017, (X(782) + X(827)) / 2);
   F.toilet(fto, M);
   col(fto, 0.45, 0.7);
   const vx = (X(842) + x1) / 2, vw = x1 - X(842);
-  const fv = W(B, 's', z1 + 0.017, vx);
+  const fv = W(B, 's', z1 - 0.017, vx);
   F.vanity(fv, M, { w: vw - 0.02, d: 0.5, h: 0.84, cab: M.oakWarm, top: M.quartz, sinks: [0], layout: 'doors', sinkW: 0.38, sinkD: 0.3, pullMat: M.black });
   col(fv, vw, 0.5);
-  F.mirror(fv.at(0, 1.5, -0.017), M, { w: 0.56, shape: 'round', frame: M.black, t: 0.025 });
-  F.sconce(fv.at(0, 1.98, -0.017), M, { shade: M.shade });
+  F.mirror(fv.at(0, 1.55, -0.016), M, { w: 0.56, shape: 'round', frame: M.black, t: 0.025 });
+  F.sconce(fv.at(0, 2.02, -0.016), M, { shade: M.shade });
   F.towelRing(W(B, 'e', x1, Z(1010)).at(0, 1.32, 0.02), M);
   F.tpHolder(W(B, 'w', x0, z1 - 0.55).at(0, 0.66, 0.02), M);
   F.art(W(B, 'n', z0, (x0 + x1) / 2 - 0.15).at(0, 1.62, 0), M, { w: 0.42, h: 0.56, art: M.art[2], frame: M.oakWarm, fw: 0.018 });
@@ -456,7 +455,7 @@ export function buildGarage(ctx, M, B, slots, H, walk) {
     const o = ctx.opening('door_garage');
     new Frame(B).box(M.concrete, o.M.w + 0.02, 0.05, o.M.d, o.M.cx, fy - 0.05, o.M.cz, { cast: false });
     const m = ctx.opening('door_garage_mud');
-    const t = new THREE.Mesh(boxGeo(m.M.w, 0.03, m.M.d), M.oakWarm); t.position.set(m.M.cx, -0.015, m.M.cz); t.receiveShadow = true; thr.push(t);
+    const t = new THREE.Mesh(boxGeo(m.M.w, 0.25, m.M.d), M.oakWarm); t.position.set(m.M.cx, -0.125, m.M.cz); t.receiveShadow = true; thr.push(t);
     // concrete step up to the mud room door
     const st = new THREE.Mesh(boxGeo(m.M.w + 0.25, 0.1, 0.34), M.concrete); st.position.set(m.M.cx, fy + 0.05, m.M.z1 + 0.17); st.receiveShadow = true; st.castShadow = true; thr.push(st);
     walk.push(t, st);

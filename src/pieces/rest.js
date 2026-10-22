@@ -12,12 +12,12 @@ import * as R from './rest/rooms.js';
 const WOOD = ['hall_w', 'mud', 'bed_ne', 'vest', 'linen_ne', 'wic_ne', 'bed_mid', 'linen_e', 'hall_e', 'wic_mid', 'wic_front', 'bed_front'];
 const TILE = ['util', 'pdr', 'bath_ne', 'dress', 'bath_front'];
 const DOORS = ['door_wic_util', 'door_util', 'door_pdr', 'door_garage_mud', 'door_bed_ne', 'door_linen_ne', 'door_bed_mid', 'door_wic_mid', 'door_linen_e', 'door_bath_front', 'door_wic_front', 'door_bed_front'];
-const DOOR_ANGLE = { door_linen_ne: 0, door_linen_e: 0, door_wic_mid: 70, door_wic_front: 75, door_pdr: 80, door_garage_mud: 85 };
+const DOOR_ANGLE = { door_linen_ne: 0, door_linen_e: 0, door_wic_mid: 0, door_wic_front: 0, door_bath_front: 0, door_pdr: 88, door_garage_mud: 0 };
 
 const shadow = (c, r = 7) => ({ center: c, radius: r });
 export const views = {
   bed_front: {
-    pos: [9.85, 1.52, 3.95], target: [7.2, 0.95, 6.55], fov: 62, label: 'Front bedroom',
+    pos: [9.9, 1.52, 4.2], target: [7.4, 0.95, 7.0], fov: 62, label: 'Front bedroom',
     preset: 'day', lighting: { exposure: 1.05, interior: 1.0, shadowFocus: shadow([8.4, 1, 6.5]) },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.5 },
   },
@@ -32,23 +32,43 @@ export const views = {
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.5 },
   },
   bath_front: {
-    pos: [9.15, 1.5, 3.2], target: [11.9, 1.0, 3.7], fov: 66, label: 'Hall bath + dressing',
+    pos: [10.36, 1.6, 2.97], target: [11.7, 0.95, 4.3], fov: 75, label: 'Hall bath',
     preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.4 },
   },
   laundry: {
-    pos: [-5.95, 1.55, -2.35], target: [-8.4, 1.15, -3.55], fov: 64, label: 'Laundry',
+    pos: [-8.62, 1.55, -2.42], target: [-6.0, 1.05, -3.55], fov: 66, label: 'Laundry',
     preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.4 },
   },
   mud: {
-    pos: [-5.05, 1.55, -3.2], target: [-5.6, 0.95, 0.9], fov: 64, label: 'Mud room + stair',
+    pos: [-5.95, 1.55, 1.38], target: [-4.7, 1.0, -0.75], fov: 66, label: 'Mud room',
     preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.45 },
   },
+  stair: {
+    pos: [-4.75, 1.55, -1.3], target: [-7.5, 1.7, -1.6], fov: 64, label: 'Stair (up to bonus / down to basement)',
+    preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
+    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.45 },
+  },
+  dress: {
+    pos: [9.95, 1.55, 1.95], target: [8.6, 1.15, 3.2], fov: 70, label: 'Jack-and-jill vanity',
+    preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
+    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.4 },
+  },
+  bath_ne: {
+    pos: [10.32, 1.55, -3.3], target: [11.75, 1.1, -4.6], fov: 72, label: 'Back bath',
+    preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
+    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.4 },
+  },
+  pdr: {
+    pos: [-7.05, 1.6, -0.82], target: [-7.05, 1.15, 0.6], fov: 72, label: 'Powder room',
+    preset: 'day', lighting: { exposure: 1.05, interior: 1.0 },
+    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.4 },
+  },
   garage: {
-    pos: [-5.1, 1.6, 8.7], target: [-10.6, 0.7, 2.6], fov: 64, label: 'Garage',
-    preset: 'day', lighting: { exposure: 1.0, interior: 1.0 },
+    pos: [-5.25, 1.6, 8.75], target: [-10.6, 0.75, 3.2], fov: 66, label: 'Garage',
+    preset: 'day', lighting: { exposure: 0.92, interior: 0.85 },
     post: { ao: true, aoIntensity: 1.0, aoRadius: 0.5 },
   },
 };

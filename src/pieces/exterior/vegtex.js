@@ -14,8 +14,50 @@ function tex(c, srgb = true) {
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 const hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
 
+// live-oak spray: a few forked twigs with small elliptic leaves along them, lots of open space
+function oakSpray(g, ox, oy, S, R, dense) {
+  g.lineCap = 'round';
+  const leaf = (x, y, rot, l) => {
+    const h = 58 + R() * 20, sat = 30 + R() * 25;
+    let li = 20 + R() * 16;
+    if (R() < 0.3) li += 14; // backlit, translucent leaves
+    g.fillStyle = hsl(h, sat, li);
+    g.beginPath(); g.ellipse(x, y, l / 2, l * 0.21, rot, 0, Math.PI * 2); g.fill();
+  };
+  const twig = (x, y, a, len, w, depth) => {
+    const steps = 6;
+    let px = x, py = y;
+    g.strokeStyle = hsl(28, 14, 30 + R() * 12); g.lineWidth = w;
+    const pts = [];
+    for (let i = 1; i <= steps; i++) {
+      a += (R() - 0.5) * 0.5;
+      const nx = px + Math.cos(a) * len / steps, ny = py + Math.sin(a) * len / steps;
+      g.beginPath(); g.moveTo(px, py); g.lineTo(nx, ny); g.stroke();
+      px = nx; py = ny; pts.push([px, py, a]);
+    }
+    for (const [lx, ly, la] of pts) {
+      const n = dense ? 7 : 4;
+      for (let k = 0; k < n; k++) {
+        const side = R() < 0.5 ? -1 : 1, ang = la + side * (0.6 + R() * 0.8);
+        const l = 18 + R() * 12;
+        leaf(lx + Math.cos(ang) * l * 0.55, ly + Math.sin(ang) * l * 0.55, ang, l);
+      }
+    }
+    if (depth < 2) for (let k = 0; k < 2; k++) { const [bx, by, ba] = pts[2 + Math.floor(R() * 3)]; twig(bx, by, ba + (R() < 0.5 ? -1 : 1) * (0.5 + R() * 0.5), len * 0.55, w * 0.65, depth + 1); }
+  };
+  const cx = ox + S / 2, cy = oy + S * 0.62;
+  const nT = dense ? 5 : 3;
+  for (let i = 0; i < nT; i++) twig(cx + (R() - 0.5) * S * 0.2, cy + (R() - 0.5) * S * 0.1, -Math.PI / 2 + (R() - 0.5) * 2.4, S * (0.32 + R() * 0.12), 3, 0);
+}
+
 // leaf cluster in a cell. kind: 'oak' | 'box' | 'dark' | 'flower' | 'bg'
 function cluster(g, ox, oy, S, R, kind) {
+  if (kind === 'oak' || kind === 'bg') {
+    g.save(); g.beginPath(); g.rect(ox + 2, oy + 2, S - 4, S - 4); g.clip();
+    oakSpray(g, ox, oy, S, R, kind === 'bg');
+    g.restore();
+    return;
+  }
   const cx = ox + S / 2, cy = oy + S / 2;
   // twigs
   if (kind === 'oak' || kind === 'bg') {
@@ -28,7 +70,7 @@ function cluster(g, ox, oy, S, R, kind) {
       g.stroke();
     }
   }
-  const n = { oak: 420, bg: 520, box: 900, dark: 520, flower: 520 }[kind];
+  const n = { oak: 300, bg: 520, box: 900, dark: 520, flower: 520 }[kind];
   const L = { oak: 26, bg: 30, box: 13, dark: 22, flower: 18 }[kind];
   for (let i = 0; i < n; i++) {
     // clumpy distribution: several sub-blobs
@@ -43,11 +85,11 @@ function cluster(g, ox, oy, S, R, kind) {
     // light from the top-right: leaves higher in the cell are lighter
     const lift = (cy - y) / S;
     let h, s, li;
-    if (kind === 'oak') { h = 70 + R() * 18; s = 35 + R() * 25; li = 17 + R() * 13 + lift * 14; if (R() < 0.12) { h = 58 + R() * 10; li += 12; s += 12; } }
+    if (kind === 'oak') { h = 62 + R() * 18; s = 25 + R() * 22; li = 15 + R() * 12 + lift * 12; if (R() < 0.14) { h = 55 + R() * 10; li += 16; s += 15; } }
     else if (kind === 'bg') { h = 75 + R() * 25; s = 25 + R() * 25; li = 16 + R() * 12 + lift * 12; }
-    else if (kind === 'box') { h = 78 + R() * 22; s = 40 + R() * 25; li = 20 + R() * 16 + lift * 14; }
-    else if (kind === 'dark') { h = 95 + R() * 30; s = 25 + R() * 20; li = 13 + R() * 11 + lift * 10; }
-    else { h = 95 + R() * 25; s = 35 + R() * 20; li = 18 + R() * 12 + lift * 10; }
+    else if (kind === 'box') { h = 75 + R() * 22; s = 45 + R() * 25; li = 28 + R() * 18 + lift * 16; }
+    else if (kind === 'dark') { h = 90 + R() * 30; s = 30 + R() * 20; li = 20 + R() * 14 + lift * 12; }
+    else { h = 90 + R() * 25; s = 40 + R() * 20; li = 26 + R() * 14 + lift * 10; }
     g.fillStyle = hsl(h, s, li);
     g.beginPath(); g.ellipse(x, y, l / 2, w / 2, rot, 0, Math.PI * 2); g.fill();
     if (kind !== 'box') {
@@ -56,11 +98,11 @@ function cluster(g, ox, oy, S, R, kind) {
     }
   }
   if (kind === 'flower') {
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 70; i++) {
       const a = R() * Math.PI * 2, d = Math.pow(R(), 0.5) * S * 0.4;
       const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d * 0.9 - S * 0.03;
       const pick = R();
-      const col = pick < 0.45 ? hsl(335 + R() * 15, 70, 62 + R() * 15) : pick < 0.8 ? hsl(40, 30, 92) : hsl(350, 75, 48);
+      const col = pick < 0.5 ? hsl(335 + R() * 15, 75, 58 + R() * 15) : pick < 0.72 ? hsl(40, 30, 92) : hsl(352, 80, 46);
       const r = 5 + R() * 4;
       for (let k = 0; k < 5; k++) { const pa = (k / 5) * Math.PI * 2 + R(); g.fillStyle = col; g.beginPath(); g.ellipse(x + Math.cos(pa) * r * 0.55, y + Math.sin(pa) * r * 0.55, r * 0.55, r * 0.38, pa, 0, Math.PI * 2); g.fill(); }
       g.fillStyle = hsl(50, 80, 60); g.beginPath(); g.arc(x, y, 1.4, 0, Math.PI * 2); g.fill();
@@ -86,7 +128,7 @@ export function mossTexture() {
   for (let i = 0; i < 260; i++) {
     let x = W * (0.15 + R() * 0.7), y = R() * H * 0.08;
     const len = H * (0.35 + R() * 0.6) * (1 - Math.abs(x / W - 0.5));
-    g.strokeStyle = hsl(70 + R() * 20, 8 + R() * 12, 52 + R() * 20, 0.55 + R() * 0.4);
+    g.strokeStyle = hsl(75 + R() * 25, 5 + R() * 8, 48 + R() * 18, 0.5 + R() * 0.4);
     g.lineWidth = 1 + R() * 2.2;
     g.beginPath(); g.moveTo(x, y);
     const steps = 18;

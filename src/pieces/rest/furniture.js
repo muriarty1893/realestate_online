@@ -594,7 +594,7 @@ export function upperCabinets(f, M, o = {}) {
 
 // front-load washer or dryer (origin floor, back centre)
 export function frontLoader(f, M, o = {}) {
-  const w = 0.686, d = 0.78, h = 0.97;
+  const w = 0.686, d = 0.7, h = 0.97;
   f.add(softBox(w, h, d, 0.02, { n: 3 }), M.appliance, 0, h / 2, d / 2);
   f.box(M.darkGlass, w - 0.04, 0.1, 0.01, 0, h - 0.13, d, { cast: false });
   f.add(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 16), M.chrome, w / 2 - 0.12, h - 0.08, d + 0.005, 0, PI / 2, 0, false);
@@ -662,7 +662,7 @@ export function lockers(f, M, o = {}) {
     if (k < 0.45) f.add(softBox(0.3, 0.55, 0.1, 0.04, { n: 4, noise: 0.01, seed: i }), M.cloth[Math.floor(r() * M.cloth.length)], cx - bw * 0.1, 1.2, 0.08, 0, 0.05, 0);
     else if (k < 0.75) f.add(softBox(0.28, 0.3, 0.12, 0.05, { n: 4, noise: 0.006, seed: i + 9 }), M.basket, cx + bw * 0.12, 1.3, 0.08);
     // shoes under the bench
-    if (r() < 0.7) for (const sx of [-1, 1]) f.add(softBox(0.1, 0.08, 0.27, 0.035, { n: 3 }), M.cloth[(i * 3) % M.cloth.length], cx + sx * 0.07 + 0.05 * (r() - 0.5), 0.1 + 0.0 - 0.1 + 0.04 + 0.0, d - 0.12, (r() - 0.5) * 0.3);
+    if (r() < 0.7) for (const sx of [-1, 1]) f.add(softBox(0.1, 0.08, 0.27, 0.035, { n: 3 }), M.cloth[(i * 3) % M.cloth.length], cx + sx * 0.07 + 0.05 * (r() - 0.5), 0.04, d + 0.12, (r() - 0.5) * 0.3);
   }
   // bench cushion
   f.add(softBox(w - 0.04, 0.06, d - 0.06, 0.025, { n: 8, noise: 0.003 }), o.cushion ?? M.linenCharcoal, 0, 0.51, d / 2);

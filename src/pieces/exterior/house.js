@@ -140,7 +140,7 @@ export function buildHouse(ctx, M, parent) {
 
   // ---------------- chimney (stucco, from the fireplace mass) with crown and metal cap
   {
-    const x0 = 6.56, x1 = 7.42, z0 = -0.34, z1 = 0.96, yTop = 9.78;
+    const x0 = 6.2, x1 = 7.06, z0 = -0.34, z1 = 0.96, yTop = 9.5;
     geo.box(M.stucco, x0, 6.2, z0, x1, yTop, z1, { skip: 'ny' });
     geo.box(M.stoneCap, x0 - 0.06, yTop, z0 - 0.06, x1 + 0.06, yTop + 0.08, z1 + 0.06);
     geo.box(M.bronze, x0 + 0.12, yTop + 0.08, z0 + 0.15, x1 - 0.12, yTop + 0.36, z1 - 0.15);
@@ -166,7 +166,20 @@ export function buildHouse(ctx, M, parent) {
   };
   awning(-0.313 - 0.14, 1.837 + 0.14, 7.771, 8.279, 0.22, [-0.313, 1.837]);
   awning(7.317 - 0.14, 9.490 + 0.14, 7.771, 8.279, 0.22, [7.317, 9.490]);
-  awning(-7.361 - 0.14, -5.188 + 0.14, 9.198, 9.706, 0.22, [-7.361, -5.188]);
+  // garage bay: its walls are rebuilt lower (see garageBay) so the awning sits right over the window
+  {
+    const x0 = -7.361 - 0.14, x1 = -5.188 + 0.14, zw = 9.198, zb = 9.706, zf = zb + 0.22, yTop = 2.98, yF = 2.42, yBot = 2.22;
+    upPoly(metal, M.metalRoof, [V3(x0, yF, zf), V3(x1, yF, zf), V3(x1, yTop, zw), V3(x0, yTop, zw)], (q) => [q.x, -q.z]);
+    geo.box(M.bronze, x0 - 0.005, yBot, zf - 0.03, x1 + 0.005, yF + 0.02, zf + 0.005);
+    for (const x of [x0, x1]) {
+      const s2 = x === x0 ? -1 : 1;
+      const pts = [V3(x, yBot, zw), V3(x, yBot, zf), V3(x, yF, zf), V3(x, yTop, zw)];
+      if (polyNormal(pts).x * s2 < 0) pts.reverse();
+      geo.poly(M.bronze, pts);
+    }
+    soffit(x0, x1, zb, zf - 0.03, yBot); soffit(x0, -7.361, zw, zb, yBot); soffit(-5.188, x1, zw, zb, yBot);
+    garageBay(ctx, M, geo, 2.26);
+  }
 
   // ---------------- gable vents (louvred) on the board-and-batten gables
   const vent = (cx, cy, z) => {
@@ -183,7 +196,7 @@ export function buildHouse(ctx, M, parent) {
   };
   vent(0.795, 4.55, 7.771 + 0.03);
   vent(8.344, 4.55, 7.771 + 0.03);
-  vent(-6.27, 4.05, 9.198 + 0.03);
+  vent(-6.27, 3.95, 9.198 + 0.03);
 
   // ---------------- back porch: posts + beam (main roof covers it)
   for (const pp of ctx.plan.marks.porchPosts) {
@@ -237,4 +250,23 @@ export function freeWindows(M, parent, glowMats) {
   unit(-8.10, 3.90, 5.12, 0.68, 8.593, 1, 2, glowMats[2]);           // bonus room, garage gable
   unit(4.58, 3.36, 4.60, 1.96, 6.853 + 0.035, 3, 2, glowMats[0]);    // shed dormer
   return geo.toMeshes(parent, { name: 'freewin' });
+}
+
+// the garage bay walls (w_bump3..6) are hidden in configure() and rebuilt to top out under the awning
+export const GARAGE_BAY_WALLS = ['w_bump3', 'w_bump4', 'w_bump5', 'w_bump6'];
+function garageBay(ctx, M, geo, top) {
+  const inner = ctx.roomMat('garage', 'wall');
+  const bot = -0.57;
+  const side = { w_bump3: 'px', w_bump6: 'nx', w_bump4: 'nz', w_bump5: 'nz' };
+  for (const id of GARAGE_BAY_WALLS) {
+    const w = ctx.plan.walls.find((q) => q.id === id);
+    const r = ctx.rectM(w.r);
+    geo.box(M.stucco, r.x0, bot, r.z0, r.x1, top, r.z1, { skip: side[id] + 'ny' });
+    const f = side[id];
+    const pts = f === 'px' ? [V3(r.x1, bot, r.z1), V3(r.x1, bot, r.z0), V3(r.x1, top, r.z0), V3(r.x1, top, r.z1)]
+      : f === 'nx' ? [V3(r.x0, bot, r.z0), V3(r.x0, bot, r.z1), V3(r.x0, top, r.z1), V3(r.x0, top, r.z0)]
+        : [V3(r.x1, bot, r.z0), V3(r.x0, bot, r.z0), V3(r.x0, top, r.z0), V3(r.x1, top, r.z0)];
+    geo.poly(inner, pts);
+    ctx.addCollider({ x0: r.x0, z0: r.z0, x1: r.x1, z1: r.z1, id });
+  }
 }

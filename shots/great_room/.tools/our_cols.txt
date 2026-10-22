@@ -1,0 +1,17 @@
+floorL         [186. 177. 169.] #b9b1a9
+floorR         [151. 108.  82.] #966b51
+wallL          [179. 166. 153.] #b3a599
+wallLtop       [189. 180. 169.] #bdb4a9
+wallMid        [181. 172. 161.] #b5aca1
+ceilingTL      [172. 165. 157.] #aba59c
+beam           [128. 106.  89.] #7f6a59
+cabUpper       [110.  60.  37.] #6e3b24
+leatherA       [155. 103.  68.] #9b6644
+leatherChair   [129.  83.  57.] #805239
+leatherB       [216. 213. 208.] #d8d5d0
+rug            [190. 181. 173.] #bdb5ac
+islandTop      [112. 106. 102.] #6f6a65
+tile           [185. 175. 165.] #b8afa4
+fridge         [102.  96.  90.] #665f59
+coffee         [120. 111. 103.] #786e66
+diningWall     [172. 160. 147.] #ac9f92

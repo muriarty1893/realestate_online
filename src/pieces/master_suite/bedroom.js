@@ -1,6 +1,6 @@
 // Master bedroom furnishings: bed, nightstands, lamps, bench, rug, art, curtains, barn door, fan, lights.
 import * as THREE from 'three';
-import { box, rbox, mesh, metreUV, pillowGeo, drapeGeo, curtainGeo, lathe, merge, rng } from './util.js';
+import { box, rbox, mesh, metreUV, pillowGeo, drapeGeo, curtainGeo, lathe, merge, rng, canvasTex } from './util.js';
 
 export const R = { x0: -8.928, x1: -4.540, z0: -9.047, z1: -3.978 }; // mstr interior faces
 export const BED = { x: -6.735, head: -8.937, W: 2.06, L: 2.3, hbW: 2.22, hbH: 1.12 };
@@ -15,6 +15,7 @@ export function buildBedroom(ctx, M, group, P) {
   curtains(ctx, M, g, P);
   barnDoor(ctx, M, g, P);
   entryDoor(ctx, M, g, P);
+  sunBeam(ctx, M, g, P);
   return g;
 }
 
@@ -31,7 +32,7 @@ function bed(ctx, M, g, P) {
   b.add(rbox(baseW, baseH - 0.07, baseL, 0.03, M.upholstery, 0, 0.07 + (baseH - 0.07) / 2, baseL / 2, { segs: 3 }));
   b.add(box(baseW - 0.12, 0.07, baseL - 0.12, M.blackMatte, 0, 0.035, baseL / 2, { cast: false }));
   // mattress
-  const mT = 0.27, mTop = baseH + mT;
+  const mT = 0.3, mTop = baseH + mT;
   b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
   // duvet: folded back near the pillows, hanging over sides and foot
   const duvTop = mTop + 0.035;
@@ -41,9 +42,17 @@ function bed(ctx, M, g, P) {
   const fold = rbox(W + 0.02, 0.07, 0.22, 0.035, M.duvet, 0, duvTop + 0.025, 0.62, { segs: 3 });
   b.add(fold);
   // cream throw blanket over the foot third, draped over the east (right) side
-  const tW = 1.25;
-  const thr = mesh(drapeGeo({ W: tW, L: L - 0.02, z0: 1.0, top: duvTop + 0.035, side: 0.44, foot: 0.3, r: 0.11, segX: 50, segZ: 40, wrinkle: 0.006, fold: 0.008, seed: 5, sideMask: [0, 1], floorY: 0.08, skew: -0.5 }), M.throwCream);
+  const tW = 1.3;
+  const thr = mesh(drapeGeo({ W: tW, L: L - 0.02, z0: 0.66, top: duvTop + 0.035, side: 0.44, foot: 0.3, r: 0.11, segX: 50, segZ: 40, wrinkle: 0.006, fold: 0.008, seed: 5, sideMask: [0, 1], floorY: 0.08, skew: 1.5 }), M.throwCream);
   thr.position.x = W / 2 - tW / 2 + 0.01;
+  {
+    // soft rolled fold along the coverlet's diagonal edge
+    const c = thr.position.x, x0 = c - tW / 2 - 0.75, x1 = c - tW / 2 + 0.75, z0 = 0.66, z1 = L + 0.29;
+    const pts = [];
+    for (let k = 0; k <= 12; k++) { const t = k / 12; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t + 0.03 * Math.sin(t * 9), duvTop + 0.05, z0 + (z1 - z0) * t * 0.88)); }
+    const roll = mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.028, 8, false), M.throwCream);
+    roll.scale.y = 0.8; b.add(roll);
+  }
   b.add(thr);
   // pillows (euro shams, sleepers, decoratives)
   const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0) => {
@@ -52,18 +61,18 @@ function bed(ctx, M, g, P) {
     b.add(m); return m;
   };
   const yb = mTop + 0.02;
-  // back row euro shams against the headboard
-  pil(0.66, 0.64, 0.2, M.pillowA, -0.66, yb + 0.31, 0.12, 0.2, 0.03, 1);
-  pil(0.66, 0.64, 0.2, M.pillowA, 0.0, yb + 0.31, 0.12, 0.18, 0, 2);
-  pil(0.66, 0.64, 0.2, M.pillowA, 0.66, yb + 0.31, 0.12, 0.2, -0.04, 3);
-  // sleeping pillows
-  pil(0.88, 0.5, 0.18, M.pillowC, -0.46, yb + 0.22, 0.3, 0.42, 0.05, 4);
-  pil(0.88, 0.5, 0.18, M.pillowC, 0.46, yb + 0.22, 0.3, 0.42, -0.05, 5);
-  pil(0.7, 0.48, 0.16, M.pillowW, 0.82, yb + 0.2, 0.22, 0.35, -0.12, 9);
-  // decoratives
-  pil(0.48, 0.46, 0.16, M.pillowB, -0.55, yb + 0.19, 0.46, 0.5, 0.12, 6);
-  pil(0.48, 0.46, 0.16, M.pillowB, 0.55, yb + 0.19, 0.46, 0.5, -0.12, 7);
-  pil(0.58, 0.34, 0.14, M.pillowA, 0.0, yb + 0.15, 0.52, 0.55, 0, 8);
+  // back row euro shams leaning on the headboard (overlapping, slightly varied)
+  pil(0.64, 0.6, 0.22, M.pillowA, -0.64, yb + 0.27, 0.15, 0.32, 0.05, 1);
+  pil(0.64, 0.6, 0.22, M.pillowA, 0.02, yb + 0.28, 0.14, 0.3, -0.02, 2);
+  pil(0.64, 0.6, 0.22, M.pillowA, 0.66, yb + 0.27, 0.15, 0.33, -0.06, 3);
+  // sleeping pillows (lighter), white one at the east end
+  pil(0.86, 0.46, 0.2, M.pillowC, -0.42, yb + 0.2, 0.34, 0.5, 0.06, 4);
+  pil(0.86, 0.46, 0.2, M.pillowC, 0.4, yb + 0.2, 0.34, 0.5, -0.05, 5);
+  pil(0.6, 0.42, 0.18, M.pillowW, 0.74, yb + 0.19, 0.28, 0.45, -0.12, 9);
+  // decoratives: two textured squares + lumbar
+  pil(0.46, 0.44, 0.17, M.pillowKnit, -0.5, yb + 0.18, 0.5, 0.55, 0.16, 6);
+  pil(0.46, 0.44, 0.17, M.pillowB, 0.47, yb + 0.18, 0.5, 0.55, -0.18, 7);
+  pil(0.56, 0.32, 0.15, M.pillowB, -0.03, yb + 0.14, 0.58, 0.6, 0.02, 8);
   ctx.addCollider({ x0: BED.x - hbW / 2, z0: BED.head - 0.11, x1: BED.x + hbW / 2, z1: BED.head + baseL });
 }
 
@@ -207,9 +216,9 @@ function curtains(ctx, M, g, P) {
   panel(M, M.curtainLit, g, { width: 0.32, height: rodY - 0.02, top: rodY - 0.02, at: -4.71, along: 'x', fixed: zN + 0.01, folds: 6, seed: 2 });
   // slider on the east wall: sheer full-height panels on a rod just below the ceiling
   const xE = R.x1 - 0.1, sY = 2.95;
-  rod(M, g, -3.99, -7.08, sY, 'z', xE, 0.014);
-  panel(M, M.sheer, g, { width: 0.98, height: sY - 0.02, top: sY - 0.02, at: -6.47, along: 'z', fixed: xE - 0.02, folds: 9, depth: 0.15, seed: 3 });
-  panel(M, M.sheer, g, { width: 0.42, height: sY - 0.02, top: sY - 0.02, at: -4.2, along: 'z', fixed: xE - 0.02, folds: 6, depth: 0.12, seed: 4 });
+  rod(M, g, -3.99, -7.62, sY, 'z', xE, 0.014);
+  panel(M, M.sheer, g, { width: 1.42, height: sY - 0.02, top: sY - 0.02, at: -6.82, along: 'z', fixed: xE - 0.02, folds: 11, depth: 0.08, seed: 3 });
+  panel(M, M.sheer, g, { width: 1.28, height: sY - 0.02, top: sY - 0.02, at: -4.66, along: 'z', fixed: xE - 0.02, folds: 10, depth: 0.1, seed: 4 });
 }
 
 // ------------------------------------------------------------------ barn door + flat track
@@ -271,4 +280,35 @@ function entryDoor(ctx, M, g, P) {
   knob.position.set(-lw + 0.07, 0.92, 0.02); leaf.add(knob);
   const k2 = knob.clone(); k2.position.z = -lt - 0.02; leaf.add(k2);
   g.add(leaf);
+}
+
+// ------------------------------------------------------------------ low morning sun through the slider
+// The photo's window-shaped sun patch on the west wall can't be reached by the real sun through this plan
+// (the porch roof and both wings shade the slider), so a shadow-casting spot with a window gobo stands in
+// for that beam. It is the piece's one shadow-casting light and is registered as an interior light.
+function sunBeam(ctx, M, g, P) {
+  const C = new THREE.Vector3(-8.928, 1.2, -7.82);           // patch centre on the west wall
+  const az = THREE.MathUtils.degToRad(117), el = THREE.MathUtils.degToRad(8);
+  const d = new THREE.Vector3(-Math.sin(az) * Math.cos(el), -Math.sin(el), Math.cos(az) * Math.cos(el)); // travel dir
+  const pos = C.clone().addScaledVector(d, -4.4);
+  const gobo = canvasTex(256, 256, (c, w, h) => {
+    c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
+    c.save(); c.translate(w / 2, h / 2); c.transform(1, 0, -0.18, 1, 0, 0);
+    c.filter = 'blur(1px)'; c.fillStyle = '#fff';
+    const pw = 0.36 * w, ph = 0.62 * h, bar = 0.03 * w;
+    c.fillRect(-pw / 2, -ph / 2, pw, ph);
+    c.fillStyle = '#000';
+    c.fillRect(-bar / 2, -ph / 2, bar, ph);                     // meeting stile
+    c.fillRect(-pw / 2, -bar / 2 - ph * 0.08, pw, bar);        // check rail
+    c.restore();
+  }, { srgb: true });
+  gobo.wrapS = gobo.wrapT = THREE.ClampToEdgeWrapping;
+  const sp = new THREE.SpotLight(0xfff0dc, 110, 9, 0.24, 0.0, 1.2);
+  sp.position.copy(pos); sp.target.position.copy(C);
+  sp.map = gobo;
+  sp.castShadow = true;
+  sp.shadow.mapSize.set(1024, 1024); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.radius = 2;
+  sp.shadow.camera.near = 0.2; sp.shadow.camera.far = 9;
+  g.add(sp, sp.target);
+  ctx.addInteriorLight(sp);
 }

@@ -10,11 +10,11 @@ import { buildClosets } from './master_suite/closets.js';
 export const views = {
   master: {
     label: 'Master suite',
-    pos: [-4.748, 1.341, -4.261], target: [-7.757, 1.249, -8.254], fov: 65.3,
+    pos: [-4.948, 1.279, -4.225], target: [-7.846, 1.216, -8.299], fov: 66.44,
     preset: {
       base: 'golden',
-      sun: { az: 68, el: 6.5, color: 0xffcf9a, intensity: 7.0 },
-      hemi: { sky: 0xffeedd, ground: 0xd9bfa0, intensity: 1.1 },
+      sun: { az: 70, el: 8, color: 0xffdcb4, intensity: 8.0 },
+      hemi: { sky: 0xffeedd, ground: 0xd2b698, intensity: 0.9 },
       env: { intensity: 0.25 },
       exposure: 1.15, interior: 1.0,
     },

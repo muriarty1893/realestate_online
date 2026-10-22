@@ -17,11 +17,28 @@ export async function buildBath(ctx, M, group, P) {
   bathRug(ctx, M, g);
   wc(ctx, M, g);
   // skylight from the tub window (soft, cool) - no shadows, faces into the bath
-  const rl = new THREE.RectAreaLight(0xf3f1ec, 2.2, 1.1, 1.6);
+  const rl = new THREE.RectAreaLight(0xf3f1ec, 1.4, 1.1, 1.6);
   rl.position.set(WEST + 0.05, 1.75, -5.585); rl.lookAt(WEST + 2, 1.5, -5.585);
   g.add(rl); ctx.addInteriorLight(rl);
   // plants / vase models
   await vases(ctx, M, g, P);
+  mirrorProbe(ctx, M, g);
+}
+
+// Mirrors reflect a cube capture of the bath taken once everything has loaded (cheap, not per frame).
+function mirrorProbe(ctx, M, g) {
+  const rt = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType });
+  const cam = new THREE.CubeCamera(0.05, 30, rt);
+  cam.position.set(-10.6, 1.6, -6.0); g.add(cam);
+  let frames = 0, done = 0;
+  const wait = ctx.shot ? 1 : 90;
+  ctx.onUpdate(() => {
+    frames++;
+    if (done >= 2 || frames < wait * (done + 1)) return;
+    cam.update(ctx.renderer, ctx.scene);
+    M.mirror.envMap = rt.texture; M.mirror.envMapIntensity = 0.9; M.mirror.needsUpdate = true;
+    done++;
+  });
 }
 
 function tub(ctx, M, g) {

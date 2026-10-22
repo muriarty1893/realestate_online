@@ -28,8 +28,8 @@ export function planarUV(g, s = 1, ox = 0, oy = 0) {
   return g;
 }
 
-function normalize(g) {
-  for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
+function normalize(g, withColor = false) {
+  for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv' && !(withColor && k === 'color')) g.deleteAttribute(k);
   if (!g.attributes.normal) g.computeVertexNormals();
   if (!g.attributes.uv) planarUV(g);
   if (!g.index) {
@@ -48,7 +48,16 @@ function normalize(g) {
 export class Batch {
   constructor() { this.map = new Map(); this.tris = 0; this.meshes = []; }
   add(geo, mat, m4, cast = true) {
-    const g = normalize(geo.clone());
+    // tinted proxy {isTint, mat, color}: one vertex-coloured material shared by many colours
+    let tint = null;
+    if (mat.isTint) { tint = new THREE.Color(mat.color); mat = mat.mat; }
+    const g = normalize(geo.clone(), !!mat.vertexColors);
+    if (mat.vertexColors) {
+      const n = g.attributes.position.count, c = tint || new THREE.Color(1, 1, 1);
+      const arr = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) { arr[3 * i] = c.r; arr[3 * i + 1] = c.g; arr[3 * i + 2] = c.b; }
+      g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+    }
     g.applyMatrix4(m4);
     const key = mat.uuid + (cast ? ':c' : ':n');
     let e = this.map.get(key);
@@ -423,27 +432,32 @@ export function abstractArt({ w = 600, h = 450, palette = ['#e9e3d7', '#c9bfae',
     }
     return c;
   }
-  // layered translucent washes + brush strokes
-  for (let k = 0; k < 26; k++) {
+  // soft painterly abstract: blurred colour fields, then a few crisp gestural strokes, canvas grain
+  g.filter = 'blur(' + Math.round(w / 28) + 'px)';
+  for (let k = 0; k < 14; k++) {
     const col = palette[1 + Math.floor(r() * (palette.length - 1))];
-    g.globalAlpha = 0.08 + r() * 0.22;
+    g.globalAlpha = 0.25 + r() * 0.4;
     g.fillStyle = col;
     g.beginPath();
-    const cx = w * r(), cy = h * r(), rx = w * (0.08 + r() * 0.3), ry = h * (0.06 + r() * 0.25);
+    const cx = w * (0.1 + r() * 0.8), cy = h * (0.1 + r() * 0.8), rx = w * (0.08 + r() * 0.22), ry = h * (0.06 + r() * 0.2);
     g.ellipse(cx, cy, rx, ry, r() * 3.14, 0, Math.PI * 2);
     g.fill();
   }
-  for (let k = 0; k < 40; k++) {
-    g.globalAlpha = 0.1 + r() * 0.35;
+  g.filter = 'blur(2px)';
+  for (let k = 0; k < 18; k++) {
+    g.globalAlpha = 0.25 + r() * 0.45;
     g.strokeStyle = palette[1 + Math.floor(r() * (palette.length - 1))];
-    g.lineWidth = 4 + r() * 18;
+    g.lineWidth = 3 + r() * 14;
     g.lineCap = 'round';
     g.beginPath();
-    const x = w * r(), y = h * r();
+    const x = w * (0.15 + r() * 0.7), y = h * (0.15 + r() * 0.7);
     g.moveTo(x, y);
-    g.bezierCurveTo(x + (r() - 0.5) * 200, y + (r() - 0.5) * 120, x + (r() - 0.5) * 200, y + (r() - 0.5) * 120, x + (r() - 0.5) * 260, y + (r() - 0.5) * 160);
+    g.bezierCurveTo(x + (r() - 0.5) * w * 0.3, y + (r() - 0.5) * h * 0.3, x + (r() - 0.5) * w * 0.3, y + (r() - 0.5) * h * 0.3, x + (r() - 0.5) * w * 0.4, y + (r() - 0.5) * h * 0.35);
     g.stroke();
   }
+  g.filter = 'none';
+  g.globalAlpha = 0.06;
+  for (let k = 0; k < w * h / 40; k++) { g.fillStyle = r() > 0.5 ? '#fff' : '#000'; g.fillRect(r() * w, r() * h, 1, 1); }
   g.globalAlpha = 1;
   return c;
 }

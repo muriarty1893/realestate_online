@@ -16,7 +16,7 @@ class Run {
   bx(x0, y0, z0, x1, y1, z1, mat, grain = 'y') { return this.add(boxMM(x0, y0, z0, x1, y1, z1, mat, { grain })); }
   // shaker door / drawer front: slab + raised frame. zf = front plane of the carcass
   front(x0, x1, y0, y1, zf, { pull = 'v', pullSide = 'r', gap = 0.003 } = {}) {
-    const M = this.M, t = 0.019, fr = Math.min(0.065, (x1 - x0) / 4, (y1 - y0) / 4), ft = 0.008;
+    const M = this.M, t = 0.012, fr = Math.min(0.065, (x1 - x0) / 4, (y1 - y0) / 4), ft = 0.013;
     x0 += gap; x1 -= gap; y0 += gap; y1 -= gap;
     this.bx(x0, y0, zf, x1, y1, zf + t, M.cab, 'y');
     const z0 = zf + t, z1 = zf + t + ft;
@@ -275,7 +275,7 @@ export function buildKitchen(ctx, M, group) {
   // ---------- west wall run (face x = -4.421), local x runs north from the south wall (z = 3.578)
   const W = new Run(M);
   const zs = (z) => KIT.z1 - z; // world z -> local x
-  const zTallS = 3.573, zOven = 3.06, zTallN = 2.29, zRangeS = 1.157, zRangeN = 0.243, zHallS = -0.746;
+  const zTallS = 3.573, zOven = 3.06, zTallN = 2.29, zRangeS = 1.222, zRangeN = 0.308, zHallS = -0.746;
   W.tall(zs(zTallS), zs(zOven), {});
   // oven tower: cabinet above, double oven, drawer below
   W.bx(zs(zOven), TOE, 0, zs(zTallN), UP_Y1, 0.625, M.cabDark);
@@ -376,8 +376,9 @@ export function buildKitchen(ctx, M, group) {
   ctx.addCollider({ x0: isl.x0, z0: isl.z0, x1: isl.x1 + 0.3, z1: isl.z1 });
 
   // pendants over the island
-  const pz = [isl.cz - 0.92, isl.cz, isl.cz + 0.92];
-  for (const z of pz) { const p = pendant(M, 3.048, 1.86); p.position.set(isl.cx, 0, z); group.add(p); }
+  // the photo hangs them slightly south of the island centre
+  const pz = [0.19, 1.11, 2.03];
+  for (const z of pz) { const p = pendant(M, 3.048, 1.93); p.position.set(isl.cx, 0, z); group.add(p); }
 
   // colliders: perimeter cabinets
   ctx.addCollider({ x0: KIT.x0, z0: zTallN, x1: KIT.x0 + 0.65, z1: KIT.z1 });

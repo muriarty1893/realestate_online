@@ -24,8 +24,8 @@ const col = (r, g, b) => new THREE.Color(r, g, b);
 export function makeMats() {
   const M = {};
   // ---------------- paint & trim (house-wide interior look)
-  M.wall = std({ color: 0xeae1d0, roughness: 0.93 });
-  M.ceiling = std({ color: 0xede6d8, roughness: 0.95 });
+  M.wall = std({ color: 0xf0e3cc, roughness: 0.93 });
+  M.ceiling = std({ color: 0xf0e5d1, roughness: 0.95 });
   M.trim = std({ color: 0xf2efe7, roughness: 0.5 });
   M.reveal = M.wall;
   M.doorInt = std({ color: 0xf0ede5, roughness: 0.45 });
@@ -35,7 +35,7 @@ export function makeMats() {
     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
     roughnessMap: tex('wood_floor_rough_1k.jpg', { tile: 2.0 }),
-    color: col(0.78, 0.68, 0.6), roughness: 0.75, normalScale: new THREE.Vector2(0.6, 0.6),
+    color: col(0.66, 0.56, 0.48), roughness: 0.7, normalScale: new THREE.Vector2(0.6, 0.6),
   });
 
   // ---------------- rough-sawn beam wood
@@ -43,15 +43,15 @@ export function makeMats() {
     map: tex('rough_wood_diff_1k.jpg', { srgb: true, tile: 1.2 }),
     normalMap: tex('rough_wood_nor_gl_1k.jpg', { tile: 1.2 }),
     roughnessMap: tex('rough_wood_rough_1k.jpg', { tile: 1.2 }),
-    color: col(0.78, 0.55, 0.40), roughness: 0.9, normalScale: new THREE.Vector2(1.2, 1.2),
+    color: col(0.64, 0.4, 0.26), roughness: 0.9, normalScale: new THREE.Vector2(1.2, 1.2),
   });
 
   // ---------------- cabinet wood (warm medium-brown shaker, cherry/hickory look)
   M.cab = std({
-    map: tex('wood_table_worn_diff_1k.jpg', { srgb: true, tile: 1.0 }),
-    color: col(1.55, 1.12, 0.82), roughness: 0.5,
+    map: tex('oak_veneer_01_diff_1k.jpg', { srgb: true, tile: 0.9 }),
+    color: col(1.12, 0.72, 0.42), roughness: 0.48,
   });
-  M.cabDark = std({ map: M.cab.map, color: col(1.1, 0.8, 0.6), roughness: 0.55 });
+  M.cabDark = std({ map: M.cab.map, color: col(0.8, 0.5, 0.3), roughness: 0.55 });
 
   // ---------------- dark leathered granite
   M.granite = std({
@@ -73,9 +73,9 @@ export function makeMats() {
     map: tex('fabric_leather_02_diff_1k.jpg', { srgb: true, tile: 0.9 }),
     normalMap: tex('fabric_leather_02_nor_gl_1k.jpg', { tile: 0.9 }),
     roughnessMap: tex('fabric_leather_02_rough_1k.jpg', { tile: 0.9 }),
-    color: col(0.92, 0.72, 0.6), roughness: 0.6, normalScale: new THREE.Vector2(0.7, 0.7),
+    color: col(0.66, 0.44, 0.3), roughness: 0.55, normalScale: new THREE.Vector2(0.7, 0.7),
   });
-  M.leatherSide = std({ map: M.leather.map, normalMap: M.leather.normalMap, roughnessMap: M.leather.roughnessMap, color: col(0.92, 0.72, 0.6), roughness: 0.6, side: THREE.DoubleSide });
+  M.leatherSide = std({ map: M.leather.map, normalMap: M.leather.normalMap, roughnessMap: M.leather.roughnessMap, color: col(0.66, 0.44, 0.3), roughness: 0.6, side: THREE.DoubleSide });
   M.leatherDark = std({ map: M.leather.map, normalMap: M.leather.normalMap, roughnessMap: M.leather.roughnessMap, color: col(0.6, 0.44, 0.34), roughness: 0.62 });
 
   // ---------------- reclaimed wood (coffee table)
@@ -88,14 +88,14 @@ export function makeMats() {
   M.tableWood = std({ map: tex('wood_table_worn_diff_1k.jpg', { srgb: true, tile: 1.2 }), color: col(1.2, 0.95, 0.78), roughness: 0.55 });
 
   // ---------------- metals
-  M.steel = std({ color: 0xc9c9c7, metalness: 1.0, roughness: 0.28 });
-  M.steelBrushed = std({ color: 0xbdbdbb, metalness: 1.0, roughness: 0.38 });
+  M.steel = std({ color: 0xc9c9c7, metalness: 1.0, roughness: 0.25, envMapIntensity: 2.6 });
+  M.steelBrushed = std({ color: 0xbdbdbb, metalness: 1.0, roughness: 0.34, envMapIntensity: 2.6 });
   M.brass = std({ color: 0xc09a5b, metalness: 1.0, roughness: 0.32 });
   M.iron = std({ color: 0x1c1b1a, metalness: 0.6, roughness: 0.5 });
   M.black = std({ color: 0x121212, roughness: 0.45 });
   M.ovenGlass = std({ color: 0x0b0b0c, metalness: 0.2, roughness: 0.08 });
   M.redKnob = std({ color: 0xb01a14, roughness: 0.35 });
-  M.glass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, metalness: 0, transparent: true, opacity: 0.18, envMapIntensity: 1.6, depthWrite: false, side: THREE.DoubleSide, clearcoat: 1 });
+  M.glass = new THREE.MeshPhysicalMaterial({ color: 0x0c0c0c, roughness: 0.03, metalness: 0, transparent: true, opacity: 0.32, envMapIntensity: 2.0, depthWrite: false, side: THREE.DoubleSide });
   M.bulb = std({ color: 0xfff1d6, emissive: 0xffc77a, emissiveIntensity: 6, roughness: 0.3 });
   M.canLens = std({ color: 0xfff6e8, emissive: 0xfff0dc, emissiveIntensity: 3.0, roughness: 0.5 });
   M.canTrim = std({ color: 0xf2f0ea, roughness: 0.4 });
@@ -106,7 +106,7 @@ export function makeMats() {
   const linenN = tex('rough_linen_nor_gl_1k.jpg', { tile: 0.25 });
   M.linen = std({ color: 0xd8ccb6, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.6, 0.6), side: THREE.DoubleSide });
   M.curtain = std({ color: 0xd6c7ad, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5), side: THREE.DoubleSide, emissive: 0x5a4a35, emissiveIntensity: 0.25 });
-  M.cream = std({ color: 0xdcd3c3, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
+  M.cream = std({ color: 0xd3c6b0, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.35 });
   M.knit = std({ color: 0xe6e0d3, roughness: 0.98, normalMap: knitN, normalScale: new THREE.Vector2(1.2, 1.2), side: THREE.DoubleSide });
   M.knitBall = std({ color: 0xefebe3, roughness: 0.98, normalMap: tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.12 }), normalScale: new THREE.Vector2(1.6, 1.6) });
@@ -117,7 +117,7 @@ export function makeMats() {
   M.throwStripe = std({ map: throwTex(), roughness: 0.95, normalMap: knitN, side: THREE.DoubleSide });
 
   // ---------------- rug: large distressed gray/beige vintage rug
-  M.rug = std({ map: rugTex(), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.6, 0.6) });
+  M.rug = std({ map: rugTex(7), color: col(0.68, 0.64, 0.62), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.6, 0.6) });
 
   // ---------------- fireplace plaster / stone
   M.plasterStone = std({
@@ -137,16 +137,31 @@ export function makeMats() {
   M.olive = std({ color: 0x6d7a52, roughness: 0.8, side: THREE.DoubleSide });
   M.herb = std({ color: 0x4f7a3a, roughness: 0.8, side: THREE.DoubleSide });
   M.paper = std({ color: 0xece7dc, roughness: 0.9 });
+  M.candle = std({ color: 0xf4efe4, roughness: 0.6 });
+  M.eucalyptus = std({ color: 0x7d917f, roughness: 0.75, side: THREE.DoubleSide });
+  M.pillowPattern = std({ map: patternTex(), roughness: 0.95, normalMap: linenN });
+  M.rugDining = std({ map: rugTex(31, ['#9a958e', '#b7b0a6', '#7f7b77', '#c9c1b5', '#8c8f93']), roughness: 1.0 });
+  M.rugFoyer = std({ map: rugTex(41, ['#8e8378', '#b19f8a', '#6f665e', '#c4b6a3', '#7c6c5e']), roughness: 1.0 });
+  M.jarGlass = new THREE.MeshPhysicalMaterial({ color: 0xf2efe6, roughness: 0.15, transparent: true, opacity: 0.55, envMapIntensity: 1.2 });
+  M.wicker = std({ color: 0x9a7a52, roughness: 0.95, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.12 }), normalScale: new THREE.Vector2(2, 2) });
+  M.mirror = std({ color: 0xd9dde0, metalness: 1.0, roughness: 0.04 });
+  M.shade = std({ color: 0xf1ebdf, roughness: 0.9, emissive: 0xffd9a8, emissiveIntensity: 0.25, side: THREE.DoubleSide });
+  M.legWood = std({ color: 0x2e1f16, roughness: 0.5 });
+  M.stem = std({ color: 0x5d5a40, roughness: 0.8 });
+  M.bookA = std({ color: 0x2f3438, roughness: 0.7 });
+  M.bookB = std({ color: 0xe6e1d6, roughness: 0.8 });
+  M.bookC = std({ color: 0x8a8174, roughness: 0.8 });
+  M.ceramicSide = std({ color: 0xeee9df, roughness: 0.35, side: THREE.DoubleSide });
   return M;
 }
 
 // --------------------------------------------------------------- canvas textures
-function rugTex() {
+function rugTex(seed = 7, palette) {
   return canvasTex(1024, 1024, (g, w, h) => {
-    const R = rng(7);
-    g.fillStyle = '#a79c90'; g.fillRect(0, 0, w, h);
+    const R = rng(seed);
+    g.fillStyle = palette ? palette[0] : '#a79c90'; g.fillRect(0, 0, w, h);
     // mottled vintage wash: many soft blobs of grey, beige and blue-grey
-    const pal = ['#b9b0a6', '#8f877e', '#c6bdb1', '#9a948f', '#7f7b78', '#b3a594', '#a2a5a6', '#cfc6b9'];
+    const pal = palette || ['#b9b0a6', '#8f877e', '#c6bdb1', '#9a948f', '#7f7b78', '#b3a594', '#a2a5a6', '#cfc6b9'];
     for (let i = 0; i < 1600; i++) {
       const x = R() * w, y = R() * h, r = 6 + R() * 60;
       const c = pal[(R() * pal.length) | 0];
@@ -169,6 +184,13 @@ function rugTex() {
     const id = g.getImageData(0, 0, w, h), d = id.data;
     for (let i = 0; i < d.length; i += 4) { const n = (R() - 0.5) * 26; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
     g.putImageData(id, 0, 0);
+  });
+}
+function patternTex() {
+  return canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#e4ddd0'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#7d8a8f'; g.lineWidth = 5;
+    for (let y = 16; y < h; y += 42) for (let x = 16; x < w; x += 42) { g.beginPath(); g.arc(x, y, 12, 0, 6.3); g.stroke(); }
   });
 }
 function stripeTex() {

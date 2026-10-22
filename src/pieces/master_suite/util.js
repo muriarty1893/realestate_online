@@ -45,27 +45,26 @@ export function rbox(w, h, d, r, mat, x = 0, y = 0, z = 0, { grain = 'y', segs =
   return m;
 }
 
-// Pillow: a subdivided box whose thickness swells toward the middle.
-export function pillowGeo(w, h, d, { segs = 18, puff = 1, corner = 0.12, seed = 0 } = {}) {
-  const g = new THREE.BoxGeometry(1, 1, 1, segs, segs, 4);
-  const p = g.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    let x = p.getX(i) * 2, y = p.getY(i) * 2, z = p.getZ(i) * 2; // -1..1
-    const fx = 1 - Math.pow(Math.abs(x), 3), fy = 1 - Math.pow(Math.abs(y), 3);
-    let t = Math.max(0.05, Math.pow(Math.max(0, fx * fy), 0.38)) * puff;
-    // pinched corners
-    const cr = Math.max(0, 1 - corner * (x * x * y * y) * 3);
-    // little wrinkle noise
-    const nn = 0.04 * Math.sin(x * 5.3 + seed) * Math.sin(y * 4.1 + seed * 2.1);
-    x *= 1 - 0.06 * Math.pow(Math.abs(y), 2) * (1 - Math.abs(z));
-    y *= 1 - 0.06 * Math.pow(Math.abs(x), 2) * (1 - Math.abs(z));
-    p.setXYZ(i, (x * w) / 2, (y * h) / 2, ((z * d) / 2) * t * cr + nn * d * 0.3 * Math.sign(z));
+// Pillow: two domed faces meeting at a seam; pointy corners, edges pulled in, soft creases.
+export function pillowGeo(w, h, d, { segs = 24, puff = 1, seed = 0, pinch = 0.07, sag = 0.0 } = {}) {
+  const geos = [];
+  for (const side of [1, -1]) {
+    const g = new THREE.PlaneGeometry(2, 2, segs, segs);
+    const p = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i);
+      const t = Math.pow(Math.max(0, 1 - x * x), 0.42) * Math.pow(Math.max(0, 1 - y * y), 0.42) * puff;
+      const crease = 0.06 * Math.sin(x * 3.1 + seed) * Math.sin(y * 2.3 + seed * 1.7) + 0.04 * Math.sin((x + y) * 5 + seed * 3);
+      const X = x * (1 - pinch * (1 - y * y)), Y = y * (1 - pinch * (1 - x * x));
+      p.setXYZ(i, (X * w) / 2, (Y * h) / 2 - sag * (1 - x * x) * h * 0.5, side * (d / 2) * t * (1 + crease));
+      uv.setXY(i, (X * w) / 2 + side * 0.37, (Y * h) / 2);
+    }
+    if (side < 0) g.scale(-1, 1, 1); // flip winding so the back faces outward
+    geos.push(g);
   }
-  g.computeVertexNormals();
-  // uv in metres for fabric textures
-  const uv = g.attributes.uv;
-  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) + p.getZ(i) * 0.3, p.getY(i));
-  return g;
+  const m = mergeGeometries(geos, false);
+  m.computeVertexNormals();
+  return m;
 }
 
 // Draped cloth over a rectangular top (local: x across, z along from head (0) to foot (L)).

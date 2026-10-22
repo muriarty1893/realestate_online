@@ -34,7 +34,7 @@ function stamp(h, W, H, cx, cy, rx, ry, rot, amp) {
 }
 
 // Chunky braided jute/wool: rows of fat loops along X with dark fibre flecks. Tile = repeatM metres.
-export function rugMaps({ size = 512, repeatM = 0.42, rows = 15, loops = 17, seed = 3 } = {}) {
+export function rugMaps({ size = 512, repeatM = 0.42, rows = 19, loops = 15, seed = 3 } = {}) {
   const W = size, H = size, R = rng(seed);
   const h = new Float32Array(W * H), tone = new Float32Array(W * H).fill(0);
   const rh = H / rows, lw = W / loops;
@@ -43,7 +43,7 @@ export function rugMaps({ size = 512, repeatM = 0.42, rows = 15, loops = 17, see
     for (let k = 0; k < loops; k++) {
       const cx = k * lw + off + (R() - 0.5) * lw * 0.15, cy = r * rh + rh / 2 + (R() - 0.5) * rh * 0.12;
       const amp = 0.75 + R() * 0.25;
-      stamp(h, W, H, cx, cy, lw * 0.62, rh * 0.58, (R() - 0.5) * 0.5 + (r % 2 ? 0.35 : -0.35), amp);
+      stamp(h, W, H, cx, cy, lw * (0.62 + R() * 0.15), rh * (0.48 + R() * 0.1), (R() - 0.5) * 0.25 + (r % 2 ? 0.12 : -0.12), amp);
       // per-loop tone
       const tv = (R() - 0.5) * 0.12;
       for (let y = -Math.floor(rh / 2); y < rh / 2; y++) for (let x = -Math.floor(lw / 2); x < lw / 2; x++) {
@@ -53,7 +53,7 @@ export function rugMaps({ size = 512, repeatM = 0.42, rows = 15, loops = 17, see
   }
   const nrm = heightToNormal(h, W, H, 2.2);
   const col = new Uint8ClampedArray(W * H * 4);
-  const base = [236, 226, 208];
+  const base = [240, 231, 214];
   for (let i = 0; i < W * H; i++) {
     const sh = 0.6 + 0.4 * h[i] + tone[i];
     col[i * 4] = base[0] * sh; col[i * 4 + 1] = base[1] * sh; col[i * 4 + 2] = base[2] * sh; col[i * 4 + 3] = 255;
@@ -68,16 +68,18 @@ export function rugMaps({ size = 512, repeatM = 0.42, rows = 15, loops = 17, see
 }
 
 // Chunky hand knit: columns of V stitches. Tile = repeatM metres (4 x 5 stitches per tile).
-export function knitMaps({ size = 256, repeatM = 0.2, cols = 4, rows = 5, seed = 5 } = {}) {
+export function knitMaps({ size = 256, repeatM = 0.22, cols = 4, rows = 5, seed = 5 } = {}) {
   const W = size, H = size, R = rng(seed);
   const h = new Float32Array(W * H);
   const cw = W / cols, rh = H / rows;
+  const tone = new Float32Array(W * H);
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) for (const side of [-1, 1]) {
-    stamp(h, W, H, c * cw + cw / 2 + side * cw * 0.2, r * rh + rh / 2, cw * 0.28, rh * 0.62, side * 0.5, 0.85 + R() * 0.15);
+    const jx = (R() - 0.5) * cw * 0.12, jy = (R() - 0.5) * rh * 0.14;
+    stamp(h, W, H, c * cw + cw / 2 + side * cw * 0.21 + jx, r * rh + rh / 2 + jy, cw * (0.27 + R() * 0.04), rh * (0.6 + R() * 0.08), side * (0.45 + R() * 0.15), 0.8 + R() * 0.2);
   }
-  const nrm = heightToNormal(h, W, H, 3.0);
+  const nrm = heightToNormal(h, W, H, 3.4);
   const col = new Uint8ClampedArray(W * H * 4);
-  for (let i = 0; i < W * H; i++) { const sh = 0.62 + 0.38 * h[i]; col[i * 4] = 238 * sh; col[i * 4 + 1] = 228 * sh; col[i * 4 + 2] = 212 * sh; col[i * 4 + 3] = 255; }
+  for (let i = 0; i < W * H; i++) { const sh = 0.58 + 0.42 * Math.pow(h[i], 0.7); col[i * 4] = 236 * sh; col[i * 4 + 1] = 224 * sh; col[i * 4 + 2] = 206 * sh; col[i * 4 + 3] = 255; }
   return { map: tex(col, W, H, true, repeatM), normalMap: tex(nrm, W, H, false, repeatM) };
 }
 

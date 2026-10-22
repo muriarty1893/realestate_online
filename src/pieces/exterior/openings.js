@@ -73,7 +73,7 @@ function windowUnit(geo, M, glowMat, o, { units = 1, cols = 2, rowsTop = 1, rows
 
 const SPEC = {
   win_garage_front: { units: 1, cols: 2, sill: 3.0, head: 8.0, glow: 0 },
-  win_garage_bay: { units: 2, cols: 2, sill: 3.0, head: 9.5, glow: 1 },
+  win_garage_bay: { units: 2, cols: 2, sill: 2.5, head: 7.5, glow: 1, top: 2.26 / 0.3048 },
   win_butler1: { units: 1, cols: 2, sill: 3.5, head: 8.0, glow: 2 },
   win_butler2: { units: 1, cols: 2, sill: 3.5, head: 8.0, glow: 3 },
   win_dining_bay: { units: 2, cols: 2, sill: 1.5, head: 8.5, glow: 4 },
@@ -82,7 +82,8 @@ const SPEC = {
 
 // called from configure(): take over these openings (new sill/head, own units)
 export function configureOpenings(ctx) {
-  for (const [id, s] of Object.entries(SPEC)) ctx.overrideOpening(id, { sill: s.sill, head: s.head, grid: [s.cols * s.units, 2], skipUnit: true });
+  for (const [id, s] of Object.entries(SPEC)) ctx.overrideOpening(id, { sill: s.sill, head: s.head, grid: [s.cols * s.units, 2], skipUnit: true, ...(s.top ? { top: s.top } : {}) });
+  for (const id of ['w_bump3', 'w_bump4', 'w_bump5', 'w_bump6']) ctx.hideWall(id);
   ctx.overrideOpening('door_entry', { skipUnit: true });
   ctx.overrideOpening('sidelight_l', { skipUnit: true });
   ctx.overrideOpening('sidelight_r', { skipUnit: true });

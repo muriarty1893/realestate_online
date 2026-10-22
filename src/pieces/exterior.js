@@ -8,6 +8,8 @@ import { configureOpenings, buildOpenings } from './exterior/openings.js';
 import { installLensShift } from './exterior/camera.js';
 import { buildSite } from './exterior/site.js';
 import { buildVegetation } from './exterior/veg.js';
+import { makeGardenEnv, installEnvSwap } from './exterior/env.js';
+import { sunVector } from '../lighting.js';
 
 // Camera matched to refs/front_view.webp: ~65 mm-equivalent from 32 m out, eye ~2.6 m, shift lens
 // (principal point right of and below the frame centre, so verticals stay vertical).
@@ -16,16 +18,16 @@ export const views = {
     label: 'Front exterior',
     pos: [4.6, 2.6, 36.0], target: [4.6, 2.6, 0], fov: 31.2, shift: [0.149, 0.097],
     preset: {
-      base: 'dusk',
-      sun: { az: 335, el: 9, color: 0xffc58a, intensity: 1.4 },
-      hemi: { sky: 0xc7d8ee, ground: 0x6b7448, intensity: 1.05 },
-      env: { intensity: 0.55 },
-      sky: { top: 0x7eaee6, horizon: 0xf3e8d2, bottom: 0x55603f },
+      base: 'golden',
+      sun: { az: 25, el: 10, color: 0xffc47e, intensity: 1.8 },
+      hemi: { sky: 0xf0f2f2, ground: 0x8a8658, intensity: 2.0 },
+      env: { intensity: 0.85 },
+      sky: { top: 0x7fb4ea, horizon: 0xe2ecf0, bottom: 0x5a6040 },
       exposure: 1.0, interior: 1.6,
     },
-    lighting: { shadowFocus: { center: [2, 3, 8], radius: 26 } },
-    post: { ao: true, aoIntensity: 0.9, aoRadius: 0.7, bloom: 0.22, bloomThreshold: 0.82, bloomRadius: 0.45 },
-    toneMapping: 'agx',
+    lighting: { shadowFocus: { center: [2, 3, 6], radius: 30 } },
+    post: { ao: true, aoIntensity: 0.9, aoRadius: 0.7, bloom: 0.25, bloomThreshold: 0.85, bloomRadius: 0.45 },
+    toneMapping: 'neutral',
   },
 };
 
@@ -51,13 +53,15 @@ export async function build(ctx) {
   root.name = 'exterior';
   ctx.scene.add(root);
   installLensShift(ctx);
+  const pv = views.front.preset;
+  installEnvSwap(ctx, makeGardenEnv(ctx.renderer, sunVector(pv.sun.az, pv.sun.el)));
 
   const house = buildHouse(ctx, M, root);
   buildCladding(ctx, M, root, house.gables);
   buildOpenings(ctx, M, root);
   freeWindows(M, root, M.glow);
-  await buildSite(ctx, M, root);
-  await buildVegetation(ctx, M, root);
+  const site = await buildSite(ctx, M, root);
+  await buildVegetation(ctx, M, root, site);
 
   // warm interior glow tracks the lighting preset's interior multiplier
   ctx.onUpdate(() => {

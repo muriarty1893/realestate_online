@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node tools/serve.mjs 8080",
-    "shot": "node tools/shot.mjs"
+    "shot": "node tools/shot.mjs",
+    "vendor": "rm -rf vendor/three && mkdir -p vendor/three/build vendor/three/examples && cp node_modules/three/build/three.module.js vendor/three/build/ && cp node_modules/three/LICENSE vendor/three/ && rsync -a --exclude libs/ node_modules/three/examples/jsm vendor/three/examples/"
   },
   "keywords": [],
   "type": "module",

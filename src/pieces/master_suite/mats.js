@@ -20,7 +20,7 @@ export function makeMats(ctx) {
     map: T('laminate_floor_02_diff_2k.jpg', { srgb: true, repeatM: 1.55, rotation: PI2 }),
     normalMap: T('laminate_floor_02_nor_gl_2k.jpg', { repeatM: 1.55, rotation: PI2 }),
     roughnessMap: T('laminate_floor_02_rough_2k.jpg', { repeatM: 1.55, rotation: PI2 }),
-    color: 0xc4b3a3, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakFloor',
+    color: 0xb9ab9f, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakFloor',
   });
   M.porcelain = std({
     map: T('porcelain_diff_1k.jpg', { srgb: true, repeatM: 1.5 }),
@@ -47,7 +47,7 @@ export function makeMats(ctx) {
     roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: size }),
   });
   M.oak = std({ ...oakTex(1.2), color: 0xd9b48e, roughness: 0.62, normalScale: new THREE.Vector2(0.4, 0.4), name: 'ms.oak' });
-  M.oakDoor = std({ map: T('oak_soft_diff_1k.jpg', { srgb: true, repeatM: 1.6 }), normalMap: T('oak_veneer_01_nor_gl_1k.jpg', { repeatM: 1.6 }), roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: 1.6 }), color: 0xf6e9d8, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakDoor' });
+  M.oakDoor = std({ map: T('oak_door_diff_1k.jpg', { srgb: true, repeatM: 1.6 }), normalMap: T('oak_veneer_01_nor_gl_1k.jpg', { repeatM: 1.6 }), roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: 1.6 }), color: 0xf6e9d8, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakDoor' });
   M.oakSoft = std({ map: T('oak_soft_diff_1k.jpg', { srgb: true, repeatM: 1.2 }), normalMap: T('oak_veneer_01_nor_gl_1k.jpg', { repeatM: 1.2 }), roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: 1.2 }), color: 0xf0dcc2, roughness: 0.6, normalScale: new THREE.Vector2(0.4, 0.4), name: 'ms.oakSoft' });
   M.oakLight = std({ ...oakTex(1.0), color: 0xe2c4a0, roughness: 0.6, normalScale: new THREE.Vector2(0.3, 0.3), name: 'ms.oakLight' });
   M.fanBlade = std({ ...oakTex(0.9), color: 0x8a6a50, roughness: 0.55, name: 'ms.fanBlade' });
@@ -78,16 +78,15 @@ export function makeMats(ctx) {
   const wrA = wrinkleMaps({ repeatM: 1.1, n: 300, dir: Math.PI / 2, spread: 0.7, seed: 4 }).normalMap;
   const wrB = wrinkleMaps({ repeatM: 0.9, n: 280, dir: 0.3, spread: 1.2, seed: 8 }).normalMap;
   const wrP = wrinkleMaps({ size: 256, repeatM: 0.5, n: 90, dir: 0, spread: 1.5, seed: 12 }).normalMap;
-  M.duvet = fab(0xa08a74, 0.3, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrA, name: 'ms.duvet' });
-  M.throwCream = fab(0xcdbfa9, 0.25, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrB, name: 'ms.throwCream' });
+  M.duvet = fab(0xa58f7a, 0.3, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrA, name: 'ms.duvet' });
+  M.throwCream = fab(0xcbbda8, 0.25, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrB, name: 'ms.throwCream' });
   M.sheet = fab(0xece6dc, 0.25, 0.9, 0.5, { side: THREE.DoubleSide, name: 'ms.sheet' });
   M.pillowA = fab(0xb09a82, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowA' });
   M.pillowB = fab(0x957d66, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowB' });
   M.pillowC = fab(0xc6b49c, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowC' });
   M.pillowW = fab(0xebe5da, 0.25, 0.95, 0.6, { normalMap: wrP, name: 'ms.pillowW' });
-  M.curtain = fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, name: 'ms.curtain' });
-  M.sheer = glowFab(fab(0xe9dcc6, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd6a6), emissiveIntensity: 0.75, name: 'ms.sheer' }));
-  M.curtainLit = glowFab(fab(0xe6d6bd, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd7a0), emissiveIntensity: 0.45, name: 'ms.curtainLit' }));
+  M.sheer = glowFab(fab(0xe9dcc6, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffdcb4), emissiveIntensity: 1.5, name: 'ms.sheer' }));
+  M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd7a0), emissiveIntensity: 0.4, name: 'ms.curtainLit' }));
   M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd7a0), emissiveIntensity: 0.12, name: 'ms.curtain' }));
   M.shade = std({ ...linenDetail(0.2), color: 0xf3e6cf, roughness: 0.95, emissive: new THREE.Color(0xffc777), emissiveIntensity: 0.55, side: THREE.DoubleSide, name: 'ms.shade' });
   M.romanShade = fab(0xe3dccf, 0.3, 0.95, 0.5, { name: 'ms.romanShade' });
@@ -95,7 +94,7 @@ export function makeMats(ctx) {
 
   // rug: chunky braided jute/wool (procedural loops + fibre flecks)
   const rm = rugMaps();
-  M.rug = std({ map: rm.map, normalMap: rm.normalMap, color: 0xf2e9dc, roughness: 1.0, normalScale: new THREE.Vector2(1.3, 1.3), name: 'ms.rug' });
+  M.rug = std({ map: rm.map, normalMap: rm.normalMap, color: 0xf3ebdf, roughness: 1.0, normalScale: new THREE.Vector2(1.3, 1.3), name: 'ms.rug' });
 
   // ceramics
   M.ceramic = std({ color: 0xead9bd, roughness: 0.55, name: 'ms.ceramic' });
@@ -122,6 +121,9 @@ export function makeMats(ctx) {
   // chunky knit throw
   const km = knitMaps();
   M.knit = std({ map: km.map, normalMap: km.normalMap, color: 0xf3ebdf, roughness: 1.0, normalScale: new THREE.Vector2(1.2, 1.2), side: THREE.DoubleSide, name: 'ms.knit' });
+  M.pillowKnit = std({ map: km.map, normalMap: km.normalMap, color: 0xcbbca6, roughness: 1, normalScale: new THREE.Vector2(0.8, 0.8), name: 'ms.pillowKnit' });
+  M.pillowKnit.map = km.map.clone(); M.pillowKnit.map.repeat.set(1 / 0.12, 1 / 0.12); M.pillowKnit.normalMap = km.normalMap.clone(); M.pillowKnit.normalMap.repeat.set(1 / 0.12, 1 / 0.12);
+  M.pillowKnit.map.needsUpdate = true; M.pillowKnit.normalMap.needsUpdate = true;
   return M;
 }
 
@@ -129,40 +131,41 @@ export function makeMats(ctx) {
 function glowFab(m) {
   m.vertexColors = true;
   m.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= vColor.rgb * vColor.rgb;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', 'vec3 keepCol = diffuseColor.rgb;\n#include <color_fragment>\ndiffuseColor.rgb = keepCol * (0.75 + 0.25 * vColor.rgb);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= 0.15 + 0.85 * vColor.rgb * vColor.rgb;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', 'vec3 keepCol = diffuseColor.rgb;\n#include <color_fragment>\ndiffuseColor.rgb = keepCol * (0.5 + 0.5 * vColor.rgb);');
   };
   m.customProgramCacheKey = () => 'ms-glowfab';
   return m;
 }
 
 function artTexture() {
-  return canvasTex(1024, 820, (g, w, h) => {
+  return canvasTex(1024, 800, (g, w, h) => {
     const R = rng(7);
-    g.fillStyle = '#ddd2c1'; g.fillRect(0, 0, w, h);
-    // soft washes
-    for (let i = 0; i < 26; i++) {
-      const x = R() * w, y = R() * h, r = 80 + R() * 260;
-      const grd = g.createRadialGradient(x, y, 0, x, y, r);
-      const c = R() < 0.5 ? '200,186,166' : '226,216,200';
-      grd.addColorStop(0, `rgba(${c},0.55)`); grd.addColorStop(1, `rgba(${c},0)`);
-      g.fillStyle = grd; g.fillRect(0, 0, w, h);
-    }
-    // charcoal gestures
+    g.fillStyle = '#d9cfbf'; g.fillRect(0, 0, w, h);
+    // layered soft washes in sand / stone / ash
+    const wash = (c, a, n, rmin, rmax) => {
+      for (let i = 0; i < n; i++) {
+        const x = R() * w, y = R() * h, r = rmin + R() * (rmax - rmin);
+        const grd = g.createRadialGradient(x, y, 0, x, y, r);
+        grd.addColorStop(0, `rgba(${c},${a})`); grd.addColorStop(1, `rgba(${c},0)`);
+        g.fillStyle = grd; g.fillRect(0, 0, w, h);
+      }
+    };
+    wash('232,224,210', 0.6, 14, 150, 380);
+    wash('190,176,156', 0.35, 10, 120, 300);
+    wash('150,138,124', 0.22, 6, 80, 220);
+    // dry-brush charcoal sweeps, very soft
     g.lineCap = 'round';
-    for (let i = 0; i < 38; i++) {
-      g.strokeStyle = `rgba(${60 + R() * 40},${55 + R() * 35},${50 + R() * 30},${0.08 + R() * 0.3})`;
-      g.lineWidth = 1 + R() * 9;
-      g.beginPath();
-      let x = w * (0.15 + R() * 0.7), y = h * (0.15 + R() * 0.7);
-      g.moveTo(x, y);
-      for (let k = 0; k < 4; k++) { x += (R() - 0.5) * 380; y += (R() - 0.5) * 240; g.quadraticCurveTo(x + (R() - 0.5) * 200, y + (R() - 0.5) * 200, x, y); }
+    for (let i = 0; i < 14; i++) {
+      g.strokeStyle = `rgba(${70 + R() * 30},${64 + R() * 25},${58 + R() * 20},${0.05 + R() * 0.12})`;
+      g.lineWidth = 6 + R() * 26;
+      g.beginPath(); let x = w * (0.1 + R() * 0.8), y = h * (0.15 + R() * 0.7); g.moveTo(x, y);
+      for (let k = 0; k < 3; k++) { x += (R() - 0.5) * 420; y += (R() - 0.5) * 160; g.quadraticCurveTo(x + (R() - 0.5) * 200, y + (R() - 0.5) * 120, x, y); }
       g.stroke();
     }
-    // a few larger muted shapes
-    for (let i = 0; i < 6; i++) {
-      g.fillStyle = `rgba(${150 + R() * 40},${132 + R() * 30},${112 + R() * 30},0.22)`;
-      g.beginPath(); g.ellipse(w * (0.2 + R() * 0.6), h * (0.2 + R() * 0.6), 60 + R() * 200, 30 + R() * 120, R() * 3, 0, Math.PI * 2); g.fill();
-    }
+    // paper grain
+    const id = g.getImageData(0, 0, w, h);
+    for (let i = 0; i < id.data.length; i += 4) { const n = (R() - 0.5) * 10; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; }
+    g.putImageData(id, 0, 0);
   });
 }

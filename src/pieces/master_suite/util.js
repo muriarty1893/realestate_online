@@ -69,7 +69,10 @@ export function pillowGeo(w, h, d, { segs = 24, puff = 1, seed = 0, pinch = 0.07
 
 // Draped cloth over a rectangular top (local: x across, z along from head (0) to foot (L)).
 // top: y of the top surface. hang: side overhang drop length, footHang: foot drop length.
-export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, segX = 60, segZ = 60, wrinkle = 0.012, seed = 1, sideMask = [1, 1], floorY = 0.02, footLift = 0, fold = 0.012, foldFreq = 9, skew = 0, undul = 0 }) {
+export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, segX = 60, segZ = 60, wrinkle = 0.012, seed = 1, sideMask = [1, 1], floorY = 0.02, footLift = 0, fold = 0.012, foldFreq = 9, skew = 0, undul = 0, crumple = 0 }) {
+  // random plane waves for soft creases (ridged), directions biased diagonally like a slept-in duvet
+  const cr = rng(seed * 977 + 13), waves = [];
+  for (let k = 0; k < 9 && crumple > 0; k++) { const a = 0.6 + (cr() - 0.5) * 1.9, f = 5 + cr() * 12; waves.push([Math.cos(a) * f, Math.sin(a) * f, cr() * 6.28, (0.4 + cr() * 0.6) / (0.4 + f / 20)]); }
   const sx0 = -W / 2 - side * sideMask[0], sx1 = W / 2 + side * sideMask[1];
   const tz1 = L + foot;
   const g = new THREE.PlaneGeometry(1, 1, segX, segZ);
@@ -107,6 +110,13 @@ export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, 
       const u = 0.5 * (r1 * r1) + 0.35 * (0.5 + 0.5 * r2) + 0.15 * (0.5 + 0.5 * r3);
       y += (1 - hang) * undul * u;
       if (es > 0) x += Math.sign(s) * hang * undul * 0.8 * (0.5 + 0.5 * r1);
+    }
+    if (crumple > 0) {
+      let c = 0;
+      for (const [kx, kz, ph, am] of waves) { const q = Math.sin(s * kx + t * kz + ph + Math.sin(s * 3.1 + t * 2.3 + ph) * 0.8); c += am * (1 - 2 * Math.abs(q) * Math.abs(q)); }
+      y += (1 - hang * 0.5) * crumple * c / 3;
+      if (es > 0) x += Math.sign(s) * hang * crumple * 0.6 * c / 3;
+      if (et > 0) z += hang * crumple * 0.6 * c / 3;
     }
     y = Math.max(y, floorY);
     p.setXYZ(i, x, y, z);
@@ -165,4 +175,35 @@ export function canvasTex(w, h, draw, { srgb = true, repeat = [1, 1] } = {}) {
   t.repeat.set(...repeat);
   t.anisotropy = 8;
   return t;
+}
+
+
+// Soft contact-shadow decal: a blurred dark rounded rectangle on a flat, unlit, transparent quad.
+// w x d metres. orient: 'floor' (faces +Y), 'wallN' (faces +Z), 'wallW' (faces +X), 'wallE' (faces -X).
+const _shadowMats = new Map();
+export function softShadow(parent, { x, y, z, w, d, orient = 'floor', opacity = 0.5, blur = 0.08, r = 0.05, color = '40,26,14', rotY = 0, order = 2 }) {
+  const key = [w, d, opacity, blur, r, color].join('|');
+  let mat = _shadowMats.get(key);
+  if (!mat) {
+    const PX = 128, aspect = w / d, cw = aspect >= 1 ? 256 : Math.round(256 * aspect) || 8, chh = aspect >= 1 ? Math.round(256 / aspect) || 8 : 256;
+    const tex = canvasTex(cw, chh, (g, W, H) => {
+      const sx = W / w, sy = H / d, b = Math.min(blur * sx, blur * sy);
+      g.clearRect(0, 0, W, H);
+      g.filter = `blur(${b * 0.5}px)`;
+      g.fillStyle = `rgba(${color},${opacity})`;
+      const inset = b * 1.6, rr = Math.min(r * sx, (W - 2 * inset) / 2, (H - 2 * inset) / 2);
+      g.beginPath(); g.roundRect(inset, inset, W - 2 * inset, H - 2 * inset, Math.max(rr, 0)); g.fill();
+    });
+    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+    mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: true, polygonOffset: true, polygonOffsetFactor: -order, polygonOffsetUnits: -order, name: 'ms.softShadow' });
+    _shadowMats.set(key, mat);
+  }
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+  m.renderOrder = 1; m.castShadow = false; m.receiveShadow = false; m.name = 'softShadow';
+  if (orient === 'floor') { m.rotation.set(-Math.PI / 2, 0, rotY); }
+  else if (orient === 'wallW') m.rotation.y = Math.PI / 2;
+  else if (orient === 'wallE') m.rotation.y = -Math.PI / 2;
+  m.position.set(x, y, z);
+  parent.add(m);
+  return m;
 }

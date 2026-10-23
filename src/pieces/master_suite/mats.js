@@ -1,7 +1,7 @@
 // Materials for the master suite. All textures are CC0 (Poly Haven / ambientCG) under assets/master_suite/tex.
 import * as THREE from 'three';
 import { BASE, canvasTex, rng } from './util.js';
-import { rugMaps, knitMaps, wrinkleMaps } from './textiles.js';
+import { rugMaps, knitMaps, linenMaps, plankFloorMaps, oakGrainMaps } from './textiles.js';
 
 const std = (o) => new THREE.MeshStandardMaterial(o);
 
@@ -16,11 +16,10 @@ export function makeMats(ctx) {
   const M = {};
 
   // ---- floors
-  M.oakFloor = std({
-    map: T('laminate_floor_02_diff_2k.jpg', { srgb: true, repeatM: 1.55, rotation: PI2 }),
-    normalMap: T('laminate_floor_02_nor_gl_2k.jpg', { repeatM: 1.55, rotation: PI2 }),
-    roughnessMap: T('laminate_floor_02_rough_2k.jpg', { repeatM: 1.55, rotation: PI2 }),
-    color: 0xb9ab9f, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakFloor',
+  const pf = plankFloorMaps();
+  M.oakFloor = new THREE.MeshPhysicalMaterial({
+    map: pf.map, normalMap: pf.normalMap, color: 0xffffff, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.42,
+    normalScale: new THREE.Vector2(0.55, 0.55), name: 'ms.oakFloor',
   });
   M.porcelain = std({
     map: T('porcelain_diff_1k.jpg', { srgb: true, repeatM: 1.5 }),
@@ -35,9 +34,9 @@ export function makeMats(ctx) {
   });
 
   // ---- paint
-  M.wallMstr = std({ color: 0xefe2d0, roughness: 0.93, name: 'ms.wallMstr' });
+  M.wallMstr = std({ color: 0xf1e9dd, roughness: 0.93, name: 'ms.wallMstr' });
   M.wallBath = std({ color: 0xebe6dc, roughness: 0.9, name: 'ms.wallBath' });
-  M.ceiling = std({ color: 0xf3eadc, roughness: 0.96, name: 'ms.ceiling' });
+  M.ceiling = std({ color: 0xf6f0e6, roughness: 0.96, name: 'ms.ceiling' });
   M.trimWhite = std({ color: 0xf4f1ea, roughness: 0.5, name: 'ms.trim' });
 
   // ---- wood
@@ -47,7 +46,8 @@ export function makeMats(ctx) {
     roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: size }),
   });
   M.oak = std({ ...oakTex(1.2), color: 0xd9b48e, roughness: 0.62, normalScale: new THREE.Vector2(0.4, 0.4), name: 'ms.oak' });
-  M.oakDoor = std({ map: T('oak_door_diff_1k.jpg', { srgb: true, repeatM: 1.6 }), normalMap: T('oak_veneer_01_nor_gl_1k.jpg', { repeatM: 1.6 }), roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: 1.6 }), color: 0xf6e9d8, roughness: 0.6, normalScale: new THREE.Vector2(0.5, 0.5), name: 'ms.oakDoor' });
+  const dg = oakGrainMaps();
+  M.oakDoor = std({ map: dg.map, normalMap: dg.normalMap, color: 0xffffff, roughness: 0.62, normalScale: new THREE.Vector2(0.45, 0.45), name: 'ms.oakDoor' });
   M.oakSoft = std({ map: T('oak_soft_diff_1k.jpg', { srgb: true, repeatM: 1.2 }), normalMap: T('oak_veneer_01_nor_gl_1k.jpg', { repeatM: 1.2 }), roughnessMap: T('oak_veneer_01_rough_1k.jpg', { repeatM: 1.2 }), color: 0xf0dcc2, roughness: 0.6, normalScale: new THREE.Vector2(0.4, 0.4), name: 'ms.oakSoft' });
   M.oakLight = std({ ...oakTex(1.0), color: 0xe2c4a0, roughness: 0.6, normalScale: new THREE.Vector2(0.3, 0.3), name: 'ms.oakLight' });
   M.fanBlade = std({ ...oakTex(0.9), color: 0x8a6a50, roughness: 0.55, name: 'ms.fanBlade' });
@@ -75,19 +75,26 @@ export function makeMats(ctx) {
     std({ ...linenDetail(size), color, roughness: rough, normalScale: new THREE.Vector2(ns, ns), ...extra });
   M.upholstery = fab(0x9a8068, 0.22, 0.95, 0.7, { name: 'ms.upholstery' });     // bed frame / headboard (taupe)
   M.benchFab = fab(0xcbb498, 0.2, 0.95, 0.6, { name: 'ms.benchFab' });
-  const wrA = wrinkleMaps({ repeatM: 1.1, n: 300, dir: Math.PI / 2, spread: 0.7, seed: 4 }).normalMap;
-  const wrB = wrinkleMaps({ repeatM: 0.9, n: 280, dir: 0.3, spread: 1.2, seed: 8 }).normalMap;
-  const wrP = wrinkleMaps({ size: 256, repeatM: 0.5, n: 90, dir: 0, spread: 1.5, seed: 12 }).normalMap;
-  M.duvet = fab(0xa58f7a, 0.3, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrA, name: 'ms.duvet' });
-  M.throwCream = fab(0xcbbda8, 0.25, 0.95, 1.0, { side: THREE.DoubleSide, normalMap: wrB, name: 'ms.throwCream' });
-  M.sheet = fab(0xece6dc, 0.25, 0.9, 0.5, { side: THREE.DoubleSide, name: 'ms.sheet' });
-  M.pillowA = fab(0xb09a82, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowA' });
-  M.pillowB = fab(0x957d66, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowB' });
-  M.pillowC = fab(0xc6b49c, 0.25, 0.95, 0.8, { normalMap: wrP, name: 'ms.pillowC' });
-  M.pillowW = fab(0xebe5da, 0.25, 0.95, 0.6, { normalMap: wrP, name: 'ms.pillowW' });
-  M.sheer = glowFab(fab(0xe9dcc6, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffdcb4), emissiveIntensity: 1.5, name: 'ms.sheer' }));
-  M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd7a0), emissiveIntensity: 0.4, name: 'ms.curtainLit' }));
-  M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffd7a0), emissiveIntensity: 0.12, name: 'ms.curtain' }));
+  // bedding: slubby linen weave + baked soft creases, with fabric sheen (physical material)
+  const bedLinen = (color, { tile = 1.1, crease, seed, ns = 1, rough = 0.94, sheen = 0.9 }) => {
+    const lm = linenMaps({ size: 1024, repeatM: tile, seed, crease });
+    const c = new THREE.Color(color);
+    return new THREE.MeshPhysicalMaterial({
+      map: lm.map, normalMap: lm.normalMap, color: c, roughness: rough, normalScale: new THREE.Vector2(ns, ns),
+      sheen, sheenRoughness: 0.8, sheenColor: c.clone().lerp(new THREE.Color(0xffffff), 0.45), side: THREE.DoubleSide,
+    });
+  };
+  M.duvet = Object.assign(bedLinen(0xb8a58f, { tile: 1.1, seed: 21, crease: { n: 420, dir: 0.5, spread: 1.1, seed: 4, amount: 1.4 }, ns: 1.0 }), { name: 'ms.duvet' });
+  M.throwCream = Object.assign(bedLinen(0xd6cab6, { tile: 0.9, seed: 22, crease: { n: 360, dir: 0.3, spread: 1.3, seed: 8, amount: 1.3 }, ns: 1.0 }), { name: 'ms.throwCream' });
+  M.sheet = Object.assign(bedLinen(0xece6dc, { tile: 0.9, seed: 23, crease: { n: 120, dir: 1.2, spread: 1.0, seed: 3, amount: 0.8 }, ns: 0.6 }), { name: 'ms.sheet' });
+  const pillowMat = (color, seed, name) => Object.assign(bedLinen(color, { tile: 0.8, seed, crease: { n: 130, dir: 0.0, spread: 1.6, seed: 12 + seed, amount: 1.2 }, ns: 1.0, rough: 0.95 }), { name, side: THREE.FrontSide });
+  M.pillowA = pillowMat(0xb6a089, 24, 'ms.pillowA');
+  M.pillowB = pillowMat(0x9b8369, 25, 'ms.pillowB');
+  M.pillowC = pillowMat(0xcdbba3, 26, 'ms.pillowC');
+  M.pillowW = pillowMat(0xede7dc, 27, 'ms.pillowW');
+  M.sheer = glowFab(fab(0xe6dccb, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xfff3e2), emissiveIntensity: 0.5, name: 'ms.sheer' }));
+  M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 0.22, name: 'ms.curtainLit' }));
+  M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 0.1, name: 'ms.curtain' }));
   M.shade = std({ ...linenDetail(0.2), color: 0xf3e6cf, roughness: 0.95, emissive: new THREE.Color(0xffc777), emissiveIntensity: 0.55, side: THREE.DoubleSide, name: 'ms.shade' });
   M.romanShade = fab(0xe3dccf, 0.3, 0.95, 0.5, { name: 'ms.romanShade' });
   M.towel = fab(0xf0ece4, 0.15, 1.0, 1.0, { name: 'ms.towel' });

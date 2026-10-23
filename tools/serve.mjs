@@ -19,7 +19,7 @@ export function startServer(port = 0) {
     if (!f.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
     fs.stat(f, (err, st) => {
       if (err || !st.isFile()) { res.writeHead(404); return res.end('not found: ' + u); }
-      res.writeHead(200, { 'Content-Type': TYPES[path.extname(f).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+      res.writeHead(200, { 'Content-Type': TYPES[path.extname(f).toLowerCase()] || 'application/octet-stream', 'Content-Length': st.size, 'Cache-Control': 'no-store' });
       fs.createReadStream(f).pipe(res);
     });
   });

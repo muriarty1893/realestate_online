@@ -1,7 +1,7 @@
 // Piece: great_room — great room, kitchen, dining, foyer, butler pantry, niche.
 // Also owns the house-wide interior keys: trim, paint.wall, paint.ceiling, reveal, door.interior.
 import * as THREE from 'three';
-import { makeMats } from './great_room/mats.js';
+import { makeMats, steelEnvTex } from './great_room/mats.js';
 import { buildVault, buildBeams, buildFireplace } from './great_room/arch.js';
 import { buildKitchen } from './great_room/kitchen.js';
 import { buildLiving } from './great_room/living.js';
@@ -50,7 +50,10 @@ export async function build(ctx) {
   await buildLiving(ctx, M, group);
   await buildDining(ctx, M, group);
   buildLights(ctx, M, group, { pendants: kit.pendants });
-  reflectionProbe(ctx, [M.steel, M.steelBrushed, M.glass, M.ovenGlass, M.mirror, M.sinkDark]);
+  reflectionProbe(ctx, [M.glass, M.ovenGlass, M.mirror, M.sinkDark]);
+  // stainless reflects a streaky bright/dark studio (the warm probe made it read as matte beige paint)
+  { const pm = new THREE.PMREMGenerator(ctx.renderer); const env = pm.fromEquirectangular(steelEnvTex()).texture; pm.dispose();
+    for (const m of [M.steel, M.steelBrushed]) { m.envMap = env; m.needsUpdate = true; } }
   ctx.scene.add(group);
   installLensShift(ctx);
 }

@@ -88,16 +88,22 @@ export function cushionGeo(w, h, d, { segs = 10, bulge = 0.25, round = 0.35, see
 }
 
 // Throw pillow: thick in the middle, pinched at the edges. Faces +Z.
-export function pillowGeo(w, h, d, { segs = 16, seed = 0, puff = 1 } = {}) {
+export function pillowGeo(w, h, d, { segs = 18, seed = 0, puff = 1 } = {}) {
   const g = new THREE.BoxGeometry(1, 1, 1, segs, segs, 3);
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     let x = p.getX(i) * 2, y = p.getY(i) * 2, z = p.getZ(i) * 2;
     const fx = 1 - Math.pow(Math.abs(x), 3), fy = 1 - Math.pow(Math.abs(y), 3);
-    const t = Math.max(0.05, Math.pow(Math.max(0, fx * fy), 0.6)) * puff;
-    const nn = 0.05 * Math.sin(x * 4.3 + seed) * Math.sin(y * 3.7 + seed * 2.1);
-    x *= 1 - 0.07 * y * y; y *= 1 - 0.07 * x * x;
-    p.setXYZ(i, (x * w) / 2, (y * h) / 2, (z * d) / 2 * t + nn * d * 0.25 * Math.sign(z));
+    let t = Math.max(0.05, Math.pow(Math.max(0, fx * fy), 0.6)) * puff;
+    // soft crease across the top ("karate chop") and a slumped, flatter lower edge
+    const chop = Math.exp(-(x * x) / 0.05) * Math.max(0, y) * 0.32;
+    t *= 1 - chop;
+    t *= 1 - 0.18 * Math.max(0, -y);
+    const nn = 0.06 * Math.sin(x * 4.3 + seed) * Math.sin(y * 3.7 + seed * 2.1) + 0.035 * Math.sin(x * 9.1 + y * 7.3 + seed * 1.3);
+    // pinch the corners inward and let the sides sag
+    const cr = Math.abs(x * y);
+    x *= 1 - 0.07 * y * y - 0.06 * cr; y *= 1 - 0.07 * x * x - 0.06 * cr - 0.04 * Math.max(0, y);
+    p.setXYZ(i, (x * w) / 2, (y * h) / 2, (z * d) / 2 * t + nn * d * 0.35 * Math.sign(z));
   }
   g.computeVertexNormals();
   const uv = g.attributes.uv;

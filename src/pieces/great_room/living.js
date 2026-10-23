@@ -44,11 +44,11 @@ function sofaSection(M, L, { D = 1.0, armL = false, armR = false, seats = 2, bac
   const sw = (x1 - x0) / seats;
   const sd = D - backT - 0.02;
   for (let i = 0; i < seats; i++) {
-    const c = mesh(cushionGeo(sw - 0.01, seatH - baseH + 0.02, sd, { segs: 10, bulge: 0.08, round: 0.4, seed: seed + i, wrinkle: 0.003 }), M.leather);
+    const c = mesh(cushionGeo(sw - 0.01, seatH - baseH + 0.02, sd, { segs: 10, bulge: 0.11, round: 0.6, seed: seed + i, wrinkle: 0.003 }), M.leather);
     c.position.set(x0 + sw * (i + 0.5), (baseH + seatH) / 2 - 0.005, backT + sd / 2 + 0.01);
     g.add(c);
     // back cushions leaning on the back
-    const bc = mesh(cushionGeo(sw - 0.02, 0.38, 0.17, { segs: 8, bulge: 0.08, round: 0.3, seed: seed + 7 + i, wrinkle: 0.004 }), M.leather);
+    const bc = mesh(cushionGeo(sw - 0.02, 0.38, 0.17, { segs: 8, bulge: 0.11, round: 0.55, seed: seed + 7 + i, wrinkle: 0.004 }), M.leather);
     bc.rotation.x = -0.18;
     bc.position.set(x0 + sw * (i + 0.5), seatH + 0.16, backT + 0.075);
     g.add(bc);
@@ -62,7 +62,7 @@ function bumper(M, L, D, { seatH = 0.46, baseH = 0.29 } = {}) {
   g.add(contactShadow(L + 0.3, D + 0.34, L / 2, D / 2 + 0.02));
   g.add(rbox(L, baseH - 0.05, D, 0.06, M.leather, L / 2, 0.05 + (baseH - 0.05) / 2, D / 2, { segs: 4 }));
   for (const [x, z] of [[0.05, 0.05], [L - 0.05, 0.05], [0.05, D - 0.05], [L - 0.05, D - 0.05]]) g.add(box(0.05, 0.05, 0.05, M.black, x, 0.025, z));
-  const c = mesh(cushionGeo(L - 0.01, seatH - baseH + 0.02, D - 0.02, { segs: 10, bulge: 0.06, round: 0.3, seed: 31 }), M.leather);
+  const c = mesh(cushionGeo(L - 0.01, seatH - baseH + 0.02, D - 0.02, { segs: 10, bulge: 0.12, round: 0.7, seed: 31 }), M.leather);
   c.position.set(L / 2, (baseH + seatH) / 2 - 0.005, D / 2); g.add(c);
   return g;
 }
@@ -76,10 +76,10 @@ function cornerBlock(M, D = 1.0, { backH = 0.8, seatH = 0.46, baseH = 0.29, seed
   g.add(rbox(D, backH - 0.05, backT, 0.05, M.leather, D / 2, 0.05 + (backH - 0.05) / 2, backT / 2, { segs: 4 }));
   g.add(rbox(backT, backH - 0.05, D, 0.05, M.leather, backT / 2, 0.05 + (backH - 0.05) / 2, D / 2, { segs: 4 }));
   const s = D - backT - 0.02;
-  const c = mesh(cushionGeo(s, seatH - baseH + 0.02, s, { segs: 10, bulge: 0.08, round: 0.4, seed }), M.leather);
+  const c = mesh(cushionGeo(s, seatH - baseH + 0.02, s, { segs: 10, bulge: 0.11, round: 0.6, seed }), M.leather);
   c.position.set(backT + s / 2 + 0.01, (baseH + seatH) / 2 - 0.005, backT + s / 2 + 0.01); g.add(c);
   for (const r of [0, 1]) {
-    const bc = mesh(cushionGeo(s - 0.05, 0.38, 0.17, { segs: 8, bulge: 0.08, round: 0.3, seed: seed + 5 + r }), M.leather);
+    const bc = mesh(cushionGeo(s - 0.05, 0.38, 0.17, { segs: 8, bulge: 0.11, round: 0.55, seed: seed + 5 + r }), M.leather);
     if (r === 0) { bc.rotation.x = -0.18; bc.position.set(backT + s / 2, seatH + 0.16, backT + 0.075); }
     else { bc.rotation.order = 'YXZ'; bc.rotation.y = Math.PI / 2; bc.rotation.x = -0.18; bc.position.set(backT + 0.075, seatH + 0.16, backT + s / 2 + 0.05); }
     g.add(bc);
@@ -106,9 +106,9 @@ function clubChair(M, { W = 0.84, D = 0.9, H = 0.82, seatH = 0.47, armH = 0.63, 
   for (const s of [-1, 1]) g.add(rbox(armW, armH - y0, D, 0.05, M.leather, s * (W / 2 - armW / 2), y0 + (armH - y0) / 2, 0, { segs: 4 }));
   // seat cushion
   const sw = W - 2 * armW, sd = D - 0.2;
-  const sc = mesh(cushionGeo(sw, seatH - y0 - 0.14, sd, { segs: 9, bulge: 0.1, round: 0.3, seed: 4 }), M.leather);
+  const sc = mesh(cushionGeo(sw, seatH - y0 - 0.14, sd, { segs: 9, bulge: 0.16, round: 0.7, seed: 4 }), M.leather);
   sc.position.set(0, y0 + 0.16 + (seatH - y0 - 0.16) / 2 + 0.01, 0.1); g.add(sc);
-  const bc = mesh(cushionGeo(sw, 0.34, 0.14, { segs: 8, bulge: 0.1, round: 0.35, seed: 9 }), M.leather);
+  const bc = mesh(cushionGeo(sw, 0.34, 0.14, { segs: 8, bulge: 0.16, round: 0.75, seed: 9 }), M.leather);
   bc.rotation.x = -0.15; bc.position.set(0, seatH + 0.18, -D / 2 + 0.26); g.add(bc);
   return g;
 }
@@ -237,7 +237,8 @@ function drapeThrow(M, mat, { W = 0.5, front = 0.5, back = 0.3, top = 0.2, r = 0
     const hang = Math.min(1, Math.abs(y) * 4);
     const wav = fold * (Math.sin(x * 23 + seed) + 0.6 * Math.sin(x * 41 + seed * 2.3 + y * 5)) * (0.25 + hang) + 0.006 * (R() - 0.5);
     const lift = fold * 0.5 * Math.sin(x * 9 + seed * 1.7 + y * 7) * (1 - hang * 0.7);
-    p.setXYZ(i, x + wav * 0.5, y + (hang < 1 ? lift * 0.4 : 0), z + wav + lift);
+    const vlift = fold * 0.45 * (1.5 + Math.sin(x * 12 + z * 9 + seed) + 0.5 * Math.sin(x * 26 - z * 15 + seed * 2)) * (1 - hang);
+    p.setXYZ(i, x + wav * 0.5, y + vlift + (hang < 1 ? lift * 0.4 : 0), z + wav + lift);
   }
   geo.computeVertexNormals();
   const uv = geo.attributes.uv;
@@ -278,7 +279,7 @@ export async function buildLiving(ctx, M, group) {
 
   // pillows on the sectional
   const pill = (mat, w, h, x, y, z, ry, rx = -0.25, rz = 0) => {
-    const p = mesh(pillowGeo(w * 0.92, h * 0.92, 0.16, { seed: x * 10 + z }), mat);
+    const p = mesh(pillowGeo(w * 0.92, h * 0.92, 0.22, { seed: x * 10 + z, puff: 1.15 }), mat);
     p.position.set(x, y - 0.035, z); p.rotation.set(rx, ry, rz, 'YXZ'); L.add(p); return p;
   };
   // west section A: south end (by the arm) leather pillow + knit ball; corner group
@@ -287,13 +288,13 @@ export async function buildLiving(ctx, M, group) {
   pill(M.pillowStripe, 0.5, 0.5, 0.0, 0.71, -0.38, Math.PI / 2 + 0.3, -0.3, -0.06);
   pill(M.pillowGray, 0.42, 0.42, 0.17, 0.63, -0.56, Math.PI / 2 + 0.5, -0.4);
   pill(M.leather, 0.5, 0.5, -0.03, 0.74, -0.8, Math.PI / 2 + 0.75, -0.28, 0.05);
-  pill(M.pillowWhite, 0.42, 0.42, -0.1, 0.72, -1.02, Math.PI / 2 + 0.9, -0.3, 0.1);
+  pill(M.leather, 0.44, 0.44, -0.08, 0.74, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
   // throws
   const t1 = drapeThrow(M, M.throwStripe, { W: 0.5, front: 0.42, back: 0.35, top: 0.24, seed: 2, fold: 0.02 });
   t1.position.set(cx + 0.55, 0.62, 1.64 - 0.12); t1.rotation.y = 0; L.add(t1);
   // cream knit throw over the bumper, hanging down its north side
-  const t2 = drapeThrow(M, M.knit, { W: 0.55, front: 0.3, back: 0.1, top: 0.98, r: 0.03, seed: 5, fold: 0.03 });
-  t2.position.set((xB1 + xB2) / 2 - 0.02, 0.505, cz + D / 2); t2.rotation.y = Math.PI; L.add(t2);
+  const t2 = drapeThrow(M, M.knit, { W: 0.55, front: 0.3, back: 0.1, top: 0.98, r: 0.03, seed: 5, fold: 0.05 });
+  t2.position.set((xB1 + xB2) / 2 - 0.02, 0.5, cz + D / 2); t2.rotation.y = Math.PI + 0.14; L.add(t2);
 
   // club chairs (face north, toward the sectional)
   const ch = clubChair(M);

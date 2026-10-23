@@ -36,7 +36,7 @@ export function makeMats(ctx) {
   // ---- paint
   M.wallMstr = std({ color: 0xf1e9dd, roughness: 0.93, name: 'ms.wallMstr' });
   M.wallBath = std({ color: 0xebe6dc, roughness: 0.9, name: 'ms.wallBath' });
-  M.ceiling = std({ color: 0xf6f0e6, roughness: 0.96, name: 'ms.ceiling' });
+  M.ceiling = std({ color: 0xf9f5ee, roughness: 0.96, name: 'ms.ceiling' });
   M.trimWhite = std({ color: 0xf4f1ea, roughness: 0.5, name: 'ms.trim' });
 
   // ---- wood
@@ -76,7 +76,7 @@ export function makeMats(ctx) {
   M.upholstery = fab(0x9a8068, 0.22, 0.95, 0.7, { name: 'ms.upholstery' });     // bed frame / headboard (taupe)
   M.benchFab = fab(0xcbb498, 0.2, 0.95, 0.6, { name: 'ms.benchFab' });
   // bedding: slubby linen weave + baked soft creases, with fabric sheen (physical material)
-  const bedLinen = (color, { tile = 1.1, crease, seed, ns = 1, rough = 0.94, sheen = 0.9 }) => {
+  const bedLinen = (color, { tile = 1.1, crease, seed, ns = 1, rough = 0.94, sheen = 0.5 }) => {
     const lm = linenMaps({ size: 1024, repeatM: tile, seed, crease });
     const c = new THREE.Color(color);
     return new THREE.MeshPhysicalMaterial({
@@ -92,7 +92,7 @@ export function makeMats(ctx) {
   M.pillowB = pillowMat(0x9b8369, 25, 'ms.pillowB');
   M.pillowC = pillowMat(0xcdbba3, 26, 'ms.pillowC');
   M.pillowW = pillowMat(0xede7dc, 27, 'ms.pillowW');
-  M.sheer = glowFab(fab(0xe6dccb, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xfff3e2), emissiveIntensity: 0.5, name: 'ms.sheer' }));
+  M.sheer = glowFab(fab(0xece3d3, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, emissive: new THREE.Color(0xfff6e8), emissiveIntensity: 2.1, name: 'ms.sheer' }), 0.8);
   M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 0.22, name: 'ms.curtainLit' }));
   M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 0.1, name: 'ms.curtain' }));
   M.shade = std({ ...linenDetail(0.2), color: 0xf3e6cf, roughness: 0.95, emissive: new THREE.Color(0xffc777), emissiveIntensity: 0.55, side: THREE.DoubleSide, name: 'ms.shade' });
@@ -135,13 +135,13 @@ export function makeMats(ctx) {
 }
 
 // curtain fabric whose emissive (fake back-light) is modulated by the vertex colour of the fold crests
-function glowFab(m) {
+function glowFab(m, floorK = 0.15) {
   m.vertexColors = true;
   m.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= 0.15 + 0.85 * vColor.rgb * vColor.rgb;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= ' + floorK.toFixed(2) + ' + ' + (1 - floorK).toFixed(2) + ' * vColor.rgb * vColor.rgb;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', 'vec3 keepCol = diffuseColor.rgb;\n#include <color_fragment>\ndiffuseColor.rgb = keepCol * (0.5 + 0.5 * vColor.rgb);');
   };
-  m.customProgramCacheKey = () => 'ms-glowfab';
+  m.customProgramCacheKey = () => 'ms-glowfab' + floorK;
   return m;
 }
 

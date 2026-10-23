@@ -34,8 +34,7 @@ export function makeMats() {
   M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.5,
     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
-    roughnessMap: tex('wood_floor_rough_1k.jpg', { tile: 2.0 }),
-    color: col(0.5, 0.43, 0.38), roughness: 0.9, envMapIntensity: 0.6, normalScale: new THREE.Vector2(0.7, 0.7),
+    color: col(0.52, 0.72, 1.15), roughness: 0.9, envMapIntensity: 0.6, normalScale: new THREE.Vector2(0.7, 0.7),
   });
 
   // ---------------- rough-sawn beam wood
@@ -65,7 +64,8 @@ export function makeMats() {
     map: tex('Tiles009_Color.jpg', { srgb: true, tile: 0.61, tileV: 0.305 }),
     normalMap: tex('Tiles009_NormalGL.jpg', { tile: 0.61, tileV: 0.305 }),
     roughnessMap: tex('Tiles009_Roughness.jpg', { tile: 0.61, tileV: 0.305 }),
-    color: col(1.0, 0.98, 0.95), roughness: 0.25, normalScale: new THREE.Vector2(0.8, 0.8),
+    color: col(0.8, 0.79, 0.76), roughness: 0.25, normalScale: new THREE.Vector2(0.8, 0.8),
+    emissive: 0xffa94d, emissiveMap: glowTex(), emissiveIntensity: 0.55,
   });
 
   // ---------------- cognac leather: smooth hide, soft satin sheen (no crackle map, no mirror highlights)
@@ -73,7 +73,7 @@ export function makeMats() {
   const leatherN = tex('fabric_leather_02_nor_gl_1k.jpg', { tile: 0.9 });
   const leatherMat = (o = {}) => new THREE.MeshPhysicalMaterial({
     map: leatherMap, normalMap: leatherN, normalScale: new THREE.Vector2(0.1, 0.1),
-    color: 0xffffff, roughness: 0.66, metalness: 0, specularIntensity: 0.42, envMapIntensity: 0.5,
+    color: 0xffffff, roughness: 0.5, metalness: 0, specularIntensity: 0.6, envMapIntensity: 0.22,
     sheen: 0.7, sheenRoughness: 0.45, sheenColor: new THREE.Color(0xd9a468), ...o,
   });
   M.leather = leatherMat();
@@ -110,9 +110,10 @@ export function makeMats() {
   const linenN = tex('rough_linen_nor_gl_1k.jpg', { tile: 0.25 });
   M.linen = std({ color: 0xd8ccb6, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.6, 0.6), side: THREE.DoubleSide });
   M.curtain = std({ color: 0xd6c7ad, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5), side: THREE.DoubleSide, emissive: 0x5a4a35, emissiveIntensity: 0.25 });
+  M.chairFabric = std({ color: 0xd9d0bd, roughness: 0.92, normalMap: linenN, normalScale: new THREE.Vector2(0.9, 0.9) });
   M.cream = std({ color: 0xc4b498, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.22 });
-  const knitMap = knitTex(); knitMap.repeat.set(1 / 0.42, 1 / 0.42);
+  const knitMap = knitTex(); knitMap.repeat.set(1 / 0.34, 1 / 0.34);
   M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xefe7d6, roughness: 1.0, side: THREE.DoubleSide });
   M.knitBall = std({ color: 0xefebe3, roughness: 0.98, normalMap: tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.12 }), normalScale: new THREE.Vector2(1.6, 1.6) });
   M.pillowWhite = std({ color: 0xcdc4b3, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
@@ -162,13 +163,25 @@ export function makeMats() {
 }
 
 // --------------------------------------------------------------- canvas textures
+// vertical warm glow for the backsplash (V in metres / 2: peak just under the uppers at y=1.39, fading down)
+function glowTex() {
+  const t = canvasTex(4, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); // canvas top = v 1 (y = 2 m), bottom = v 0
+    const vy = (y) => 1 - y / 2;
+    gr.addColorStop(vy(1.52), '#000'); gr.addColorStop(vy(1.40), '#fff'); gr.addColorStop(vy(1.30), '#8a8a8a');
+    gr.addColorStop(vy(1.15), '#2a2a2a'); gr.addColorStop(vy(0.96), '#000');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  });
+  t.repeat.set(1, 0.5); t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
 function rugTex(seed = 7, palette) {
   return canvasTex(1024, 1024, (g, w, h) => {
     const R = rng(seed);
     g.fillStyle = palette ? palette[0] : '#9b9892'; g.fillRect(0, 0, w, h);
     // cloudy vintage wash: large soft blobs (blue-grey, cream, brown-grey), then smaller ones
-    const pal = palette || ['#b9b6ae', '#8d9296', '#cfc8b9', '#7d7a76', '#a29a8e', '#a6adb2', '#d8d0c0', '#6f6c68', '#93908a'];
-    for (const [n, r0, r1, a] of [[260, 70, 190, '88'], [900, 20, 90, '99'], [900, 6, 28, '77']]) {
+    const pal = palette || ['#c4c0b6', '#7a8590', '#ddd5c4', '#6a6662', '#a3998a', '#98a3ad', '#e2dac9', '#5a5753', '#8e8a84', '#b0a08c'];
+    for (const [n, r0, r1, a] of [[260, 70, 190, 'aa'], [900, 20, 90, 'aa'], [900, 6, 28, '88']]) {
       for (let i = 0; i < n; i++) {
         const x = R() * w, y = R() * h, r = r0 + R() * (r1 - r0);
         const c = pal[(R() * pal.length) | 0];
@@ -178,8 +191,7 @@ function rugTex(seed = 7, palette) {
       }
     }
     // faint worn border bands
-    g.strokeStyle = 'rgba(95,92,90,0.22)'; g.lineWidth = 10; g.strokeRect(46, 46, w - 92, h - 92);
-    g.strokeStyle = 'rgba(215,208,196,0.28)'; g.lineWidth = 4; g.strokeRect(74, 74, w - 148, h - 148);
+    g.strokeStyle = 'rgba(95,92,90,0.12)'; g.lineWidth = 8; g.strokeRect(40, 40, w - 80, h - 80);
     // distressing: pale abrasion streaks along the pile
     for (let i = 0; i < 1100; i++) {
       const x = R() * w, y = R() * h;
@@ -196,7 +208,7 @@ function rugTex(seed = 7, palette) {
 function leatherTex() {
   return canvasTex(512, 512, (g, w, h) => {
     const R = rng(77);
-    g.fillStyle = '#7e4c28'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#683d1f'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 700; i++) {
       const x = R() * w, y = R() * h, r = 4 + R() * 14;
       const c = R() < 0.5 ? '#a9693a' : '#5f3820';
@@ -221,7 +233,7 @@ function knitTex() {
   return canvasTex(512, 512, (g, w, h) => {
     const R = rng(5);
     g.fillStyle = '#b3a892'; g.fillRect(0, 0, w, h);
-    const sw = 16, sh = 14;
+    const sw = 12, sh = 10;
     for (let r = 0; r * sh < h + sh; r++) {
       for (let c = -1; c * sw < w + sw; c++) {
         const x = c * sw + (r % 2 ? sw / 2 : 0), y = r * sh;

@@ -6,6 +6,7 @@ import { buildBedroom } from './master_suite/bedroom.js';
 import { buildCeiling } from './master_suite/ceiling.js';
 import { buildBath } from './master_suite/bath.js';
 import { buildClosets } from './master_suite/closets.js';
+import { applyWarmEnv } from './master_suite/env.js';
 
 export const views = {
   master: {
@@ -19,7 +20,7 @@ export const views = {
       exposure: 1.2, interior: 1.0,
     },
     lighting: { shadowFocus: { center: [-7.2, 1.2, -6.4], radius: 7.5 } },
-    post: { ao: true, aoIntensity: 1.4, aoRadius: 0.6 },
+    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.6 },
     toneMapping: 'neutral',
   },
 };
@@ -52,4 +53,5 @@ export async function build(ctx) {
   buildBedroom(ctx, M, group, P);
   await buildBath(ctx, M, group, P);
   buildClosets(ctx, M, group, P);
+  applyWarmEnv(ctx, M, group, 0.3);
 }

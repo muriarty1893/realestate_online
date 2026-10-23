@@ -1,4 +1,4 @@
-# Status: running, round 2 (2026-10-23)
+# Status: paused 2026-10-23 ~11:15 by the user, mid round 2
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -16,13 +16,23 @@
 ## Critic loop
 | piece | photo | round 1 (baseline) | round 2 |
 |---|---|---|---|
-| exterior | refs/front_view.webp | photo won: flat lighting, no shadows under overhangs | builder starts 11:00 |
-| great_room | refs/inside_view_1.webp | photo won: flat grey floor with no planks or rug | builder running |
-| master_suite | refs/inside_view_2.webp | photo won: exterior roof pokes through the ceiling (exterior's), weak contact shadows | builder running |
-| rest | none | n/a (QA and polish only) | builder starts 11:00 |
+| exterior | refs/front_view.webp | photo won: flat lighting, no shadows under overhangs | builder stopped early, nothing changed yet |
+| great_room | refs/inside_view_1.webp | photo won: flat grey floor with no planks or rug | done (`shots/great_room/round_2.png`); photo won: clay-like sectional cushions, flat light |
+| master_suite | refs/inside_view_2.webp | photo won: exterior roof pokes through the ceiling (exterior's), weak contact shadows | done (`shots/master_suite/round_2.png`); critic waits on the exterior's ridge-cap fix |
+| rest | none | n/a (QA and polish only) | builder stopped early, nothing changed yet |
 
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
 as PNGs with metadata stripped, and each critic reads only those two files.
+
+## Next steps (in order)
+1. Exterior builder, round 2: first fix `house:ext.ridgecap`, which hangs into `mstr` at X≈-8.5, Y≈3.1, Z≈-6.7, below
+   the 11 ft tray ceiling. Then the round-1 critique in LOG.md (flat lighting first).
+2. Then the master critic, round 2 (full scene, blind pair).
+3. Great room builder, round 3: the round-2 critique in LOG.md. Also re-check the living-group layout: our sectional is too
+   close to the camera and the coffee table sits left of where the photo has it.
+4. Rest builder: the QA and polish pass (the prompt said: shoot every view, fix defects, then raise the weakest 2 or 3).
+5. Engine (mine): GTAO's blend does `mix(1, ao, intensity)`, which extrapolates when `aoIntensity` > 1 (the great room uses
+   1.25). Switch the blend to `pow(ao, intensity)` above 1, or clamp to 1. The master builder saw a blue tint when over-driven.
 
 ## To resume
 1. `npm install` (node_modules is untracked now), then `npm start` and open http://localhost:8080

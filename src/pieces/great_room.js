@@ -22,7 +22,7 @@ export const views = {
     fov: FOV, shiftY: (600 - CAM.cy) / 1200, pixelAspect: CAM.s, label: 'Great room',
     preset: { base: 'day', hemi: { sky: 0xfff0dc, ground: 0x8c6f55, intensity: 0.55 }, env: { intensity: 0.5 } },
     lighting: { exposure: 1.0, interior: 1.0 },
-    post: { ao: true, aoIntensity: 1.0, aoRadius: 0.5 },
+    post: { ao: true, aoIntensity: 1.25, aoRadius: 0.4 },
     toneMapping: 'agx',
   },
 };

@@ -8,19 +8,25 @@ import { framedArt } from './living.js';
 // --------------------------------------------------------------- dining chair (faces +z)
 function diningChair(M) {
   const g = new THREE.Group();
-  const W = 0.5, D = 0.58, seatH = 0.48, H = 0.92;
+  const W = 0.5, D = 0.58, seatH = 0.48;
+  // tapered dark legs; the rear pair sweeps back
   for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const l = mesh(new THREE.CylinderGeometry(0.016, 0.012, seatH - 0.08, 8), M.legWood);
-    l.position.set(x * (W / 2 - 0.04), (seatH - 0.08) / 2, z * (D / 2 - 0.05)); l.rotation.x = z < 0 ? -0.1 : 0; g.add(l);
+    const l = mesh(new THREE.CylinderGeometry(0.02, 0.012, seatH - 0.1, 10), M.legWood);
+    l.position.set(x * (W / 2 - 0.045), (seatH - 0.1) / 2, z * (D / 2 - 0.05)); l.rotation.x = z < 0 ? -0.1 : 0; l.rotation.z = -x * 0.03; g.add(l);
   }
-  const seat = mesh(cushionGeo(W, 0.1, D - 0.04, { segs: 8, bulge: 0.15, round: 0.4 }), M.cream);
-  seat.position.set(0, seatH - 0.05, 0.02); g.add(seat);
-  // curved upholstered back (slight wing), tapers toward the top
-  const back = mesh(new THREE.CylinderGeometry(0.42, 0.42, H - seatH + 0.04, 18, 1, false, -0.6, 1.2), M.cream);
-  back.scale.set(1, 1, 0.55);
-  back.position.set(0, seatH + (H - seatH) / 2 - 0.02, -D / 2 + 0.2); back.rotation.y = Math.PI; g.add(back);
-  // back thickness fill
-  g.add(rbox(W - 0.02, H - seatH, 0.07, 0.03, M.cream, 0, seatH + (H - seatH) / 2 - 0.02, -D / 2 + 0.03));
+  // upholstered seat: rounded apron + soft cushion
+  g.add(rbox(W - 0.02, 0.1, D - 0.04, 0.035, M.chairFabric, 0, seatH - 0.11, 0.0, { segs: 4 }));
+  const seat = mesh(cushionGeo(W - 0.03, 0.09, D - 0.07, { segs: 10, bulge: 0.25, round: 0.45 }), M.chairFabric);
+  seat.position.set(0, seatH - 0.03, 0.01); g.add(seat);
+  // tall rounded-top back, leaning back, with a soft bevel (extruded arch)
+  const hw = 0.235, h1 = 0.4, h2 = 0.52;
+  const sh = new THREE.Shape();
+  sh.moveTo(-hw, 0); sh.lineTo(hw, 0); sh.lineTo(hw * 0.97, h1);
+  sh.bezierCurveTo(hw * 0.97, h2, hw * 0.55, h2 + 0.02, 0, h2 + 0.02);
+  sh.bezierCurveTo(-hw * 0.55, h2 + 0.02, -hw * 0.97, h2, -hw * 0.97, h1); sh.lineTo(-hw, 0);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 4, curveSegments: 14 });
+  const back = mesh(geo, M.chairFabric);
+  back.position.set(0, seatH - 0.02, -D / 2 + 0.07); back.rotation.x = -0.12; g.add(back);
   return g;
 }
 

@@ -37,7 +37,7 @@ function bed(ctx, M, g, P) {
   b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
   // duvet: folded back near the pillows, hanging over sides and foot
   const duvTop = mTop + 0.035;
-  const duv = mesh(drapeGeo({ W: W - 0.04, L: L - 0.05, z0: 0.62, top: duvTop, side: 0.4, foot: 0.38, r: 0.07, segX: 130, segZ: 120, wrinkle: 0.008, fold: 0.028, foldFreq: 6, undul: 0.022, crumple: 0.013, seed: 2, floorY: 0.06 }), M.duvet);
+  const duv = mesh(drapeGeo({ W: W - 0.04, L: L - 0.05, z0: 0.62, top: duvTop, side: 0.4, foot: 0.38, r: 0.07, segX: 130, segZ: 120, wrinkle: 0.008, fold: 0.028, foldFreq: 6, undul: 0.022, crumple: 0.01, seed: 2, floorY: 0.06 }), M.duvet);
   b.add(duv);
   // turned-down duvet fold (thicker roll) at the top edge
   const fold = rbox(W + 0.02, 0.07, 0.22, 0.035, M.duvet, 0, duvTop + 0.025, 0.62, { segs: 3 });
@@ -218,7 +218,7 @@ function curtains(ctx, M, g, P) {
   // slider on the east wall: sheer full-height panels on a rod just below the ceiling
   const xE = R.x1 - 0.1, sY = 2.95;
   rod(M, g, -3.99, -7.62, sY, 'z', xE, 0.014);
-  panel(M, M.sheer, g, { width: 2.0, height: sY - 0.02, top: sY - 0.02, at: -6.55, along: 'z', fixed: xE - 0.02, folds: 8, depth: 0.13, seed: 3 });
+  panel(M, M.sheer, g, { width: 2.0, height: sY - 0.02, top: sY - 0.02, at: -6.55, along: 'z', fixed: xE - 0.02, folds: 12, depth: 0.035, seed: 3 });
   panel(M, M.sheer, g, { width: 1.28, height: sY - 0.02, top: sY - 0.02, at: -4.66, along: 'z', fixed: xE - 0.02, folds: 10, depth: 0.1, seed: 4 });
 }
 
@@ -335,6 +335,7 @@ function grounding(ctx, M, g, P) {
   xs.forEach((x, i) => {
     softShadow(g, { x, y: 0.12, z: R.z0 + 0.003, w: w + 0.2, d: 0.42, orient: 'wallN', blur: 0.11, r: 0.05, opacity: 0.5 });
     softShadow(g, { x, y: 0.004, z: zc + 0.05, w: w + 0.3, d: d + 0.3, blur: 0.14, r: 0.1, opacity: 0.4 });
+    softShadow(g, { x, y: 0.246, z: zc, w: w - 0.08, d: d - 0.06, blur: 0.14, r: 0.03, opacity: 0.55 });   // open shelf sits under the top slab
     const lx = x + (i === 1 ? -0.07 : 0.02), lz = zc - 0.02;
     softShadow(g, { x: lx + 0.03, y: top + 0.002, z: lz + 0.04, w: 0.36, d: 0.36, blur: 0.09, r: 0.16, opacity: 0.55 });
   });
@@ -347,9 +348,9 @@ function grounding(ctx, M, g, P) {
   softShadow(g, { x: BED.x, y: 0.6, z: R.z0 + 0.003, w: hbW + 0.25, d: 1.35, orient: 'wallN', blur: 0.13, r: 0.05, opacity: 0.32 });
 
   // warm bounce light: no shadow, high in the room so walls and ceiling glow evenly like the photo
-  const bounce = new THREE.HemisphereLight(0xffeedb, 0xd9b890, 0.55);
+  const bounce = new THREE.HemisphereLight(0xfff4e6, 0xe6d6bf, 0.5);
   g.add(bounce); ctx.addInteriorLight(bounce);
-  const glow = new THREE.PointLight(0xffe0bd, 1.6, 9, 1.6);
-  glow.position.set(BED.x + 0.2, 2.8, -6.3); glow.castShadow = false;
+  const glow = new THREE.PointLight(0xffe8cc, 1.1, 9, 1.6);
+  glow.position.set(BED.x + 0.2, 2.2, -6.3); glow.castShadow = false;
   g.add(glow); ctx.addInteriorLight(glow);
 }

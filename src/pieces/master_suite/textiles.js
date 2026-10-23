@@ -111,7 +111,7 @@ export function wrinkleMaps({ size = 512, repeatM = 1.0, n = 260, dir = Math.PI 
 
 // Slubby linen: plain weave + irregular slub streaks in both thread directions (albedo + normal), with soft creases
 // baked into the normal map. Albedo is a near-white luminance variation to be tinted by the material colour.
-export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 4, seed = 21, crease = { n: 260, dir: Math.PI / 2, spread: 0.9, seed: 4, amount: 1 }, creaseStrength = 6, slub = 1 } = {}) {
+export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 6, seed = 21, crease = { n: 260, dir: Math.PI / 2, spread: 0.9, seed: 4, amount: 1 }, creaseStrength = 6, slub = 1 } = {}) {
   const W = size, H = size, R = rng(seed), pxPerM = W / repeatM;
   const h = new Float32Array(W * H), tone = new Float32Array(W * H);
   // weave height + per-thread random thickness
@@ -119,12 +119,12 @@ export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 4, seed = 21, cr
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = Math.sin((x / pitch) * Math.PI), b = Math.sin((y / pitch) * Math.PI);
     const over = ((Math.floor(x / pitch) + Math.floor(y / pitch)) & 1) ? 1 : -1;
-    h[y * W + x] = 0.12 * (a * b * over) + 0.05 * (warp[Math.floor(x / pitch)] + weft[Math.floor(y / pitch)]);
-    tone[y * W + x] = 0.04 * warp[Math.floor(x / pitch)] + 0.04 * weft[Math.floor(y / pitch)];
+    h[y * W + x] = 0.1 * (R() - 0.5);
+    tone[y * W + x] = 0.06 * (R() - 0.5);
   }
   // slubs: long thick thread streaks (horizontal and vertical), lighter or darker
-  for (let k = 0; k < 700 * slub; k++) {
-    const horiz = R() < 0.5, len = (0.015 + R() * 0.07) * pxPerM, th = 1 + Math.floor(R() * 2), amp = (R() < 0.5 ? -1 : 1) * (0.02 + R() * 0.045);
+  for (let k = 0; k < 900 * slub; k++) {
+    const horiz = R() < 0.5, len = (0.02 + R() * 0.09) * pxPerM, th = 1 + Math.floor(R() * 1.6), amp = (R() < 0.5 ? -1 : 1) * (0.02 + R() * 0.05);
     const x0 = Math.floor(R() * W), y0 = Math.floor(R() * H);
     for (let i = 0; i < len; i++) {
       const f = Math.sin((i / len) * Math.PI);
@@ -182,7 +182,7 @@ function canvasPix(draw, W, H) {
 }
 
 // Light natural oak boards with varied tone, butt joints and fine grain. Planks run along V (canvas +y). Tile = tileM metres.
-export function plankFloorMaps({ size = 2048, tileM = 3.8, cols = 20, seed = 31, base = [160, 130, 102] } = {}) {
+export function plankFloorMaps({ size = 2048, tileM = 3.8, cols = 20, seed = 31, base = [132, 116, 98] } = {}) {
   const W = size, H = size, R = rng(seed), pw = W / cols, pxPerM = W / tileM;
   const boards = [];
   for (let c = 0; c < cols; c++) {
@@ -218,7 +218,7 @@ export function plankFloorMaps({ size = 2048, tileM = 3.8, cols = 20, seed = 31,
 }
 
 // Subtle vertical oak grain for the barn door (one tile = repeatM metres, grain along V).
-export function oakGrainMaps({ size = 1024, repeatM = 1.3, seed = 41, base = [186, 152, 120], streaks = 170, contrast = 1.05 } = {}) {
+export function oakGrainMaps({ size = 1024, repeatM = 1.3, seed = 41, base = [170, 148, 126], streaks = 170, contrast = 1.05 } = {}) {
   const W = size, H = size, R = rng(seed);
   const alb = canvasPix((g) => paintGrain(g, 0, 0, W, H, R, { base, streaks, contrast }), W, H);
   const hf = new Float32Array(W * H);

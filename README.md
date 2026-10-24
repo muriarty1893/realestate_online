@@ -4,4 +4,4 @@ The project recreates a farmhouse interior with detailed rooms, walls, doors, wi
 
 The project focuses on immersive real estate visualization directly in the browser.
 
-[Live Demo]([realestateonline-omega.vercel.app](https://realestateonline-omega.vercel.app/))
+https://realestateonline-omega.vercel.app/

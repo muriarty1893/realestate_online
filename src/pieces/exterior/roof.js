@@ -78,9 +78,17 @@ export function emitRoof(geo, blk, M, opts = {}) {
   if (opts.rakes !== false) for (const r of blk.rakes) rakeTrim(geo, M, r, blk, FH);
   if (!opts.noRidge) for (const [a, b] of blk.ridges) if (a.distanceTo(b) > 0.05) geo.beam(M.ridgeCap, a.clone().add(V3(0, 0.035, 0)), b.clone().add(V3(0, 0.035, 0)), 0.26, 0.06);
   if (!opts.noHipCaps) for (const [a, b] of blk.hips) {
-    const pieces = opts.clipper ? opts.clipper([a.clone(), b.clone(), b.clone().add(V3(0, 0.001, 0))]) : null;
-    if (pieces && !pieces.length) continue;
-    geo.beam(M.ridgeCap, a.clone().add(V3(0, 0.03, 0)), b.clone().add(V3(0, 0.03, 0)), 0.24, 0.05);
+    // keep only the parts of the hip line the clipper keeps: a hip that dies into another roof must not run on
+    // underneath it (the main roof's west hip used to hang into the master bedroom)
+    let segs = [[a.clone(), b.clone()]];
+    if (opts.clipper) {
+      const d = b.clone().sub(a), L2 = d.lengthSq();
+      segs = opts.clipper([a.clone(), b.clone(), b.clone().add(V3(0, 0.001, 0))]).map((pc) => {
+        const ts = pc.map((q) => q.clone().sub(a).dot(d) / L2);
+        return [a.clone().addScaledVector(d, Math.max(0, Math.min(...ts))), a.clone().addScaledVector(d, Math.min(1, Math.max(...ts)))];
+      }).filter(([p, q]) => p.distanceTo(q) > 0.05);
+    }
+    for (const [p, q] of segs) geo.beam(M.ridgeCap, p.add(V3(0, 0.03, 0)), q.add(V3(0, 0.03, 0)), 0.24, 0.05);
   }
 }
 

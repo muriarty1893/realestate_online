@@ -57,6 +57,17 @@ gtao.output = GTAOPass.OUTPUT.Default;
 gtao.blendIntensity = 1.0;
 gtao.updateGtaoMaterial({ radius: 0.5, distanceExponent: 1.5, thickness: 1.0, scale: 1.0, samples: 16, distanceFallOff: 1.0 });
 gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+// stock blend is mix(1, ao, intensity), which extrapolates past 1 (negative, tinted darks); darken with pow() instead
+gtao.blendMaterial.fragmentShader = /* glsl */`
+  uniform float intensity;
+  uniform sampler2D tDiffuse;
+  varying vec2 vUv;
+  void main() {
+    vec4 texel = texture2D(tDiffuse, vUv);
+    float ao = clamp(texel.r, 0.0, 1.0);
+    gl_FragColor = vec4(vec3(intensity <= 1.0 ? mix(1.0, ao, intensity) : pow(ao, intensity)), texel.a);
+  }`;
+gtao.blendMaterial.needsUpdate = true;
 composer.addPass(gtao);
 const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.0, 0.4, 0.92);
 bloom.enabled = false;

@@ -2,6 +2,7 @@
 // 36" pro range + chimney hood, oven tower, built-in fridge in its niche, island with sink, stools,
 // glass pendants. Positions follow plan.marks, adjusted where the photo shows the built layout.
 import * as THREE from 'three';
+import { contactShadow } from './living.js';
 import { boxMM, box, cyl, mesh, rbox, mergeByMaterial, cushionGeo } from './util.js';
 
 const KIT = { x0: -4.421, x1: -0.357, z0: -2.627, z1: 3.578 };
@@ -376,6 +377,7 @@ export function buildKitchen(ctx, M, group) {
     // face west (toward the island): local +z -> world -x
     s.rotation.y = -Math.PI / 2 + 0.08 * Math.sin(z * 7);
     group.add(s);
+    group.add(contactShadow(0.62, 0.62, isl.x1 + 0.06, z, { opacity: 0.9 }));
   }
   ctx.addCollider({ x0: isl.x0, z0: isl.z0, x1: isl.x1 + 0.3, z1: isl.z1 });
 

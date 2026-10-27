@@ -1,4 +1,4 @@
-# Status: paused 2026-10-23 ~11:15 by the user, mid round 2
+# Status: running (resumed 2026-10-27 04:17 UTC)
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -24,15 +24,12 @@
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
 as PNGs with metadata stripped, and each critic reads only those two files.
 
-## Next steps (in order)
-1. Exterior builder, round 2: first fix `house:ext.ridgecap`, which hangs into `mstr` at X≈-8.5, Y≈3.1, Z≈-6.7, below
-   the 11 ft tray ceiling. Then the round-1 critique in LOG.md (flat lighting first).
-2. Then the master critic, round 2 (full scene, blind pair).
-3. Great room builder, round 3: the round-2 critique in LOG.md. Also re-check the living-group layout: our sectional is too
-   close to the camera and the coffee table sits left of where the photo has it.
-4. Rest builder: the QA and polish pass (the prompt said: shoot every view, fix defects, then raise the weakest 2 or 3).
-5. Engine (mine): GTAO's blend does `mix(1, ao, intensity)`, which extrapolates when `aoIntensity` > 1 (the great room uses
-   1.25). Switch the blend to `pow(ao, intensity)` above 1, or clamp to 1. The master builder saw a blue tint when over-driven.
+## Running now (2026-10-27)
+- Done by the orchestrator: roof hip caps are clipped (the master ceiling block is gone), and the GTAO blend uses `pow()` above 1.
+- The master critic, round 2, ran: the photo won (flat lighting, nothing grounded). The master builder is on round 3.
+- The exterior builder is on round 2, the great room builder on round 3 (layout first, then the clay-like sectional),
+  and the rest builder on its QA pass.
+- After each builder finishes: blind critic, log, push.
 
 ## To resume
 1. `npm install` (node_modules is untracked now), then `npm start` and open http://localhost:8080

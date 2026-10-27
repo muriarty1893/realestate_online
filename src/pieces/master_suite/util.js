@@ -46,15 +46,15 @@ export function rbox(w, h, d, r, mat, x = 0, y = 0, z = 0, { grain = 'y', segs =
 }
 
 // Pillow: two domed faces meeting at a seam; pointy corners, edges pulled in, soft creases.
-export function pillowGeo(w, h, d, { segs = 24, puff = 1, seed = 0, pinch = 0.07, sag = 0.0 } = {}) {
+export function pillowGeo(w, h, d, { segs = 24, puff = 1, seed = 0, pinch = 0.07, sag = 0.0, shape = 0.42, crumple = 0.06 } = {}) {
   const geos = [];
   for (const side of [1, -1]) {
     const g = new THREE.PlaneGeometry(2, 2, segs, segs);
     const p = g.attributes.position, uv = g.attributes.uv;
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i);
-      const t = Math.pow(Math.max(0, 1 - x * x), 0.42) * Math.pow(Math.max(0, 1 - y * y), 0.42) * puff;
-      const crease = 0.06 * Math.sin(x * 3.1 + seed) * Math.sin(y * 2.3 + seed * 1.7) + 0.04 * Math.sin((x + y) * 5 + seed * 3);
+      const t = Math.pow(Math.max(0, 1 - x * x), shape) * Math.pow(Math.max(0, 1 - y * y), shape) * puff;
+      const crease = crumple * Math.sin(x * 3.1 + seed) * Math.sin(y * 2.3 + seed * 1.7) + crumple * 0.7 * Math.sin((x + y) * 5 + seed * 3) - crumple * 1.4 * Math.exp(-Math.pow(x * 1.3 + y * 0.9 + Math.sin(seed) * 0.5, 2) * 18);
       const X = x * (1 - pinch * (1 - y * y)), Y = y * (1 - pinch * (1 - x * x));
       p.setXYZ(i, (X * w) / 2, (Y * h) / 2 - sag * (1 - x * x) * h * 0.5, side * (d / 2) * t * (1 + crease));
       uv.setXY(i, (X * w) / 2 + side * 0.37, (Y * h) / 2);
@@ -128,7 +128,7 @@ export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, 
 
 // Pleated curtain panel hanging in local XY plane (width along X, from y=0 at top downward to -h),
 // folds bulge along +Z.
-export function curtainGeo(width, height, { folds = 6, depth = 0.05, segX = 64, segY = 24, hem = 0.0, flare = 0.0, seed = 0 } = {}) {
+export function curtainGeo(width, height, { folds = 6, depth = 0.05, segX = 64, segY = 24, hem = 0.0, flare = 0.0, seed = 0, irr = 1 } = {}) {
   const g = new THREE.PlaneGeometry(1, 1, segX, segY);
   const p = g.attributes.position, uv = g.attributes.uv;
   const col = new Float32Array(p.count * 3);
@@ -136,10 +136,12 @@ export function curtainGeo(width, height, { folds = 6, depth = 0.05, segX = 64, 
     const u = uv.getX(i), v = 1 - uv.getY(i); // v: 0 top, 1 bottom
     const w = width * (1 + flare * v);
     const x = (u - 0.5) * w;
-    const ph = u * folds * Math.PI * 2 + seed;
-    const f = Math.sin(ph) + 0.25 * Math.sin(ph * 2.3 + v * 3);
-    const z = depth * 0.5 * f * (1 + 0.3 * v);
-    const y = -v * height;
+    const ph = u * folds * Math.PI * 2 + seed + irr * (1.1 * Math.sin(u * 5.3 + seed * 2) + 0.5 * Math.sin(v * 2.2 + u * 3.1 + seed) * (1 + v));
+    const amp = 1 - irr * 0.45 + irr * 0.45 * Math.sin(u * 7.3 + seed * 1.7 + v * 1.3);
+    const f = amp * Math.sin(ph) + 0.3 * Math.sin(ph * 2.3 + v * 3);
+    const v6 = v * v * v * v * v * v;
+    const z = depth * 0.5 * f * (1 + 0.3 * v) + depth * 1.6 * v6 * (0.5 + 0.5 * Math.sin(u * 9 + seed * 3)) + 0.012 * v6 * Math.sin(u * 31 + seed);
+    const y = -v * height + 0.035 * v6 * (0.5 + 0.5 * Math.sin(u * 11 + seed * 2.3));
     p.setXYZ(i, x, y, z);
     uv.setXY(i, u * width * 1.6, -y);
     // translucency proxy: thin crests glow more than the doubled-up valleys

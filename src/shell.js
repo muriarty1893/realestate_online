@@ -18,6 +18,9 @@ export function classify(xm, zm, ctx) {
   for (const o of ctx.openingsResolved) if (inRect(o.r, x, y)) return { kind: 'opening', opening: o };
   for (const w of ctx.wallsResolved) if (inRect(w.r, x, y)) return { kind: 'solid', wall: w };
   for (const rm of P.rooms) for (const r of rm.rects) if (inRect(r, x, y)) return { kind: rm.outdoor ? 'outdoor' : 'room', room: rm };
+  // a point exactly on the shared edge of two rooms (e.g. the face of w_colS, centred on the kitchen/great line) is
+  // still indoors; without this it read as 'outside' and got stucco and stone cladding inside the great room
+  for (const rm of P.rooms) for (const r of rm.rects) if (x >= r[0] && x <= r[2] && y >= r[1] && y <= r[3]) return { kind: rm.outdoor ? 'outdoor' : 'room', room: rm };
   return { kind: 'outside' };
 }
 

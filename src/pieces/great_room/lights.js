@@ -56,6 +56,18 @@ export function buildLights(ctx, M, group, { pendants = [], chandelier = [0.79, 
   // dining / foyer trays
   for (const [x, z] of [[-0.75, 5.0], [-0.75, 6.5], [2.3, 5.0], [2.3, 6.5]]) can(x, 3.048, z);
   for (const [x, z] of [[3.4, 4.0], [5.8, 4.0], [3.4, 6.62], [5.8, 6.62]]) can(x, 3.048, z);
+  // ---------- baked glow decals (additive): under-cabinet wash on the range wall, warm pools on the floor
+  const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const glow = (w, h, pos, rot, color, op) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: glowTex, color, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: true }));
+    m.position.set(...pos); m.rotation.set(...rot); m.renderOrder = 3; m.castShadow = m.receiveShadow = false; m.userData.noProbe = true; L.add(m);
+  };
+  glow(3.6, 0.9, [-4.395, 1.12, 0.75], [0, Math.PI / 2, 0], 0xffb766, 0.55);   // range wall backsplash wash
+  glow(4.0, 3.2, [1.4, 0.016, 0.8], [-Math.PI / 2, 0, 0], 0xffc27a, 0.1);     // living pool
+  glow(2.6, 2.6, [-1.68, 0.02, 1.0], [-Math.PI / 2, 0, 0], 0xffbb70, 0.1);     // island pool
+  glow(2.2, 2.2, [0.79, 0.016, 5.75], [-Math.PI / 2, 0, 0], 0xffc27a, 0.07);   // dining pool
   group.add(L);
   return L;
 }

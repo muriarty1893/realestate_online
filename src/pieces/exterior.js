@@ -19,11 +19,11 @@ export const views = {
     pos: [4.6, 2.6, 36.0], target: [4.6, 2.6, 0], fov: 31.2, shift: [0.149, 0.097],
     preset: {
       base: 'golden',
-      sun: { az: 25, el: 10, color: 0xffc47e, intensity: 1.8 },
-      hemi: { sky: 0xf0f2f2, ground: 0x8a8658, intensity: 2.0 },
-      env: { intensity: 0.85 },
-      sky: { top: 0x7fb4ea, horizon: 0xe2ecf0, bottom: 0x5a6040 },
-      exposure: 1.25, interior: 1.6,
+      sun: { az: 150, el: 9, color: 0xb4c0e0, intensity: 0.22 },
+      hemi: { sky: 0xd2dcec, ground: 0x6c6c52, intensity: 2.5 },
+      env: { intensity: 0.9 },
+      sky: { top: 0x6ab0f8, horizon: 0xf2e2c4, bottom: 0x5a6040 },
+      exposure: 1.2, interior: 1.4,
     },
     lighting: { shadowFocus: { center: [2, 3, 6], radius: 30 } },
     post: { ao: true, aoIntensity: 0.9, aoRadius: 0.7, bloom: 0.25, bloomThreshold: 0.85, bloomRadius: 0.45 },
@@ -56,6 +56,10 @@ export async function build(ctx) {
   const pv = views.front.preset;
   installEnvSwap(ctx, makeGardenEnv(ctx.renderer, sunVector(pv.sun.az, pv.sun.el)));
 
+  // warm porch lights washing columns, ceiling, floor and steps
+  for (const [x, y, z, k] of [[3.4, 2.5, 7.2, 1], [5.8, 2.5, 7.2, 1], [4.6, 2.7, 8.2, 0.8]]) {
+    const l = new THREE.PointLight(0xffb866, 8 * k, 8, 2); l.position.set(x, y, z); ctx.scene.add(l); ctx.addInteriorLight(l);
+  }
   const house = buildHouse(ctx, M, root);
   buildCladding(ctx, M, root, house.gables);
   buildOpenings(ctx, M, root);

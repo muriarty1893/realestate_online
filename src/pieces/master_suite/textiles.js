@@ -34,7 +34,7 @@ function stamp(h, W, H, cx, cy, rx, ry, rot, amp) {
 }
 
 // Chunky braided jute/wool: rows of fat loops along X with dark fibre flecks. Tile = repeatM metres.
-export function rugMaps({ size = 512, repeatM = 0.42, rows = 19, loops = 15, seed = 3 } = {}) {
+export function rugMaps({ size = 2048, repeatM = 3.8, rows = 120, loops = 96, seed = 3 } = {}) {
   const W = size, H = size, R = rng(seed);
   const h = new Float32Array(W * H), tone = new Float32Array(W * H).fill(0);
   const rh = H / rows, lw = W / loops;
@@ -45,7 +45,7 @@ export function rugMaps({ size = 512, repeatM = 0.42, rows = 19, loops = 15, see
       const amp = 0.75 + R() * 0.25;
       stamp(h, W, H, cx, cy, lw * (0.62 + R() * 0.15), rh * (0.48 + R() * 0.1), (R() - 0.5) * 0.25 + (r % 2 ? 0.12 : -0.12), amp);
       // per-loop tone
-      const tv = (R() - 0.5) * 0.12;
+      const tv = (R() - 0.5) * 0.2;
       for (let y = -Math.floor(rh / 2); y < rh / 2; y++) for (let x = -Math.floor(lw / 2); x < lw / 2; x++) {
         const px = ((Math.round(cx) + x) % W + W) % W, py = ((Math.round(cy) + y) % H + H) % H; tone[py * W + px] = tv;
       }
@@ -53,9 +53,13 @@ export function rugMaps({ size = 512, repeatM = 0.42, rows = 19, loops = 15, see
   }
   const nrm = heightToNormal(h, W, H, 2.2);
   const col = new Uint8ClampedArray(W * H * 4);
-  const base = [240, 231, 214];
+  const base = [244, 236, 220];
+  // large-scale blotches + wavy bands so the weave never reads as a repeating tile
+  const bl = Array.from({ length: 40 }, () => [R() * W, R() * H, (0.15 + R() * 0.3) * W, (R() - 0.5) * 0.2]);
   for (let i = 0; i < W * H; i++) {
-    const sh = 0.6 + 0.4 * h[i] + tone[i];
+    const x = i % W, y = (i / W) | 0;
+    let lf = 0; for (const [bx, by, br, ba] of bl) { const dx = Math.min(Math.abs(x - bx), W - Math.abs(x - bx)), dy = Math.min(Math.abs(y - by), H - Math.abs(y - by)); lf += ba * Math.exp(-(dx * dx + dy * dy) / (br * br * 0.35)); }
+    const sh = 0.7 + 0.3 * h[i] + tone[i] + lf + 0.05 * Math.sin(y / 9 + Math.sin(x / 140) * 2);
     col[i * 4] = base[0] * sh; col[i * 4 + 1] = base[1] * sh; col[i * 4 + 2] = base[2] * sh; col[i * 4 + 3] = 255;
   }
   // dark and light fibre flecks (short strokes along the rows)
@@ -182,35 +186,35 @@ function canvasPix(draw, W, H) {
 }
 
 // Light natural oak boards with varied tone, butt joints and fine grain. Planks run along V (canvas +y). Tile = tileM metres.
-export function plankFloorMaps({ size = 2048, tileM = 3.8, cols = 20, seed = 31, base = [132, 116, 98] } = {}) {
-  const W = size, H = size, R = rng(seed), pw = W / cols, pxPerM = W / tileM;
-  const boards = [];
-  for (let c = 0; c < cols; c++) {
-    let y = -R() * 1.4 * pxPerM;
+export function plankFloorMaps({ size = 2048, tileM = 3.8, seed = 31, base = [138, 118, 96] } = {}) {
+  const W = size, H = size, R = rng(seed), pxPerM = W / tileM;
+  const boards = [], cols = [];
+  { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.1 + R() * 0.07) * pxPerM); cols.push([x, w]); x += w; } }
+  cols.forEach(([cx, cw], c) => {
+    let y = -R() * 1.6 * pxPerM;
     while (y < H) {
-      const len = (0.9 + R() * 1.7) * pxPerM;
-      boards.push({ c, y0: y, y1: Math.min(y + len, H + 4), tint: 0.87 + R() * 0.26, warm: (R() - 0.5) * 0.1, seed: Math.floor(R() * 1e6) });
+      const len = (0.7 + R() * 1.9) * pxPerM;
+      boards.push({ cx, cw, y0: y, y1: Math.min(y + len, H + 4), tint: 0.78 + R() * 0.44, warm: (R() - 0.5) * 0.16, seed: Math.floor(R() * 1e6) });
       y += len;
     }
-  }
+  });
   const alb = canvasPix((g) => {
-    g.fillStyle = 'rgb(150,105,70)'; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgb(120,82,52)'; g.fillRect(0, 0, W, H);
     for (const b of boards) {
       const y0 = Math.max(0, b.y0), r = rng(b.seed);
       const bs = [base[0] * (1 + b.warm), base[1], base[2] * (1 - b.warm)];
-      paintGrain(g, b.c * pw + 1, y0, pw - 2, b.y1 - y0, r, { base: bs, tint: b.tint, streaks: 55, contrast: 1.1 });
+      paintGrain(g, b.cx + 0.5, y0, b.cw - 1, b.y1 - y0, r, { base: bs, tint: b.tint, streaks: 40, contrast: 1.6 });
     }
-    // joints and gaps
-    g.fillStyle = 'rgba(70,44,24,0.62)';
-    for (let c = 0; c < cols; c++) g.fillRect(c * pw - 1, 0, 2, H);
-    for (const b of boards) if (b.y0 > 0) g.fillRect(b.c * pw, b.y0 - 1, pw, 2);
+    g.fillStyle = 'rgba(60,38,20,0.7)';
+    for (const [cx] of cols) g.fillRect(cx - 1, 0, 2, H);
+    for (const b of boards) if (b.y0 > 0) g.fillRect(b.cx, b.y0 - 1, b.cw, 2);
   }, W, H);
   const hgt = canvasPix((g) => {
     g.fillStyle = '#c8c8c8'; g.fillRect(0, 0, W, H);
-    for (const b of boards) { const v = 190 + Math.floor((rng(b.seed)() - 0.5) * 22); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(b.c * pw + 1, Math.max(0, b.y0), pw - 2, b.y1 - Math.max(0, b.y0)); }
+    for (const b of boards) { const v = 190 + Math.floor((rng(b.seed)() - 0.5) * 22); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(b.cx + 1, Math.max(0, b.y0), b.cw - 2, b.y1 - Math.max(0, b.y0)); }
     g.fillStyle = '#2a2a2a';
-    for (let c = 0; c < cols; c++) g.fillRect(c * pw - 1.5, 0, 3, H);
-    for (const b of boards) if (b.y0 > 0) g.fillRect(b.c * pw, b.y0 - 1.5, pw, 3);
+    for (const [cx] of cols) g.fillRect(cx - 1.5, 0, 3, H);
+    for (const b of boards) if (b.y0 > 0) g.fillRect(b.cx, b.y0 - 1.5, b.cw, 3);
   }, W, H);
   const hf = new Float32Array(W * H);
   for (let i = 0; i < W * H; i++) hf[i] = hgt[i * 4] / 255;

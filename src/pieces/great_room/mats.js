@@ -34,7 +34,7 @@ export function makeMats() {
   M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.5,
     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
-    color: col(0.52, 0.72, 1.15), roughness: 0.9, envMapIntensity: 0.6, normalScale: new THREE.Vector2(0.7, 0.7),
+    color: col(0.36, 0.45, 0.68), roughness: 0.72, envMapIntensity: 0.6, clearcoat: 0.08, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
   });
 
   // ---------------- rough-sawn beam wood
@@ -72,9 +72,9 @@ export function makeMats() {
   const leatherMap = leatherTex();
   const leatherN = tex('fabric_leather_02_nor_gl_1k.jpg', { tile: 0.9 });
   const leatherMat = (o = {}) => new THREE.MeshPhysicalMaterial({
-    map: leatherMap, normalMap: leatherN, normalScale: new THREE.Vector2(0.1, 0.1),
-    color: 0xffffff, roughness: 0.5, metalness: 0, specularIntensity: 0.6, envMapIntensity: 0.22,
-    sheen: 0.7, sheenRoughness: 0.45, sheenColor: new THREE.Color(0xd9a468), ...o,
+    map: leatherMap, normalMap: leatherN, normalScale: new THREE.Vector2(0.3, 0.3),
+    color: new THREE.Color(1.15, 1.2, 1.2), roughness: 0.42, metalness: 0, specularIntensity: 0.8, envMapIntensity: 0.35, clearcoat: 0.25, clearcoatRoughness: 0.35,
+    sheen: 0.5, sheenRoughness: 0.45, sheenColor: new THREE.Color(0xd9a468), ...o,
   });
   M.leather = leatherMat();
   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
@@ -87,7 +87,7 @@ export function makeMats() {
     roughnessMap: tex('wood_planks_dirt_rough_1k.jpg', { tile: 1.3 }),
     color: col(0.86, 0.78, 0.7), roughness: 0.85,
   });
-  M.tableWood = std({ map: tex('wood_table_worn_diff_1k.jpg', { srgb: true, tile: 1.2 }), color: col(1.2, 0.95, 0.78), roughness: 0.55 });
+  M.tableWood = std({ map: tex('wood_table_worn_diff_1k.jpg', { srgb: true, tile: 1.2 }), color: col(0.9, 0.76, 0.62), roughness: 0.55 });
 
   // ---------------- metals
   const brushed = brushedTex();
@@ -100,7 +100,7 @@ export function makeMats() {
   M.redKnob = std({ color: 0xb01a14, roughness: 0.35 });
   // clear glass without a transmission pass: additive specular-only layer (reflections add light, nothing darkens)
   M.glass = std({ color: 0x000000, roughness: 0.04, metalness: 0, transparent: true, blending: THREE.AdditiveBlending, envMapIntensity: 2.2, depthWrite: false, side: THREE.DoubleSide });
-  M.bulb = std({ color: 0xfff1d6, emissive: 0xffc77a, emissiveIntensity: 6, roughness: 0.3 });
+  M.bulb = std({ color: 0xfff1d6, emissive: 0xffc77a, emissiveIntensity: 16, roughness: 0.3 });
   M.canLens = std({ color: 0xfff6e8, emissive: 0xfff0dc, emissiveIntensity: 3.0, roughness: 0.5 });
   M.canTrim = std({ color: 0xf2f0ea, roughness: 0.4 });
   M.ledStrip = std({ color: 0xfff3dd, emissive: 0xffd9a0, emissiveIntensity: 4, roughness: 0.5 });
@@ -114,7 +114,7 @@ export function makeMats() {
   M.cream = std({ color: 0xc4b498, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.22 });
   const knitMap = knitTex(); knitMap.repeat.set(1 / 0.34, 1 / 0.34);
-  M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xefe7d6, roughness: 1.0, side: THREE.DoubleSide });
+  M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xcbc3b0, roughness: 1.0, side: THREE.DoubleSide });
   M.knitBall = std({ color: 0xefebe3, roughness: 0.98, normalMap: tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.12 }), normalScale: new THREE.Vector2(1.6, 1.6) });
   M.pillowWhite = std({ color: 0xcdc4b3, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
   M.pillowGray = std({ color: 0x55565a, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
@@ -306,5 +306,37 @@ function throwTex() {
       g.fillStyle = '#6f6c69'; g.fillRect(0, y + 20, w, 10);
       g.fillStyle = '#9d9892'; g.fillRect(0, y + 36, w, 4);
     }
+  });
+}
+
+// faded vintage Oushak-style rug: worn field, lattice medallions, banded border, abrasion
+function vintageRugTex() {
+  return canvasTex(1024, 1400, (g, w, h) => {
+    const R = rng(77);
+    g.fillStyle = '#a9a8a2'; g.fillRect(0, 0, w, h);
+    // washed field
+    for (let i = 0; i < 500; i++) { const x = R() * w, y = R() * h, r = 40 + R() * 160; const c = ['#b9b7b0', '#8e98a2', '#c9c2b3', '#9a948a', '#7e8892'][(R() * 5) | 0];
+      const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c + '88'); gr.addColorStop(1, c + '00'); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    // lattice of diamonds
+    const B = 130; g.strokeStyle = 'rgba(70,82,98,0.45)'; g.lineWidth = 5;
+    const cxm = w / 2, cym = h / 2;
+    for (let j = -4; j <= 4; j++) for (let i = -3; i <= 3; i++) {
+      const x = cxm + i * 190 + (j % 2 ? 95 : 0), y = cym + j * 190; if (x < B + 40 || x > w - B - 40 || y < B + 40 || y > h - B - 40) continue;
+      g.beginPath(); g.moveTo(x, y - 80); g.lineTo(x + 60, y); g.lineTo(x, y + 80); g.lineTo(x - 60, y); g.closePath(); g.stroke();
+      g.fillStyle = 'rgba(150,100,80,0.35)'; g.beginPath(); g.arc(x, y, 14, 0, 7); g.fill();
+      g.fillStyle = 'rgba(60,78,100,0.28)'; g.beginPath(); g.moveTo(x, y - 34); g.lineTo(x + 24, y); g.lineTo(x, y + 34); g.lineTo(x - 24, y); g.fill();
+    }
+    // border bands
+    g.fillStyle = 'rgba(78,92,110,0.55)'; g.fillRect(40, 40, w - 80, 22); g.fillRect(40, h - 62, w - 80, 22); g.fillRect(40, 40, 22, h - 80); g.fillRect(w - 62, 40, 22, h - 80);
+    g.fillStyle = 'rgba(205,198,182,0.7)'; g.fillRect(70, 70, w - 140, 70); g.fillRect(70, h - 140, w - 140, 70); g.fillRect(70, 70, 70, h - 140); g.fillRect(w - 140, 70, 70, h - 140);
+    g.strokeStyle = 'rgba(70,82,98,0.5)'; g.lineWidth = 4;
+    for (let t = 90; t < w - 100; t += 46) { g.beginPath(); g.moveTo(t, 80); g.lineTo(t + 23, 130); g.lineTo(t + 46, 80); g.stroke(); g.beginPath(); g.moveTo(t, h - 80); g.lineTo(t + 23, h - 130); g.lineTo(t + 46, h - 80); g.stroke(); }
+    for (let t = 90; t < h - 100; t += 46) { g.beginPath(); g.moveTo(80, t); g.lineTo(130, t + 23); g.lineTo(80, t + 46); g.stroke(); g.beginPath(); g.moveTo(w - 80, t); g.lineTo(w - 130, t + 23); g.lineTo(w - 80, t + 46); g.stroke(); }
+    g.strokeStyle = 'rgba(60,70,84,0.7)'; g.lineWidth = 10; g.strokeRect(8, 8, w - 16, h - 16);
+    // abrasion + fibre
+    for (let i = 0; i < 1400; i++) { const x = R() * w, y = R() * h; g.strokeStyle = `rgba(225,220,210,${0.05 + R() * 0.12})`; g.lineWidth = 1 + R() * 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (R() - 0.5) * 50, y + (R() - 0.5) * 12); g.stroke(); }
+    const id = g.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (R() - 0.5) * 20; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+    g.putImageData(id, 0, 0);
   });
 }

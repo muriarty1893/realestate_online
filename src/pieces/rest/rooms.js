@@ -512,6 +512,22 @@ export function buildGarage(ctx, M, B, slots, H, walk) {
     fbk.box(M.rubber, 0.24, 0.05, 0.1, -0.2, 0.92, 0.25, { cast: false });
     fbk.rodZ(M.black, 0.012, 0.5, 0.36, 1.0, 0.25);
   }
+  // soft contact-shadow blobs under the garage furniture (the AO pass is too weak on open concrete)
+  {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+    const cx = cv.getContext('2d'), gr = cx.createRadialGradient(64, 64, 8, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(0,0,0,0.9)'); gr.addColorStop(0.6, 'rgba(0,0,0,0.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128);
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+    const bm = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, opacity: 1 });
+    const blob = (fr, x, z, w, d) => {
+      B.add(new THREE.PlaneGeometry(w, d), bm, fr.m.clone().multiply(new THREE.Matrix4().makeTranslation(x, 0.004, z)).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)), false);
+    };
+    for (const x of [-11.3, -9.95]) blob(W(B, 'n', Z(1065), x, fy), 0, 0.3, 1.9, 1.3);
+    blob(W(B, 'n', Z(1166), -8.1, fy), 0, 0.25, 1.7, 0.55);
+    blob(W(B, 'e', X(1080), 7.3, fy), 0, 0.3, 2.5, 1.2);
+    for (const z of [2.25, 2.95]) blob(W(B, 'e', X(1080), z, fy), 0, 0.38, 1.0, 1.05);
+  }
   // garage door hardware: vertical + horizontal tracks, opener with rail, strut on each section
   {
     const o = ctx.opening('door_garage');

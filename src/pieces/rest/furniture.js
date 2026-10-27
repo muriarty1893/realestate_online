@@ -439,6 +439,7 @@ export function vanity(f, M, o = {}) {
   f.box(cab, w - 0.01, h - 0.12, 0.012, 0, 0.09, 0.006);
   slabWithHoles(f, top, w, d, h - 0.03, 0.03, sinks.map((x) => ({ x, z: sz, w: sw, d: sd })), { cast: true });
   if (o.splash !== false) f.box(top, w, 0.1, 0.02, 0, h, 0.01, { cast: false });
+  f.box(cab, w - 0.01, 0.1, 0.02, 0, h - 0.13, d - 0.03, { cast: false });   // top rail closes the slot above the fronts
   // fronts: drawers on the ends, doors under sinks
   const fh = h - 0.12 - 0.09;
   const n = o.bays ?? sinks.length * 2 + (sinks.length > 1 ? 1 : 0);

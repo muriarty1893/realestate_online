@@ -121,7 +121,7 @@ export async function buildDining(ctx, M, group) {
   const c1 = curtainPanel(M, 0.55, 2.82, { seed: 1 }); c1.position.set(1.62, 2.84, 7.58); D.add(c1);
   const c2 = curtainPanel(M, 0.62, 2.82, { seed: 2 }); c2.position.set(-0.08, 2.84, 7.58); D.add(c2);
   // art on the south wall west of the bay
-  const a2 = framedArt(M, 0.46, 0.66, 'land', { frameMat: M.frameWood }); a2.position.set(-0.6, 1.5, 7.65 - 0.035 - 0.0); D.add(a2);
+  const a2 = framedArt(M, 0.46, 0.66, 'land', { frameMat: M.frameWood }); a2.position.set(-0.6, 1.5, 7.65 - 0.002); a2.rotation.y = Math.PI; D.add(a2);
   group.add(D);
 
   buildButler(ctx, M, group);

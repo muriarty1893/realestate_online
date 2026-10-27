@@ -1,4 +1,4 @@
-# Status: running (resumed 2026-10-27 04:17 UTC)
+# Status: paused 2026-10-27 ~05:45 UTC (weekly usage 87%, guard 90%), after round 5
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -13,32 +13,40 @@
   - master_suite: bedroom, bath and tray ceiling
   - rest: all 11 views, furnished
 
-## Critic loop
-| piece | photo | round 1 (baseline) | round 2 |
+## Critic loop (the photo has won every blind A/B so far; latest round per piece)
+| piece | latest | live in commit | biggest gap left (critiques/LOG.md has all of them) |
 |---|---|---|---|
-| exterior | refs/front_view.webp | photo won: flat lighting, no shadows under overhangs | builder stopped early, nothing changed yet |
-| great_room | refs/inside_view_1.webp | photo won: flat grey floor with no planks or rug | done (`shots/great_room/round_2.png`); photo won: clay-like sectional cushions, flat light |
-| master_suite | refs/inside_view_2.webp | photo won: exterior roof pokes through the ceiling (exterior's), weak contact shadows | done (`shots/master_suite/round_2.png`); critic waits on the exterior's ridge-cap fix |
-| rest | none | n/a (QA and polish only) | builder stopped early, nothing changed yet |
+| exterior | round 4 (beat round 3 in the regression check) | df2909a | beds too empty: fill with low mounds, ferns and pink/white blooms below the sills; warm the siding to cream; lighten the roof |
+| great_room | round 5 (beat round 4, narrowly) | df2909a | the sectional still reads as matte clay; parameter tweaks failed in rounds 2–5, so rebuild the cushions or use a CC0 model |
+| master_suite | round 5 (round 4 was narrowly closer) | df2909a | orange-tan white balance and flat fill; take back round 4's bright ceiling, lit right-edge sheer and draped throw |
+| rest | QA pass done | df2909a | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
 
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
 as PNGs with metadata stripped, and each critic reads only those two files.
 
-## Running now (2026-10-27)
-- Done by the orchestrator: roof hip caps are clipped (the master ceiling block is gone), and the GTAO blend uses `pow()` above 1.
-- The master critic, round 2, ran: the photo won (flat lighting, nothing grounded). The master builder is on round 3.
-- The exterior builder is on round 2, the great room builder on round 3 (layout first, then the clay-like sectional),
-  and the rest builder on its QA pass.
-- After each builder finishes: blind critic, log, push.
+## Next steps (in order)
+1. Exterior: bake the simplified plants to small .glb files offline and load those instead of the full-res models
+   (walk-mode load went from ~17 s to ~27 s locally). Then the round 4 critique: denser low beds, cream siding, a lighter roof.
+2. Master suite: round 4's take-backs (above), then neutral white balance with directional sun on the bed and rug.
+3. Great room: rebuild the sectional (see the round 5 orchestrator note in LOG.md).
+4. After each builder: a blind critic **and** a blind regression check against the previous round (they caught 3 regressions).
+
+## Lessons from 2026-10-27
+- Builders regress about half the time. The regression check (photo plus two of our renders, blind) is worth its cost.
+- Single critics are noisy and sometimes contradict each other (the coffee table, bed density). Prefer pixel-measurable claims and the overlay check.
+- Builders on Sonnet stop early (20–35 of 60 tool calls) and are cheap: a builder round costs ~0.5–1% of the weekly budget.
+- Always run `node tools/tris.mjs` after a builder adds models (one round went to 12.6M triangles).
 
 ## To resume
 1. `npm install` (node_modules is untracked now), then `npm start` and open http://localhost:8080
    (WASD walk, 1-9 views, L lighting, O AO).
 2. Builders: fresh agents with BUILDERS.md plus the last critique. They finish with `shots/<piece>/round_<N>.png`.
-3. Critics: a fresh agent per photo piece, with a blind A/B. Log every round in `critiques/LOG.md`.
+3. Critics: a fresh agent per photo piece, with a blind A/B made by `tools/critic_pair.sh`. Log every round in `critiques/LOG.md`.
 
 ## Notes
 - Vercel: three.js is vendored in vendor/three/ (Vercel never serves node_modules). `npm run vendor` refreshes it.
+- tools/tris.mjs prints triangle, mesh and light counts per piece. Budget: ~400k per piece.
+- shell.js classify(): points exactly on a shared room edge now count as indoors (w_colS fix).
 - tools/serve.mjs now sends Content-Length. Without it, Chromium reported spurious `net::ERR_ABORTED` on glTF/glb loads.
 - Cost: 4 parallel Opus builders used ~90% of a 5-hour window in ~20 minutes, so builders run on Sonnet from
   round 2. The run pauses at 88% of the 5-hour window or 90% weekly (claude-hud usage-snapshot.json).

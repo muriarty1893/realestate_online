@@ -91,11 +91,18 @@ export function drapeGeo({ W, L, z0 = 0, top, side = 0.3, foot = 0.3, r = 0.06, 
     const t = z0 + (tz1 - z0) * v;
     let x = s, z = t, y = top;
     const es = Math.abs(s) - W / 2;
-    const [os, ds] = foldAt(es);
-    if (es > 0) x = Math.sign(s) * (W / 2 + os);
     const et = t - L;
-    const [ot, dt] = foldAt(et);
-    if (et > 0) z = L + ot;
+    let ds = 0, dt = 0, os = 0, ot = 0;
+    if (es > 0 && et > 0) {
+      const hh = Math.hypot(es, et), ec = Math.min(hh, Math.min(side, foot) * 0.95);
+      const [o, d] = foldAt(ec);
+      os = o * es / hh; ot = o * et / hh; ds = d;
+      x = Math.sign(s) * (W / 2 + os); z = L + ot;
+    } else {
+      [os, ds] = foldAt(es); [ot, dt] = foldAt(et);
+      if (es > 0) x = Math.sign(s) * (W / 2 + os);
+      if (et > 0) z = L + ot;
+    }
     y = top - ds - dt + (et > 0 ? footLift * Math.min(1, et / 0.1) : 0);
     // wrinkles: stronger on hanging parts
     const hang = Math.min(1, (ds + dt) / 0.15);

@@ -18,7 +18,7 @@ export function makeMats(ctx) {
   // ---- floors
   const pf = plankFloorMaps();
   M.oakFloor = new THREE.MeshPhysicalMaterial({
-    map: pf.map, normalMap: pf.normalMap, color: 0xcac1b3, roughness: 0.9, clearcoat: 0, specularIntensity: 0.5,
+    map: pf.map, normalMap: pf.normalMap, color: 0xb4ada2, roughness: 0.9, clearcoat: 0, specularIntensity: 0.5,
     normalScale: new THREE.Vector2(0.55, 0.55), name: 'ms.oakFloor',
   });
   M.porcelain = std({
@@ -96,8 +96,8 @@ export function makeMats(ctx) {
   M.sheer = glowFab(fab(0xf4e8d2, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false, emissive: new THREE.Color(0xffe6c4), emissiveIntensity: 3.2, name: 'ms.sheer' }), 0.8);
   M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, transparent: true, opacity: 1, emissive: new THREE.Color(0xffe0b8), emissiveIntensity: 0.3, name: 'ms.curtainLit' }));
   M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, opacity: 1, emissive: new THREE.Color(0xffe0b8), emissiveIntensity: 0.2, name: 'ms.curtain' }));
-  M.curtainNear = glowFab(fab(0xf3e9d6, 0.35, 0.95, 0.25, { side: THREE.DoubleSide, opacity: 1, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 2.3, name: 'ms.curtainNear' }), 1.0);
-  M.curtainSlider = glowFab(fab(0xeee2cc, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, transparent: true, opacity: 0.93, depthWrite: false, emissive: new THREE.Color(0xffe6c0), emissiveIntensity: 2.6, name: 'ms.curtainSlider' }), 1.0);
+  M.curtainNear = glowFab(fab(0xf3e9d6, 0.35, 0.95, 0.25, { side: THREE.DoubleSide, opacity: 1, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 0.9, name: 'ms.curtainNear' }), 1.0);
+  M.curtainSlider = glowFab(fab(0xeee2cc, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, transparent: true, opacity: 0.93, depthWrite: false, emissive: new THREE.Color(0xffe6c0), emissiveIntensity: 1.0, name: 'ms.curtainSlider' }), 1.0);
   M.shade = std({ ...linenDetail(0.2), color: 0xf3e6cf, roughness: 0.95, emissive: new THREE.Color(0xffc777), emissiveIntensity: 0.55, side: THREE.DoubleSide, name: 'ms.shade' });
   M.romanShade = fab(0xe3dccf, 0.3, 0.95, 0.5, { name: 'ms.romanShade' });
   M.towel = fab(0xf0ece4, 0.15, 1.0, 1.0, { name: 'ms.towel' });

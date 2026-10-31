@@ -34,18 +34,18 @@ function stamp(h, W, H, cx, cy, rx, ry, rot, amp) {
 }
 
 // Chunky braided jute/wool: rows of fat loops along X with dark fibre flecks. Tile = repeatM metres.
-export function rugMaps({ size = 2048, repeatM = 3.8, rows = 120, loops = 96, seed = 3 } = {}) {
+export function rugMaps({ size = 2048, repeatM = 3.8, rows = 230, loops = 150, seed = 3 } = {}) {
   const W = size, H = size, R = rng(seed);
   const h = new Float32Array(W * H), tone = new Float32Array(W * H).fill(0);
   const rh = H / rows, lw = W / loops;
   for (let r = 0; r < rows; r++) {
     const off = (r % 2) * lw * 0.5;
     for (let k = 0; k < loops; k++) {
-      const cx = k * lw + off + (R() - 0.5) * lw * 0.15, cy = r * rh + rh / 2 + (R() - 0.5) * rh * 0.12;
+      const cx = k * lw + off + (R() - 0.5) * lw * 0.45, cy = r * rh + rh / 2 + (R() - 0.5) * rh * 0.3 + Math.sin(k * 0.21 + r * 0.9) * rh * 0.12;
       const amp = 0.75 + R() * 0.25;
       stamp(h, W, H, cx, cy, lw * (0.62 + R() * 0.15), rh * (0.48 + R() * 0.1), (R() - 0.5) * 0.25 + (r % 2 ? 0.12 : -0.12), amp);
       // per-loop tone
-      const tv = (R() - 0.5) * 0.2;
+      const tv = (R() - 0.5) * 0.14;
       for (let y = -Math.floor(rh / 2); y < rh / 2; y++) for (let x = -Math.floor(lw / 2); x < lw / 2; x++) {
         const px = ((Math.round(cx) + x) % W + W) % W, py = ((Math.round(cy) + y) % H + H) % H; tone[py * W + px] = tv;
       }
@@ -53,7 +53,7 @@ export function rugMaps({ size = 2048, repeatM = 3.8, rows = 120, loops = 96, se
   }
   const nrm = heightToNormal(h, W, H, 2.2);
   const col = new Uint8ClampedArray(W * H * 4);
-  const base = [244, 236, 220];
+  const base = [240, 228, 206];
   // large-scale blotches + wavy bands so the weave never reads as a repeating tile
   const bl = Array.from({ length: 40 }, () => [R() * W, R() * H, (0.15 + R() * 0.3) * W, (R() - 0.5) * 0.2]);
   for (let i = 0; i < W * H; i++) {
@@ -65,7 +65,7 @@ export function rugMaps({ size = 2048, repeatM = 3.8, rows = 120, loops = 96, se
   // dark and light fibre flecks (short strokes along the rows)
   for (let n = 0; n < W * H * 0.006; n++) {
     const x = Math.floor(R() * W), y = Math.floor(R() * H), len = 3 + Math.floor(R() * 7), dark = R() < 0.75;
-    const c = dark ? [110 + R() * 30, 92 + R() * 25, 72 + R() * 20] : [240, 232, 216];
+    const c = dark ? [170 + R() * 25, 152 + R() * 22, 128 + R() * 20] : [240, 232, 216];
     for (let k = 0; k < len; k++) { const px = (x + k) % W, py = (y + Math.round(k * (R() - 0.5) * 0.4) + H) % H, i = (py * W + px) * 4; col[i] = c[0]; col[i + 1] = c[1]; col[i + 2] = c[2]; }
   }
   return { map: tex(col, W, H, true, repeatM), normalMap: tex(nrm, W, H, false, repeatM) };
@@ -187,20 +187,20 @@ function canvasPix(draw, W, H) {
 }
 
 // Light natural oak boards with varied tone, butt joints and fine grain. Planks run along V (canvas +y). Tile = tileM metres.
-export function plankFloorMaps({ size = 2048, tileM = 5.6, seed = 31, base = [128, 112, 94] } = {}) {
+export function plankFloorMaps({ size = 2048, tileM = 5.6, seed = 31, base = [116, 108, 98] } = {}) {
   const W = size, H = size, R = rng(seed), pxPerM = W / tileM;
   const boards = [], cols = [];
-  { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.1 + R() * 0.07) * pxPerM); cols.push([x, w]); x += w; } }
+  { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.075 + R() * 0.05) * pxPerM); cols.push([x, w]); x += w; } }
   cols.forEach(([cx, cw], c) => {
     let y = -R() * 1.6 * pxPerM;
     while (y < H) {
       const len = (0.7 + R() * 1.9) * pxPerM;
-      boards.push({ cx, cw, y0: y, y1: Math.min(y + len, H + 4), tint: 0.78 + R() * 0.44, warm: (R() - 0.5) * 0.16, seed: Math.floor(R() * 1e6) });
+      boards.push({ cx, cw, y0: y, y1: Math.min(y + len, H + 4), tint: 0.8 + R() * 0.4, warm: (R() - 0.5) * 0.08, seed: Math.floor(R() * 1e6) });
       y += len;
     }
   });
   const alb = canvasPix((g) => {
-    g.fillStyle = 'rgb(120,82,52)'; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgb(92,78,64)'; g.fillRect(0, 0, W, H);
     for (const b of boards) {
       const y0 = Math.max(0, b.y0), r = rng(b.seed);
       const bs = [base[0] * (1 + b.warm), base[1], base[2] * (1 - b.warm)];

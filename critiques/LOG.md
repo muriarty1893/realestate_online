@@ -292,3 +292,13 @@ Further: (1) Almost no contact shadows; flat, low-contrast light. (2) The olive 
 (4) The kitchen cabinets are uniform light orange with no grain. (5) The window is a blank green field; the books are grey blocks.
 *Regression check (blind, round 5 vs round 6): round 6 is clearly closer* — tailored cushions, piping, the leather's sheen and shading, structured chairs, pillow placement.
 Round 5's hue was slightly nearer (less orange). Both have an awkward foreground chaise slab with the blanket; the photo has a low chaise end running toward the camera at the bottom right.
+
+## Round 10, master_suite (2026-10-31)
+Builder changes: round 9's bed base ported onto round 8 (headboard upholstery, flat on the floor, a softer contact shadow; the duvet corner falls radially); the right-edge
+curtain emissive is lowered (2.3/2.6 -> 0.9/1.0), so the folds read; narrower, greyer floor boards (7.5–12.5 cm) with neutral gaps; a finer, cream jute rug.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the duvet is one flat, even mid-brown slab with hard edges and few stiff folds; it should be lighter,
+varied linen with many small folds, soft drape over the edges, and light falling across it from bright to shadow. Further: grounding shadows; the window views (the exterior's);
+the floor at the bottom right is still orange with oversized planks; the right-edge sheer is still a smudge; the bench knit's V-pattern is cartoonish; the art is muddy.
+*Regression check (blind, round 8 vs round 10): round 10 is closer, narrowly* (clean upholstered base with no plinth, a tidier duvet edge, a warmer cream rug). Round 8's bench
+throw draped further down the front. Neither has the photo's pale layered throw over the lower half; the pillows are too dark and uniform.
+*Orchestrator:* rounds 6–10 have circled the duvet without solving it; the next attempt should rebuild the bedding as separate layered meshes (Opus), the way the sofa rebuild worked.

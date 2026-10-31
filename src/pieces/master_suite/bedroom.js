@@ -30,8 +30,7 @@ function bed(ctx, M, g, P) {
   b.add(rbox(hbW, hbH, 0.11, 0.035, M.upholstery, 0, hbH / 2 + 0.02, -0.055, { segs: 4 }));
   // platform base with recessed plinth
   const baseH = 0.34, baseW = W + 0.06, baseL = L + 0.12;
-  b.add(rbox(baseW - 0.1, baseH - 0.07, baseL - 0.1, 0.03, M.bedBase, 0, 0.07 + (baseH - 0.07) / 2, baseL / 2, { segs: 3 }));
-  b.add(box(baseW - 0.12, 0.07, baseL - 0.12, M.blackMatte, 0, 0.035, baseL / 2, { cast: false }));
+  b.add(rbox(baseW - 0.06, baseH - 0.02, baseL - 0.06, 0.035, M.upholstery, 0, 0.02 + (baseH - 0.02) / 2, baseL / 2 - 0.01, { segs: 3 }));
   // mattress
   const mT = 0.3, mTop = baseH + mT;
   b.add(rbox(W - 0.2, mT, L - 0.2, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
@@ -324,7 +323,7 @@ function grounding(ctx, M, g, P) {
   const bz = BED.head + (L + 0.12) / 2;
   // bed: wide soft occlusion + tight dark core under the platform
   softShadow(g, { x: BED.x, y: f, z: bz + 0.02, w: W + 0.7, d: L + 0.75, blur: 0.3, r: 0.25, opacity: 0.62 });
-  softShadow(g, { x: BED.x, y: f + 0.002, z: bz + 0.02, w: W + 0.2, d: L + 0.25, blur: 0.09, r: 0.08, opacity: 0.8 });
+  softShadow(g, { x: BED.x, y: f + 0.002, z: bz + 0.02, w: W + 0.2, d: L + 0.25, blur: 0.12, r: 0.08, opacity: 0.5 });
   // bench
   const bzc = P.bench.z, bD = P.bench.D;
   softShadow(g, { x: BED.x, y: f, z: bzc + 0.03, w: 1.62 + 0.4, d: bD + 0.4, blur: 0.18, r: 0.12, opacity: 0.64 });

@@ -267,3 +267,28 @@ edge: the sheer is blown out and smeared. (4) The rug repeats like a grid; the p
 stray dots near the barn-door rail.
 *Regression check (blind, round 6 vs round 8): round 8 is closer, narrowly* (light right-edge linen, woven duvet texture). Round 6 had the better throw layout
 (over the right half, spilling to the floor) and a cleaner front-right duvet corner. Both need a less orange floor and a richer rug weave.
+
+## Round 9 (2026-10-31)
+
+### master_suite: photo won (critic saw ours as B); **reverted to round 8**
+Builder changes: the foot-right flap is gone (the corner falls radially); the base is upholstered like the headboard with no plinth; the throw is back at round 6's layout;
+fewer, larger duvet folds and a finer weave; a greyer floor; a finer jute rug (230×150 loops). The speck by the barn-door rail raycasts to the shell's west wall
+`w_x664a` at (-8.93, 2.26, -7.82): two bright pixels, probably a shadow-map light leak at the junction with `w_wicS2` (not yet fixed).
+**Biggest gap:** the duvet is an inflated caramel balloon with a jagged, scalloped edge at the turndown, and its sides bulge instead of hanging.
+Further: the right-edge curtain is a blown-out white streak; the rug speckle is noisy and coarse; the floor planks are oversized and orange; flat, overexposed light; the window views.
+*Regression check (blind, round 8 vs round 9): round 8 is slightly closer* (its bed top: the diagonal blanket, the flatter linen duvet, no scalloped sheet).
+Round 9's only win is the bed base (a clean upholstered box, no pointed corner hanging onto the rug). The master files are reverted to commit 08a8cbf;
+round 9's diff is kept in `shots/master_suite/rejected/round_9.patch` for its base code.
+
+## Round 6, great_room (2026-10-31): the sectional rebuild (Opus builder)
+Builder changes: a new `great_room/sofa.js` replaces the parametric sofa: every cushion and frame part is its own rounded box with a crowned top, 8 mm gaps (seams come
+from AO and shadow), piping built in each cushion's local frame, darker sides and undersides; a tailored track arm, firm seats, plump backs on a 0.66 m frame;
+the Poly Haven `brown_leather` set (CC0, ~4 mm grain) tinted to the photo's cognac, roughness ~0.55, light clearcoat; the armchairs rebuilt the same way; pillows
+moved forward; the striped throw over the back by the arm; the knit throw along the near arm. 248k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: still the sectional — flat, oversaturated orange-rust, evenly lit; the back cushions are oversized rounded
+blobs. It should be muted cognac/tan with soft sitting wrinkles, stitched seams, varying gloss along arms and tops, darker under the seat front and between cushions,
+and slimmer, tighter back cushions.
+Further: (1) Almost no contact shadows; flat, low-contrast light. (2) The olive stems and dining sprigs are paper cutouts. (3) The foreground throw drapes stiffly like a sheet (no knit, no fringe).
+(4) The kitchen cabinets are uniform light orange with no grain. (5) The window is a blank green field; the books are grey blocks.
+*Regression check (blind, round 5 vs round 6): round 6 is clearly closer* — tailored cushions, piping, the leather's sheen and shading, structured chairs, pillow placement.
+Round 5's hue was slightly nearer (less orange). Both have an awkward foreground chaise slab with the blanket; the photo has a low chaise end running toward the camera at the bottom right.

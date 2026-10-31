@@ -68,17 +68,21 @@ export function makeMats() {
     emissive: 0xffa94d, emissiveMap: glowTex(), emissiveIntensity: 0.55,
   });
 
-  // ---------------- cognac leather: smooth hide, soft satin sheen (no crackle map, no mirror highlights)
-  const leatherMap = leatherTex();
-  const leatherN = tex('fabric_leather_02_nor_gl_1k.jpg', { tile: 0.9 });
+  // ---------------- cognac leather: Poly Haven brown_leather (CC0) PBR set, albedo tinted to the photo's cognac.
+  // Grain ~4 mm at a 0.32 m tile. Clearcoat gives the soft satin highlights along cushion and arm tops.
+  const LT = 0.26;
   const leatherMat = (o = {}) => new THREE.MeshPhysicalMaterial({
-    map: leatherMap, normalMap: leatherN, normalScale: new THREE.Vector2(0.3, 0.3),
-    color: new THREE.Color(1.15, 1.2, 1.2), roughness: 0.42, metalness: 0, specularIntensity: 0.8, envMapIntensity: 0.35, clearcoat: 0.25, clearcoatRoughness: 0.35,
-    sheen: 0.5, sheenRoughness: 0.45, sheenColor: new THREE.Color(0xd9a468), ...o,
+    map: tex('brown_leather_albedo_1k.jpg', { srgb: true, tile: LT }),
+    normalMap: tex('brown_leather_nor_gl_1k.jpg', { tile: LT }), normalScale: new THREE.Vector2(0.28, 0.28),
+    roughnessMap: tex('brown_leather_rough_1k.jpg', { tile: LT }), roughness: 0.82,
+    color: new THREE.Color(1.86, 1.48, 0.8), metalness: 0, specularIntensity: 0.6, specularColor: new THREE.Color(1.0, 0.78, 0.55), envMapIntensity: 0.45,
+    clearcoat: 0.14, clearcoatRoughness: 0.3, ...o,
   });
   M.leather = leatherMat();
   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
-  M.leatherDark = leatherMat({ color: 0xcfa58c });
+  M.leatherDark = leatherMat({ color: new THREE.Color(1.5, 1.18, 0.64) });
+  M.sofaLeather = leatherMat({ vertexColors: true });           // upholstery blocks carry baked under-cushion shade
+  M.leatherPipe = leatherMat({ color: new THREE.Color(1.25, 0.95, 0.52), clearcoat: 0.35 });
 
   // ---------------- reclaimed wood (coffee table)
   M.reclaimed = std({
@@ -114,8 +118,9 @@ export function makeMats() {
   M.cream = std({ color: 0xc4b498, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.22 });
   const knitMap = knitTex(); knitMap.repeat.set(1 / 0.34, 1 / 0.34);
-  M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xcbc3b0, roughness: 1.0, side: THREE.DoubleSide });
-  M.knitBall = std({ color: 0xefebe3, roughness: 0.98, normalMap: tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.12 }), normalScale: new THREE.Vector2(1.6, 1.6) });
+  M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xb5ad9c, roughness: 1.0, side: THREE.DoubleSide });
+  const kb = knitMap.clone(); kb.repeat.set(2.4, 1.2); kb.needsUpdate = true;   // chunky stitches around the ball
+  M.knitBall = std({ map: kb, bumpMap: kb, bumpScale: 4.0, color: 0xddd6c9, roughness: 1.0 });
   M.pillowWhite = std({ color: 0xcdc4b3, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
   M.pillowGray = std({ color: 0x55565a, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
   M.pillowLeather = M.leather;
@@ -292,12 +297,12 @@ function patternTex() {
 }
 function stripeTex() {
   return canvasTex(256, 256, (g, w, h) => {
-    g.fillStyle = '#e8e2d6'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e6dfd2'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 9; i++) {
-      g.fillStyle = i % 3 === 1 ? '#4c4b4a' : '#8b8580';
-      g.fillRect(i * 28 + 10, 0, i % 3 === 1 ? 7 : 3, h);
+      g.fillStyle = i % 3 === 1 ? '#5a5048' : '#8c8178';
+      g.fillRect(i * 28 + 10, 0, i % 3 === 1 ? 6 : 3, h);
     }
-  });
+  }, { repeat: [2.4, 2.4] });
 }
 function throwTex() {
   return canvasTex(256, 256, (g, w, h) => {

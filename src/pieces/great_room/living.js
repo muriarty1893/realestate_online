@@ -1,33 +1,10 @@
 // Living area: cognac leather L-sectional, two leather club chairs, reclaimed-wood coffee table with
 // decor, large distressed rug, throws, pillows, knit ball, side table, framed abstract art.
 import * as THREE from 'three';
-import { boxMM, box, rbox as rbox0, cyl, mesh as mesh0, cushionGeo, pillowGeo, rng, canvasTex, ASSET } from './util.js';
+import { boxMM, cyl, mesh as mesh0, pillowGeo, rng, canvasTex, ASSET } from './util.js';
+import { buildSectional, clubChair } from './sofa.js';
 
-// --- baked leather shading: darker in the folds/seams, at the bottom and at the rim of each piece, plus faint sitting creases.
-// Applied through vertex colours on a cloned leather material so it needs no extra lights.
-const _lc = new Map();
-function bakeLeather(m) {
-  const mat = m.material;
-  if (!mat || !mat.sheen || !mat.map || mat.userData.noBake) return m;
-  const g = m.geometry; g.computeBoundingBox();
-  const bb = g.boundingBox, c = bb.getCenter(new THREE.Vector3()), h = bb.getSize(new THREE.Vector3()).multiplyScalar(0.5);
-  const p = g.attributes.position, n = g.attributes.normal, col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const ux = h.x > 1e-4 ? (p.getX(i) - c.x) / h.x : 0, uy = h.y > 1e-4 ? (p.getY(i) - c.y) / h.y : 0, uz = h.z > 1e-4 ? (p.getZ(i) - c.z) / h.z : 0;
-    const edge = Math.pow(Math.max(Math.abs(ux), Math.abs(uy), Math.abs(uz)), 10);     // seam / rim
-    const under = Math.max(0, -n.getY(i)) * 0.35 + Math.max(0, -uy) * 0.12;             // faces down / low
-    const crease = 0.045 * Math.sin(ux * 9 + uz * 5 + h.x * 17) * Math.sin(uz * 8 - ux * 3 + h.z * 11) + 0.03 * Math.sin((ux + uz) * 17);
-    const hl = Math.max(0, n.getY(i)) * Math.pow(Math.max(0, Math.max(Math.abs(ux), Math.abs(uz))), 4) * 0.22 * (1 - edge);
-    const k = Math.min(1.18, Math.max(0.5, 1 + hl - 0.3 * edge - under - Math.max(0, crease) * 2 + Math.min(0, crease) * 0.5));
-    col[i * 3] = k; col[i * 3 + 1] = k * 0.97; col[i * 3 + 2] = k * 0.94;
-  }
-  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  if (!_lc.has(mat)) { const c2 = mat.clone(); c2.vertexColors = true; c2.specularIntensity = 0.4; c2.roughness = 0.46; c2.clearcoat = 0; c2.sheen = 0.35; c2.envMapIntensity = 0.15; c2.clearcoatRoughness = 0.4; _lc.set(mat, c2); }
-  m.material = _lc.get(mat);
-  return m;
-}
-const mesh = (geo, mat, o) => bakeLeather(mesh0(geo, mat, o));
-const rbox = (...a) => bakeLeather(rbox0(...a));
+const mesh = mesh0;
 
 // --------------------------------------------------------------- contact shadows
 // soft dark footprint under furniture (blurred rounded rect, multiplies the floor/rug)
@@ -48,121 +25,6 @@ export function contactShadow(w, d, x = 0, z = 0, { y = 0.0135, opacity = 1 } = 
   return m;
 }
 
-
-// thin piping tube along a cushion edge, and a dark seam strip between cushions
-function pipe(M, len, x, y, z, ax) {
-  const p = mesh0(new THREE.CylinderGeometry(0.009, 0.009, len, 8), M.leatherPipe || (M.leatherPipe = M.leather.clone()));
-  p.material.color.multiplyScalar(0.85); p.rotation.z = Math.PI / 2; p.position.set(x, y, z); return p;
-}
-let _seamM = null;
-function seam(w, x, y, z) {
-  _seamM = _seamM || new THREE.MeshBasicMaterial({ color: 0x1c0f07 });
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.03, 0.03), _seamM); m.position.set(x, y, z); return m;
-}
-// firm tailored box cushion with piped (welted) top edges
-function boxCush(M, w, h, d, { r = 0.035, tilt = 0, pipe = true, sag = 0 } = {}) {
-  const g = new THREE.Group();
-  g.add(rbox(w, h, d, r, M.leather, 0, 0, 0, { segs: 3 }));
-  if (pipe) {
-    const pr = 0.0075;
-    const pm = M.leather;
-    for (const sz of [-1, 1]) { const p = mesh(new THREE.CylinderGeometry(pr, pr, w - 2 * r, 8), pm); p.rotation.z = Math.PI / 2; p.position.set(0, h / 2 - 0.003, sz * (d / 2 - 0.004)); g.add(p); }
-    for (const sx of [-1, 1]) { const p = mesh(new THREE.CylinderGeometry(pr, pr, d - 2 * r, 8), pm); p.rotation.x = Math.PI / 2; p.position.set(sx * (w / 2 - 0.004), h / 2 - 0.003, 0); g.add(p); }
-  }
-  g.rotation.x = tilt;
-  return g;
-}
-
-// --------------------------------------------------------------- sectional
-// Built in a local frame: seat runs along +x from 0..L, back at z=0, front at z=D. y up.
-function sofaSection(M, L, { D = 1.0, armL = false, armR = false, seats = 2, backH = 0.8, seatH = 0.46, baseH = 0.29, armW = 0.24, armH = 0.62, seed = 1, roundEnd = false } = {}) {
-  const g = new THREE.Group();
-  const backT = 0.22;
-  g.add(contactShadow(L + 0.3, D + 0.34, L / 2, D / 2 + 0.02));
-  const x0 = armL ? armW : 0, x1 = L - (armR ? armW : 0);
-  // base / plinth (leather wrapped) on short dark feet
-  g.add(rbox(L, baseH - 0.05, D, 0.03, M.leather, L / 2, 0.05 + (baseH - 0.05) / 2, D / 2));
-  for (const [x, z] of [[0.05, 0.05], [L - 0.05, 0.05], [0.05, D - 0.05], [L - 0.05, D - 0.05]]) g.add(box(0.05, 0.05, 0.05, M.black, x, 0.025, z));
-  // outer back
-  if (roundEnd) {
-    g.add(rbox(L - 0.12, backH - 0.05, backT, 0.05, M.leather, (L - 0.12) / 2, 0.05 + (backH - 0.05) / 2, backT / 2, { segs: 4 }));
-    g.add(rbox(0.3, backH - 0.05, backT, 0.11, M.leather, L - 0.15, 0.05 + (backH - 0.05) / 2, backT / 2, { segs: 5 }));
-  } else g.add(rbox(L, backH - 0.05, backT, 0.05, M.leather, L / 2, 0.05 + (backH - 0.05) / 2, backT / 2, { segs: 4 }));
-  // arms
-  if (armL) g.add(rbox(armW, armH - 0.05, D, 0.07, M.leather, armW / 2, 0.05 + (armH - 0.05) / 2, D / 2, { segs: 4 }));
-  if (armR) g.add(rbox(armW, armH - 0.05, D, 0.07, M.leather, L - armW / 2, 0.05 + (armH - 0.05) / 2, D / 2, { segs: 4 }));
-  // seat cushions
-  const sw = (x1 - x0) / seats;
-  const sd = D - backT - 0.02;
-  for (let i = 0; i < seats; i++) {
-    const c = mesh(cushionGeo(sw - 0.01, seatH - baseH + 0.02, sd, { segs: 16, bulge: 0.05, round: 0.3, seed: seed + i, wrinkle: 0.006 }), M.leather);
-    c.position.set(x0 + sw * (i + 0.5), (baseH + seatH) / 2 - 0.005, backT + sd / 2 + 0.01);
-    g.add(c);
-    // back cushions leaning on the back
-    const bc = mesh(cushionGeo(sw - 0.02, 0.38, 0.17, { segs: 14, bulge: 0.05, round: 0.3, seed: seed + 7 + i, wrinkle: 0.006 }), M.leather);
-    bc.rotation.x = -0.18;
-    bc.position.set(x0 + sw * (i + 0.5), seatH + 0.16, backT + 0.075);
-    g.add(bc);
-  }
-  return g;
-}
-
-function bumper(M, L, D, { seatH = 0.46, baseH = 0.29 } = {}) {
-  // backless, armless end piece: leather base + one seat cushion, rounded outer end
-  const g = new THREE.Group();
-  g.add(contactShadow(L + 0.3, D + 0.34, L / 2, D / 2 + 0.02));
-  g.add(rbox(L, baseH - 0.05, D, 0.06, M.leather, L / 2, 0.05 + (baseH - 0.05) / 2, D / 2, { segs: 4 }));
-  for (const [x, z] of [[0.05, 0.05], [L - 0.05, 0.05], [0.05, D - 0.05], [L - 0.05, D - 0.05]]) g.add(box(0.05, 0.05, 0.05, M.black, x, 0.025, z));
-  const c = mesh(cushionGeo(L - 0.01, seatH - baseH + 0.02, D - 0.02, { segs: 16, bulge: 0.05, round: 0.35, seed: 31 }), M.leather);
-  c.position.set(L / 2, (baseH + seatH) / 2 - 0.005, D / 2); g.add(c);
-  return g;
-}
-
-function cornerBlock(M, D = 1.0, { backH = 0.8, seatH = 0.46, baseH = 0.29, seed = 3 } = {}) {
-  // square corner: backs on z=0 and x=0
-  const g = new THREE.Group();
-  const backT = 0.22;
-  g.add(contactShadow(D + 0.3, D + 0.3, D / 2, D / 2));
-  g.add(rbox(D, baseH - 0.05, D, 0.03, M.leather, D / 2, 0.05 + (baseH - 0.05) / 2, D / 2));
-  g.add(rbox(D, backH - 0.05, backT, 0.05, M.leather, D / 2, 0.05 + (backH - 0.05) / 2, backT / 2, { segs: 4 }));
-  g.add(rbox(backT, backH - 0.05, D, 0.05, M.leather, backT / 2, 0.05 + (backH - 0.05) / 2, D / 2, { segs: 4 }));
-  const s = D - backT - 0.02;
-  const c = mesh(cushionGeo(s, seatH - baseH + 0.02, s, { segs: 16, bulge: 0.05, round: 0.3, seed }), M.leather);
-  c.position.set(backT + s / 2 + 0.01, (baseH + seatH) / 2 - 0.005, backT + s / 2 + 0.01); g.add(c);
-  for (const r of [0, 1]) {
-    const bc = mesh(cushionGeo(s - 0.05, 0.38, 0.17, { segs: 14, bulge: 0.05, round: 0.3, seed: seed + 5 + r }), M.leather);
-    if (r === 0) { bc.rotation.x = -0.18; bc.position.set(backT + s / 2, seatH + 0.16, backT + 0.075); }
-    else { bc.rotation.order = 'YXZ'; bc.rotation.y = Math.PI / 2; bc.rotation.x = -0.18; bc.position.set(backT + 0.075, seatH + 0.16, backT + s / 2 + 0.05); }
-    g.add(bc);
-  }
-  return g;
-}
-
-// --------------------------------------------------------------- club chair (faces +z)
-function clubChair(M, { W = 0.84, D = 0.9, H = 0.82, seatH = 0.47, armH = 0.63, armW = 0.13, legH = 0.14 } = {}) {
-  const g = new THREE.Group();
-  // tapered dark legs
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const l = mesh(new THREE.CylinderGeometry(0.018, 0.012, legH, 10), M.legWood);
-    l.position.set(x * (W / 2 - 0.05), legH / 2, z * (D / 2 - 0.06)); l.rotation.z = -x * 0.08; l.rotation.x = z * 0.08; g.add(l);
-  }
-  g.add(contactShadow(W + 0.28, D + 0.28, 0, 0, { opacity: 0.8 }));
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(contactShadow(0.16, 0.16, x * (W / 2 - 0.05), z * (D / 2 - 0.06), { y: 0.0145 }));
-  const y0 = legH;
-  // seat deck
-  g.add(rbox(W, 0.16, D, 0.04, M.leather, 0, y0 + 0.08, 0));
-  // back
-  g.add(rbox(W, H - y0, 0.2, 0.06, M.leather, 0, y0 + (H - y0) / 2, -D / 2 + 0.1, { segs: 4 }));
-  // arms (track)
-  for (const s of [-1, 1]) g.add(rbox(armW, armH - y0, D, 0.05, M.leather, s * (W / 2 - armW / 2), y0 + (armH - y0) / 2, 0, { segs: 4 }));
-  // seat cushion
-  const sw = W - 2 * armW, sd = D - 0.2;
-  const sc = boxCush(M, sw - 0.01, seatH - y0 - 0.13, sd);
-  sc.position.set(0, y0 + 0.16 + (seatH - y0 - 0.16) / 2 + 0.01, 0.1); g.add(sc);
-  const bc = boxCush(M, sw - 0.02, 0.36, 0.15, { tilt: -0.1 });
-  bc.rotation.x = -0.1; bc.position.set(0, seatH + 0.18, -D / 2 + 0.26); g.add(bc);
-  return g;
-}
 
 // --------------------------------------------------------------- coffee table (reclaimed, trestle legs)
 function coffeeTable(M, L = 1.27, W = 0.9, H = 0.46) {
@@ -316,15 +178,8 @@ export async function buildLiving(ctx, M, group) {
 
   // sectional: corner at the north-west, section A runs south along x≈-0.3..0.7, section B east along z≈-1.65..-0.65
   const D = 1.0, cx = -0.30, cz = -1.55;
-  const corner = cornerBlock(M, D); corner.position.set(cx, 0, cz); L.add(corner);
-  // section A (west, faces east): local x -> world -z, local z (out of the back) -> world +x
   const LA = 1.64 - (cz + D), xB1 = 1.75, xB2 = 2.32;
-  const A = sofaSection(M, LA, { D, armL: true, seats: 2, seed: 11 });
-  A.rotation.y = Math.PI / 2; A.position.set(cx, 0, cz + D + LA); L.add(A);
-  // section B (north, faces south) with a rounded back end, then a backless leather bumper end
-  const B = sofaSection(M, xB1 - (cx + D), { D, seats: 1, seed: 21, roundEnd: true });
-  B.position.set(cx + D, 0, cz); L.add(B);
-  const bump = bumper(M, xB2 - xB1, D); bump.position.set(xB1, 0, cz); L.add(bump);
+  L.add(buildSectional(M, { D, cx, cz, zA1: 1.64, xB1, xB2 }));
   ctx.addCollider({ x0: cx, z0: cz, x1: cx + D, z1: cz + D + LA });
   ctx.addCollider({ x0: cx, z0: cz, x1: xB2, z1: cz + D });
 
@@ -334,18 +189,20 @@ export async function buildLiving(ctx, M, group) {
     p.position.set(x, y - 0.06, z); p.rotation.set(rx, ry, rz, 'YXZ'); L.add(p); return p;
   };
   // west section A: south end (by the arm) leather pillow + knit ball; corner group
-  pill(M.leather, 0.5, 0.5, -0.02, 0.72, 1.4, Math.PI / 2 - 0.25, -0.3, 0.04);
-  const ball = mesh(new THREE.SphereGeometry(0.13, 24, 18), M.knitBall); ball.position.set(0.22, 0.58, 1.08); ball.scale.set(1, 0.92, 1); L.add(ball);
-  pill(M.pillowStripe, 0.5, 0.5, 0.0, 0.71, -0.38, Math.PI / 2 + 0.3, -0.3, -0.06);
-  pill(M.pillowGray, 0.42, 0.42, 0.17, 0.63, -0.56, Math.PI / 2 + 0.5, -0.4);
-  pill(M.leather, 0.5, 0.5, -0.03, 0.74, -0.8, Math.PI / 2 + 0.75, -0.28, 0.05);
-  pill(M.leather, 0.44, 0.44, -0.08, 0.74, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
+  pill(M.leather, 0.5, 0.5, 0.27, 0.8, 1.2, Math.PI / 2 - 0.25, -0.3, 0.04);
+  const ball = mesh(new THREE.SphereGeometry(0.13, 24, 18), M.knitBall); ball.position.set(0.47, 0.63, 0.98); ball.scale.set(1, 0.92, 1); L.add(ball);
+  pill(M.pillowStripe, 0.5, 0.5, 0.29, 0.79, -0.36, Math.PI / 2 + 0.3, -0.3, -0.06);
+  pill(M.pillowGray, 0.42, 0.42, 0.45, 0.71, -0.52, Math.PI / 2 + 0.5, -0.4);
+  pill(M.leather, 0.5, 0.5, 0.3, 0.81, -0.78, Math.PI / 2 + 0.75, -0.28, 0.05);
+  pill(M.leather, 0.44, 0.44, 0.33, 0.8, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
   // throws
-  const t1 = drapeThrow(M, M.throwStripe, { W: 0.5, front: 0.42, back: 0.35, top: 0.24, seed: 2, fold: 0.04 });
-  t1.position.set(cx + 0.55, 0.62, 1.64 - 0.12); t1.rotation.y = 0; L.add(t1);
-  // cream knit throw over the bumper, hanging down its north side
-  const t2 = drapeThrow(M, M.knit, { W: 0.55, front: 0.3, back: 0.1, top: 0.98, r: 0.03, seed: 5, fold: 0.05 });
-  t2.position.set((xB1 + xB2) / 2 - 0.02, 0.5, cz + D / 2); t2.rotation.y = Math.PI + 0.14; L.add(t2);
+  // striped throw over the back cushion by the arm, hanging onto the seat
+  const t1 = drapeThrow(M, M.throwStripe, { W: 0.46, front: 0.4, back: 0.16, top: 0.3, seed: 2, fold: 0.03 });
+  t1.position.set(0.0, 0.875, 1.1); t1.rotation.y = Math.PI / 2; L.add(t1);
+  // cream knit throw lying along the return's near arm, hanging off its front
+  // draped across the arm's width: bar along the arm (z), hanging into the seat and down the outside
+  const t2 = drapeThrow(M, M.knit, { W: 0.84, front: 0.04, back: 0.3, top: 0.38, r: 0.07, seed: 5, fold: 0.045, seg: 40 });
+  t2.position.set(xB2 - 0.2, 0.6, cz + D / 2 - 0.06); t2.rotation.y = -Math.PI / 2 + 0.04; L.add(t2);
 
   // club chairs (face north, toward the sectional)
   const ch = clubChair(M);

@@ -37,17 +37,17 @@ function bed(ctx, M, g, P) {
   b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
   // duvet: one thick continuous shape, broad soft undulations, rounded edges draping over the sides and foot
   const duvTop = mTop + 0.045;
-  const duv = mesh(drapeGeo({ W: W - 0.02, L: L - 0.05, z0: 0.6, top: duvTop, side: 0.34, foot: 0.3, r: 0.14, segX: 120, segZ: 110, wrinkle: 0.004, fold: 0.03, foldFreq: 4.5, undul: 0.03, crumple: 0.0035, seed: 2, floorY: 0.08 }), M.duvet);
+  const duv = mesh(drapeGeo({ W: W - 0.02, L: L - 0.05, z0: 0.6, top: duvTop, side: 0.34, foot: 0.3, r: 0.14, segX: 120, segZ: 110, wrinkle: 0.006, fold: 0.035, foldFreq: 4.5, undul: 0.055, crumple: 0.011, seed: 2, floorY: 0.08 }), M.duvet);
   b.add(duv);
   // folded-back top edge showing the sheet
   b.add(rbox(W + 0.0, 0.05, 0.28, 0.025, M.sheet, 0, duvTop + 0.012, 0.68, { segs: 4 }));
   // cream blanket laid across the lower third, draping over both sides
   const tW = W + 0.02, tz0 = 1.2;
-  const thr = mesh(drapeGeo({ W: tW, L: L - 0.5, z0: tz0, top: duvTop + 0.03, side: 0.3, foot: 0.04, r: 0.1, segX: 110, segZ: 60, wrinkle: 0.004, fold: 0.03, foldFreq: 5, undul: 0.026, crumple: 0.004, seed: 5, sideMask: [1, 1], floorY: 0.1, skew: 0.5 }), M.throwCream);
+  const thr = mesh(drapeGeo({ W: tW, L: L - 0.5, z0: tz0, top: duvTop + 0.085, side: 0.6, foot: 0.12, r: 0.12, segX: 110, segZ: 70, wrinkle: 0.008, fold: 0.075, foldFreq: 3.4, undul: 0.045, crumple: 0.009, seed: 5, sideMask: [0.5, 1.5], floorY: 0.06, skew: 1.7 }), M.throwCream);
   b.add(thr);
   // pillows (euro shams, sleepers, decoratives)
   const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0) => {
-    const m = mesh(pillowGeo(w, h, d, { seed, puff: 1.0, pinch: 0.1, shape: 0.62, crumple: 0.09, sag: 0.04 }), mat);
+    const m = mesh(pillowGeo(w, h, d, { seed, puff: 1.0, pinch: 0.1, shape: 0.62, crumple: 0.16, sag: 0.06 }), mat);
     m.position.set(x, y, z); m.rotation.set(-tilt, yaw, 0, 'YXZ');
     b.add(m); return m;
   };
@@ -131,7 +131,7 @@ function bench(ctx, M, g, P) {
   b.add(box(Lb - 2 * legT, 0.025, D - 0.08, M.oakSoft, 0, H - cushT - 0.0125, 0, { grain: 'x' }));
   b.add(rbox(Lb, cushT, D, 0.03, M.benchFab, 0, H - cushT / 2, 0, { segs: 4 }));
   // chunky knit throw draped over the east half, hanging toward the floor in front
-  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.03, side: 0.1, foot: 0.43, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.012, fold: 0.045, foldFreq: 13, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
+  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.03, side: 0.1, foot: 0.43, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.022, fold: 0.08, foldFreq: 8, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
   th.position.set(0.12, 0, -D / 2 + 0.01); th.rotation.y = 0.14;
   const th2 = mesh(drapeGeo({ W: 0.5, L: 0.2, z0: 0, top: H + 0.075, side: 0.05, foot: 0.1, r: 0.04, segX: 30, segZ: 20, wrinkle: 0.015, fold: 0.02, foldFreq: 18, seed: 13, floorY: H }), M.knit);
   th2.position.set(0.1, 0, -0.08); th2.rotation.y = 0.3;
@@ -192,6 +192,7 @@ function panel(M, mat, g, { width, height, top, at, along, fixed, folds = 7, dep
   m.position.y = top;
   if (along === 'x') { m.position.x = at; m.position.z = fixed; m.rotation.y = flip > 0 ? 0 : Math.PI; }
   else { m.position.z = at; m.position.x = fixed; m.rotation.y = flip > 0 ? Math.PI / 2 : -Math.PI / 2; }
+  if (mat === M.curtainNear || mat === M.curtainSlider) { m.castShadow = false; m.receiveShadow = false; }
   g.add(m);
   // header rings
   return m;
@@ -208,8 +209,8 @@ function curtains(ctx, M, g, P) {
   // slider on the east wall: sheer full-height panels on a rod just below the ceiling
   const xE = R.x1 - 0.07, sY = 2.95;
   rod(M, g, -3.99, -7.62, sY, 'z', xE, 0.014);
-  panel(M, M.curtainSlider, g, { width: 2.0, height: sY - 0.02, top: sY - 0.02, at: -6.55, along: 'z', fixed: xE - 0.02, folds: 10, depth: 0.06, seed: 3, irr: 1 });
-  panel(M, M.curtainSlider, g, { width: 0.8, height: sY - 0.02, top: sY - 0.02, at: -4.95, along: 'z', fixed: xE - 0.01, folds: 7, depth: 0.05, seed: 4, irr: 1 });
+  panel(M, M.curtainNear, g, { width: 2.0, height: sY - 0.02, top: sY - 0.02, at: -6.55, along: 'z', fixed: xE - 0.02, folds: 10, depth: 0.022, seed: 3, irr: 1 });
+  panel(M, M.curtainNear, g, { width: 0.8, height: sY - 0.02, top: sY - 0.02, at: -4.95, along: 'z', fixed: xE - 0.01, folds: 5, depth: 0.02, seed: 4, irr: 1 });
 }
 
 // ------------------------------------------------------------------ barn door + flat track
@@ -323,12 +324,12 @@ function grounding(ctx, M, g, P) {
   const { W, L, hbW } = BED;
   const bz = BED.head + (L + 0.12) / 2;
   // bed: wide soft occlusion + tight dark core under the platform
-  softShadow(g, { x: BED.x, y: f, z: bz + 0.02, w: W + 0.7, d: L + 0.75, blur: 0.3, r: 0.25, opacity: 0.5 });
-  softShadow(g, { x: BED.x, y: f + 0.002, z: bz + 0.02, w: W + 0.2, d: L + 0.25, blur: 0.09, r: 0.08, opacity: 0.62 });
+  softShadow(g, { x: BED.x, y: f, z: bz + 0.02, w: W + 0.7, d: L + 0.75, blur: 0.3, r: 0.25, opacity: 0.62 });
+  softShadow(g, { x: BED.x, y: f + 0.002, z: bz + 0.02, w: W + 0.2, d: L + 0.25, blur: 0.09, r: 0.08, opacity: 0.8 });
   // bench
   const bzc = P.bench.z, bD = P.bench.D;
-  softShadow(g, { x: BED.x, y: f, z: bzc + 0.03, w: 1.62 + 0.4, d: bD + 0.4, blur: 0.18, r: 0.12, opacity: 0.5 });
-  for (const s of [-1, 1]) softShadow(g, { x: BED.x + s * (0.81 - 0.04), y: f + 0.002, z: bzc, w: 0.2, d: bD + 0.08, blur: 0.05, r: 0.02, opacity: 0.6 });
+  softShadow(g, { x: BED.x, y: f, z: bzc + 0.03, w: 1.62 + 0.4, d: bD + 0.4, blur: 0.18, r: 0.12, opacity: 0.64 });
+  for (const s of [-1, 1]) softShadow(g, { x: BED.x + s * (0.81 - 0.04), y: f + 0.002, z: bzc, w: 0.2, d: bD + 0.08, blur: 0.05, r: 0.02, opacity: 0.78 });
   // rug edge on the floor
   softShadow(g, { x: BED.x + 0.03, y: 0.004, z: -5.35 - 1.37, w: 3.66 + 0.1, d: 2.74 + 0.1, blur: 0.12, r: 0.04, opacity: 0.3 });
   // nightstands: floor + wall shadows below the floating cabinets, tops under lamps / decor
@@ -336,8 +337,8 @@ function grounding(ctx, M, g, P) {
   const xs = [BED.x - hbW / 2 - 0.07 - w / 2, BED.x + hbW / 2 + 0.07 + w / 2];
   const zc = R.z0 + d / 2 + 0.005;
   xs.forEach((x, i) => {
-    softShadow(g, { x, y: 0.12, z: R.z0 + 0.003, w: w + 0.2, d: 0.42, orient: 'wallN', blur: 0.11, r: 0.05, opacity: 0.5 });
-    softShadow(g, { x, y: 0.004, z: zc + 0.05, w: w + 0.3, d: d + 0.3, blur: 0.14, r: 0.1, opacity: 0.4 });
+    softShadow(g, { x, y: 0.12, z: R.z0 + 0.003, w: w + 0.2, d: 0.42, orient: 'wallN', blur: 0.11, r: 0.05, opacity: 0.65 });
+    softShadow(g, { x, y: 0.004, z: zc + 0.05, w: w + 0.3, d: d + 0.3, blur: 0.14, r: 0.1, opacity: 0.55 });
     softShadow(g, { x, y: 0.246, z: zc, w: w - 0.08, d: d - 0.06, blur: 0.14, r: 0.03, opacity: 0.55 });   // open shelf sits under the top slab
     const lx = x + (i === 1 ? -0.07 : 0.02), lz = zc - 0.02;
     softShadow(g, { x: lx + 0.03, y: top + 0.002, z: lz + 0.04, w: 0.36, d: 0.36, blur: 0.09, r: 0.16, opacity: 0.55 });
@@ -351,9 +352,9 @@ function grounding(ctx, M, g, P) {
   softShadow(g, { x: BED.x, y: 0.6, z: R.z0 + 0.003, w: hbW + 0.25, d: 1.35, orient: 'wallN', blur: 0.13, r: 0.05, opacity: 0.32 });
 
   // warm bounce light: no shadow, high in the room so walls and ceiling glow evenly like the photo
-  const bounce = new THREE.HemisphereLight(0xfff4e6, 0xe6d6bf, 0.22);
+  const bounce = new THREE.HemisphereLight(0xfff6ea, 0xe6d6bf, 0.4);
   g.add(bounce); ctx.addInteriorLight(bounce);
-  const glow = new THREE.PointLight(0xffe8cc, 0.55, 9, 1.6);
+  const glow = new THREE.PointLight(0xffeedc, 0.8, 9, 1.6);
   glow.position.set(BED.x + 0.2, 2.2, -6.3); glow.castShadow = false;
   g.add(glow); ctx.addInteriorLight(glow);
 }

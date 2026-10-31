@@ -115,7 +115,7 @@ export function wrinkleMaps({ size = 512, repeatM = 1.0, n = 260, dir = Math.PI 
 
 // Slubby linen: plain weave + irregular slub streaks in both thread directions (albedo + normal), with soft creases
 // baked into the normal map. Albedo is a near-white luminance variation to be tinted by the material colour.
-export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 6, seed = 21, crease = { n: 260, dir: Math.PI / 2, spread: 0.9, seed: 4, amount: 1 }, creaseStrength = 6, slub = 1 } = {}) {
+export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 8, seed = 21, crease = { n: 260, dir: Math.PI / 2, spread: 0.9, seed: 4, amount: 1 }, creaseStrength = 6, slub = 1 } = {}) {
   const W = size, H = size, R = rng(seed), pxPerM = W / repeatM;
   const h = new Float32Array(W * H), tone = new Float32Array(W * H);
   // weave height + per-thread random thickness
@@ -123,8 +123,9 @@ export function linenMaps({ size = 1024, repeatM = 1.1, pitch = 6, seed = 21, cr
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = Math.sin((x / pitch) * Math.PI), b = Math.sin((y / pitch) * Math.PI);
     const over = ((Math.floor(x / pitch) + Math.floor(y / pitch)) & 1) ? 1 : -1;
-    h[y * W + x] = 0.1 * (R() - 0.5);
-    tone[y * W + x] = 0.06 * (R() - 0.5);
+    const wv = (over > 0 ? a * a : b * b) * (0.6 + 0.4 * warp[Math.floor(x / pitch)] * (over > 0 ? 1 : 0) + 0.4 * weft[Math.floor(y / pitch)] * (over > 0 ? 0 : 1));
+    h[y * W + x] = 0.1 * (R() - 0.5) + 0.32 * wv;
+    tone[y * W + x] = 0.06 * (R() - 0.5) + 0.07 * (wv - 0.5) + 0.04 * (over > 0 ? warp[Math.floor(x / pitch)] : weft[Math.floor(y / pitch)]);
   }
   // slubs: long thick thread streaks (horizontal and vertical), lighter or darker
   for (let k = 0; k < 900 * slub; k++) {
@@ -186,7 +187,7 @@ function canvasPix(draw, W, H) {
 }
 
 // Light natural oak boards with varied tone, butt joints and fine grain. Planks run along V (canvas +y). Tile = tileM metres.
-export function plankFloorMaps({ size = 2048, tileM = 3.8, seed = 31, base = [138, 118, 96] } = {}) {
+export function plankFloorMaps({ size = 2048, tileM = 5.6, seed = 31, base = [128, 112, 94] } = {}) {
   const W = size, H = size, R = rng(seed), pxPerM = W / tileM;
   const boards = [], cols = [];
   { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.1 + R() * 0.07) * pxPerM); cols.push([x, w]); x += w; } }

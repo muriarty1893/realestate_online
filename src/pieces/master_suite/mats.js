@@ -18,7 +18,7 @@ export function makeMats(ctx) {
   // ---- floors
   const pf = plankFloorMaps();
   M.oakFloor = new THREE.MeshPhysicalMaterial({
-    map: pf.map, normalMap: pf.normalMap, color: 0xffffff, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.42,
+    map: pf.map, normalMap: pf.normalMap, color: 0xcac1b3, roughness: 0.9, clearcoat: 0, specularIntensity: 0.5,
     normalScale: new THREE.Vector2(0.55, 0.55), name: 'ms.oakFloor',
   });
   M.porcelain = std({
@@ -34,9 +34,9 @@ export function makeMats(ctx) {
   });
 
   // ---- paint
-  M.wallMstr = std({ color: 0xe9dfd0, roughness: 0.93, name: 'ms.wallMstr' });
-  M.wallBath = std({ color: 0xebe6dc, roughness: 0.9, name: 'ms.wallBath' });
-  M.ceiling = std({ color: 0xe8dfd0, roughness: 0.96, name: 'ms.ceiling' });
+  M.wallMstr = std({ color: 0xf3ebdf, roughness: 0.93, name: 'ms.wallMstr' });
+  M.wallBath = std({ color: 0xf1ede5, roughness: 0.9, name: 'ms.wallBath' });
+  M.ceiling = std({ color: 0xfaf4ea, roughness: 0.96, emissive: new THREE.Color(0xfff0dc), emissiveIntensity: 0.1, name: 'ms.ceiling' });
   M.trimWhite = std({ color: 0xf4f1ea, roughness: 0.5, name: 'ms.trim' });
 
   // ---- wood
@@ -84,10 +84,10 @@ export function makeMats(ctx) {
       sheen, sheenRoughness: 0.8, sheenColor: c.clone().lerp(new THREE.Color(0xffffff), 0.45), side: THREE.DoubleSide,
     });
   };
-  M.duvet = Object.assign(bedLinen(0xb9a58d, { tile: 1.1, seed: 21, crease: { n: 90, dir: 0.5, spread: 1.1, seed: 4, amount: 0.7 }, ns: 0.55, sheen: 0.7 }), { name: 'ms.duvet' });
-  M.throwCream = Object.assign(bedLinen(0xf0e6d4, { tile: 0.9, seed: 22, crease: { n: 80, dir: 0.3, spread: 1.3, seed: 8, amount: 0.7 }, ns: 0.55 }), { name: 'ms.throwCream' });
+  M.duvet = Object.assign(bedLinen(0xb9a58d, { tile: 1.1, seed: 21, crease: { n: 110, dir: 0.5, spread: 1.1, seed: 4, amount: 1.1 }, ns: 0.9, sheen: 0.7 }), { name: 'ms.duvet' });
+  M.throwCream = Object.assign(bedLinen(0xf0e6d4, { tile: 0.9, seed: 22, crease: { n: 90, dir: 0.3, spread: 1.3, seed: 8, amount: 1.0 }, ns: 0.85 }), { name: 'ms.throwCream' });
   M.sheet = Object.assign(bedLinen(0xece6dc, { tile: 0.9, seed: 23, crease: { n: 120, dir: 1.2, spread: 1.0, seed: 3, amount: 0.8 }, ns: 0.6 }), { name: 'ms.sheet' });
-  const pillowMat = (color, seed, name) => Object.assign(bedLinen(color, { tile: 0.8, seed, crease: { n: 130, dir: 0.0, spread: 1.6, seed: 12 + seed, amount: 1.2 }, ns: 1.0, rough: 0.95 }), { name, side: THREE.FrontSide });
+  const pillowMat = (color, seed, name) => Object.assign(bedLinen(color, { tile: 0.8, seed, crease: { n: 160, dir: 0.0, spread: 1.6, seed: 12 + seed, amount: 1.5 }, ns: 1.3, rough: 0.97, sheen: 0.3 }), { name, side: THREE.FrontSide });
   M.pillowA = pillowMat(0xb6a089, 24, 'ms.pillowA');
   M.pillowB = pillowMat(0x9b8369, 25, 'ms.pillowB');
   M.pillowC = pillowMat(0xcdbba3, 26, 'ms.pillowC');
@@ -95,7 +95,8 @@ export function makeMats(ctx) {
   M.sheer = glowFab(fab(0xf4e8d2, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false, emissive: new THREE.Color(0xffe6c4), emissiveIntensity: 3.2, name: 'ms.sheer' }), 0.8);
   M.curtainLit = glowFab(fab(0xd9c8af, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, transparent: true, opacity: 1, emissive: new THREE.Color(0xffe0b8), emissiveIntensity: 0.3, name: 'ms.curtainLit' }));
   M.curtain = glowFab(fab(0xdccfba, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, opacity: 1, emissive: new THREE.Color(0xffe0b8), emissiveIntensity: 0.2, name: 'ms.curtain' }));
-  M.curtainSlider = glowFab(fab(0xe0cfb2, 0.35, 0.95, 0.5, { side: THREE.DoubleSide, emissive: new THREE.Color(0xffdfb0), emissiveIntensity: 0.85, name: 'ms.curtainSlider' }), 1.0);
+  M.curtainNear = glowFab(fab(0xf3e9d6, 0.35, 0.95, 0.25, { side: THREE.DoubleSide, opacity: 1, emissive: new THREE.Color(0xffe8c8), emissiveIntensity: 2.3, name: 'ms.curtainNear' }), 1.0);
+  M.curtainSlider = glowFab(fab(0xeee2cc, 0.35, 0.95, 0.4, { side: THREE.DoubleSide, transparent: true, opacity: 0.93, depthWrite: false, emissive: new THREE.Color(0xffe6c0), emissiveIntensity: 2.6, name: 'ms.curtainSlider' }), 1.0);
   M.shade = std({ ...linenDetail(0.2), color: 0xf3e6cf, roughness: 0.95, emissive: new THREE.Color(0xffc777), emissiveIntensity: 0.55, side: THREE.DoubleSide, name: 'ms.shade' });
   M.romanShade = fab(0xe3dccf, 0.3, 0.95, 0.5, { name: 'ms.romanShade' });
   M.towel = fab(0xf0ece4, 0.15, 1.0, 1.0, { name: 'ms.towel' });
@@ -140,7 +141,7 @@ function glowFab(m, floorK = 0.15) {
   m.vertexColors = true;
   m.onBeforeCompile = (sh) => {
     sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= ' + floorK.toFixed(2) + ' + ' + (1 - floorK).toFixed(2) + ' * vColor.rgb * vColor.rgb;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', 'vec3 keepCol = diffuseColor.rgb;\n#include <color_fragment>\ndiffuseColor.rgb = keepCol * (0.5 + 0.5 * vColor.rgb);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', 'vec3 keepCol = diffuseColor.rgb;\n#include <color_fragment>\ndiffuseColor.rgb = keepCol * (' + (floorK >= 1 ? '0.8 + 0.2' : '0.5 + 0.5') + ' * vColor.rgb);');
   };
   m.customProgramCacheKey = () => 'ms-glowfab' + floorK;
   return m;

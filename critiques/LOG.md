@@ -236,3 +236,20 @@ too sharply; they should be small, crisp, muted tan and grey. (3) The lawn is fl
 courses. (5) The windows are a flat orange glow, and the spot over the door looks artificial.
 *Regression check (blind, round 4 vs round 5): round 5 is clearly closer* (beds, cream siding, the lighter roof, the right-side trees). Round 4's warm sunset glow
 low in the sky is better; take it back.
+
+## Round 7 (2026-10-31)
+
+### master_suite: photo won (critic saw ours as A)
+Builder changes: the dark right-edge column was the 0.93-opacity sheer showing the black window frame behind it at a grazing angle, now opaque light linen
+(no shadows); a real woven linen texture (8 px pitch); broad diagonal duvet folds; the throw raised, wider and more skewed; crushed pillows; a muted floor,
+with the plank tile stretched to 5.6 m; darker contact shadows; a slumping bench knit.
+**Biggest gap:** the bedding. The duvet is a stiff, glossy brown shell; the cream throw has jagged, torn-looking edges; a sheet flap hangs off the near right
+corner; the bed base pokes out as a separate brown box. It should be matte washed linen with fine creases, layered taupe and cream folding neatly over the
+top, draping evenly down both sides, with clean tucked edges.
+Further: (1) The bench knit is a rigid chunky plastic shell. (2) The light is flat and over-warm, with blown wall highlights, a smeary sun patch and few contact shadows.
+(3) The curtains are stiff and opaque; the frame-right one is smeared. (4) The rug is a coarse, repeating grey-beige with a hard edge; the photo's is fine ivory jute.
+(5) The window views (the exterior's).
+*Regression check (blind, round 6 vs round 7): round 6 is closer, narrowly.* Round 6's cream blanket lay folded across the middle and draped off the right side
+like the photo's; round 7's is bunched near the pillows, with a stiff white sheet panel at the right corner, plus a notch artifact on the bench knit (≈ x 800,
+y 830). Round 7 is better on the right-edge curtain (light linen; round 6 had a dark strip) and the duvet's fine wrinkle texture. Round 6's code was not committed,
+so round 7 stays and round 8 restores the blanket layout. From now on, each piece's round is committed locally as soon as it finishes.

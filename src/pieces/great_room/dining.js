@@ -2,7 +2,7 @@
 // linen curtains, art), butler pantry (cabinets + lit shelving), foyer (console, mirror, lantern, rug)
 // and the great-room niche (built-in shelves).
 import * as THREE from 'three';
-import { boxMM, box, rbox, cyl, mesh, cushionGeo, pillowGeo, rng, ASSET, mergeByMaterial } from './util.js';
+import { boxMM, box, rbox, cyl, mesh, cushionGeo, pillowGeo, rng, ASSET, mergeByMaterial, leafGeo } from './util.js';
 import { framedArt } from './living.js';
 
 // --------------------------------------------------------------- dining chair (faces +z)
@@ -132,15 +132,15 @@ export async function buildDining(ctx, M, group) {
 function branchesSimple(M, leafMat, n = 6) {
   const g = new THREE.Group();
   const R = rng(9);
-  const leafGeo = new THREE.CircleGeometry(0.018, 8);
-  const inst = new THREE.InstancedMesh(leafGeo, leafMat, n * 12);
+  const lg = leafGeo(0.05, 0.013, { curl: 0.12 });
+  const inst = new THREE.InstancedMesh(lg, leafMat, n * 26);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
   let k = 0;
   for (let i = 0; i < n; i++) {
     const a = R() * 6.28, tilt = 0.2 + R() * 0.5, len = 0.32 + R() * 0.15;
     const dir = new THREE.Vector3(Math.sin(a) * Math.sin(tilt), Math.cos(tilt), Math.cos(a) * Math.sin(tilt));
     const s = mesh(new THREE.CylinderGeometry(0.002, 0.003, len, 5), M.stem); s.position.copy(dir.clone().multiplyScalar(len / 2)); s.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); g.add(s);
-    for (let j = 0; j < 12; j++) { const p = dir.clone().multiplyScalar(len * (0.25 + 0.75 * j / 12)); e.set(R() * 3, R() * 6, R() * 3); q.setFromEuler(e); m4.compose(p, q, new THREE.Vector3(1, 1, 1)); inst.setMatrixAt(k++, m4); }
+    for (let j = 0; j < 26; j++) { const p = dir.clone().multiplyScalar(len * (0.2 + 0.8 * j / 26)); e.set((R() - 0.5) * 1.4 + (j % 2 ? 0.8 : -0.8), R() * 6.28, (R() - 0.5) * 1.4); q.setFromEuler(e); m4.compose(p, q, new THREE.Vector3(1, 1, 1)); inst.setMatrixAt(k++, m4); }
   }
   inst.count = k; g.add(inst);
   return g;

@@ -10,7 +10,7 @@ import { contactShadow } from './living.js';
 // Rounded box w x h x d centred at the origin. Edge radius r. Faces bow outward: +y by `crown`, -y by `crownB`,
 // the four sides by `bulge`, plus faint wrinkles on the +y face. UVs in metres per face (grain continuous over
 // the rounded edges), normals welded across face boundaries. Vertex colour darkens toward the bottom.
-export function upholsteryGeo(w, h, d, { r = 0.025, crown = 0, crownB = 0, bulge = 0, wrinkle = 0, seed = 1, k = 3, m = [8, 2, 6], shade = 0.3, p = 2.5, up = [0, 1, 0] } = {}) {
+export function upholsteryGeo(w, h, d, { r = 0.025, crown = 0, crownB = 0, bulge = 0, wrinkle = 0, seed = 1, k = 3, m = [8, 2, 6], shade = 0.3, p = 2.5, up = [0, 1, 0], sag = 0, crease = 0, wear = 0.1 } = {}) {
   // `up` = world up in the block's local frame (back cushions are rotated), for the top-lit tone below
   const ext = Math.abs(up[0]) * w / 2 + Math.abs(up[1]) * h / 2 + Math.abs(up[2]) * d / 2;
   const H = [w / 2, h / 2, d / 2];
@@ -44,14 +44,26 @@ export function upholsteryGeo(w, h, d, { r = 0.025, crown = 0, crownB = 0, bulge
     const dy = n[1] > 0 ? crown * fy * n[1] : crownB * fy * n[1];
     let wr = 0;
     if (wrinkle && n[1] > 0) wr = wrinkle * n[1] * fy * (Math.sin(P[0] * 31 + seed) * Math.sin(P[2] * 23 + seed * 1.9) + 0.6 * Math.sin(P[0] * 57 - P[2] * 41 + seed * 3.1));
+    // sitting wear: a soft dip in the middle of the seat (slightly toward the front) and creases fanning out
+    // toward the front edge (local +z), strongest where the seat rolls over the front
+    if ((sag || crease) && n[1] > 0) {
+      const u = P[0] / H[0], v = P[2] / H[2];
+      wr -= sag * n[1] * fy * Math.exp(-(u * u) / 0.35 - ((v - 0.25) * (v - 0.25)) / 0.3);
+      const fr = Math.max(0, v - 0.1) / 0.9, ang = P[0] * 26 + v * 2.2 * Math.sin(P[0] * 7 + seed) + seed;
+      wr -= crease * n[1] * fy * fr * fr * Math.pow(0.5 + 0.5 * Math.sin(ang), 6) * (0.6 + 0.4 * Math.sin(P[0] * 11 + seed * 2.7));
+    }
     const X = P[0] + bulge * fx * n[0], Y = P[1] + dy + wr, Z = P[2] + bulge * fz * n[2];
     // under-cushion shade: darker low on the sides and on the bottom
     const ndu = n[0] * up[0] + n[1] * up[1] + n[2] * up[2];
     const t = (P[0] * up[0] + P[1] * up[1] + P[2] * up[2] + ext) / (2 * ext);
     let c = 1 - shade * Math.pow(1 - t, 2);
     if (ndu < -0.5) c *= 0.55;
-    c *= 0.5 + 0.5 * Math.max(0, ndu);
-    col[v * 3] = c; col[v * 3 + 1] = c * 0.98; col[v * 3 + 2] = c * 0.96;
+    c *= 0.42 + 0.58 * Math.max(0, ndu);
+    // worn, lighter top edges (rounded band between the top and a side face)
+    const edge = Math.max(0, ndu) * (1 - Math.abs(ndu)) * 4;
+    c *= 1 + wear * Math.min(1, edge);
+    // shade desaturates (bluer multiplier in the dark) so creases and undersides go brown, not rust
+    col[v * 3] = c; col[v * 3 + 1] = Math.pow(c, 0.92) * 0.98; col[v * 3 + 2] = Math.pow(c, 0.8) * 0.95;
     pos.setXYZ(v, X, Y, Z);
   }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
@@ -92,18 +104,19 @@ const at = (o, x, y, z) => { o.position.set(x, y, z); return o; };
 
 // --------------------------------------------------------------- sectional parts
 // Local frame for every part: seat runs along +x from 0..L, outer back at z=0, front at z=D, y up.
-const S = { foot: 0.06, baseTop: 0.3, seatTop: 0.46, backTop: 0.66, backT: 0.18, armW: 0.2, armTop: 0.63, gap: 0.008, lean: 0.18 };
+const S = { foot: 0.06, baseTop: 0.25, seatTop: 0.46, backTop: 0.66, backT: 0.18, armW: 0.2, armTop: 0.63, gap: 0.008, lean: 0.18 };
 
 function feet(M, g, L, D) {
   for (const [x, z] of [[0.06, 0.06], [L - 0.06, 0.06], [0.06, D - 0.06], [L - 0.06, D - 0.06]]) g.add(box(0.05, S.foot, 0.05, M.legWood, x, S.foot / 2, z));
 }
 function seatCushion(M, w, d, seed) {
   const h = S.seatTop - S.baseTop;
-  return block(M, w, h, d, { r: 0.042, crown: 0.022, bulge: 0.012, wrinkle: 0.002, seed, m: [10, 2, 8], shade: 0.4, k: 4 }, [1, -1]);
+  return block(M, w, h, d, { r: 0.062, crown: 0.028, bulge: 0.014, wrinkle: 0.0018, sag: 0.018, crease: 0.008, seed, m: [24, 3, 18], shade: 0.55, k: 5, wear: 0.16 }, [1, -1]);
 }
 // back cushion: thickness along its local y (front face +y), height along z. Leans back against the frame top.
-function backCushion(M, w, seed, { H = 0.4, T = 0.21, lean = S.lean, zBack = S.backT } = {}) {
-  const c = block(M, w, T, H, { r: 0.065 + 0.04 * (lean - S.lean), crown: 0.045, crownB: 0.03 + 0.08 * (lean - S.lean), bulge: 0.018, wrinkle: 0.0025, seed, m: [10, 2, 8], shade: 0.15, k: 4, up: [0, Math.sin(lean), -Math.cos(lean)] }, [1, -1]);
+function backCushion(M, w, seed, { H = 0.38, T = 0.165, lean = S.lean, zBack = S.backT } = {}) {
+  // slim, tight back cushion: small edge radius, shallow crown, faint wrinkles
+  const c = block(M, w, T, H, { r: 0.042 + 0.03 * (lean - S.lean), crown: 0.022, crownB: 0.012 + 0.05 * (lean - S.lean), bulge: 0.008, wrinkle: 0.0025, seed, m: [12, 2, 10], shade: 0.35, k: 4, up: [0, Math.sin(lean), -Math.cos(lean)], wear: 0.12 }, [1, -1]);
   c.rotation.x = Math.PI / 2 - lean;
   // the back face touches the frame's top front edge; the bottom rests on the seat cushions
   const zb = zBack + (S.backTop - S.seatTop) * Math.tan(lean) + 0.005;
@@ -111,7 +124,7 @@ function backCushion(M, w, seed, { H = 0.4, T = 0.21, lean = S.lean, zBack = S.b
   c.position.set(0, S.seatTop + 0.006 + (T / 2) * sl + (H / 2) * cl, zb + (T / 2) * cl - (H / 2) * sl);
   return c;
 }
-const frame = (M, w, h, d, opt = {}) => block(M, w, h, d, { r: 0.032, bulge: 0.008, m: [6, 6, 4], shade: 0.25, ...opt });
+const frame = (M, w, h, d, opt = {}) => block(M, w, h, d, { r: 0.032, bulge: 0.008, m: [6, 6, 4], shade: 0.42, ...opt });
 
 function section(M, L, { D = 1.0, armL = false, armR = false, seats = 1, seed = 1, lean = S.lean, endGap = [true, true], armTopR = S.armTop, armWR = S.armW } = {}) {
   const g = new THREE.Group(), G = S.gap;
@@ -127,7 +140,7 @@ function section(M, L, { D = 1.0, armL = false, armR = false, seats = 1, seed = 
   const ah = S.armTop - S.foot;
   if (armL) g.add(at(frame(M, S.armW, ah, D, { crown: 0.012, r: 0.045, m: [4, 6, 8] }), S.armW / 2, S.foot + ah / 2, D / 2));
   const ahR = armTopR - S.foot;
-  if (armR) g.add(at(frame(M, armWR, ahR, D, { crown: armWR > 0.3 ? 0.025 : 0.012, r: 0.045, m: [6, 6, 8] }), L - armWR / 2, S.foot + ahR / 2, D / 2));
+  if (armR) g.add(at(frame(M, armWR, ahR, D, { crown: armWR > 0.3 ? 0.03 : 0.012, r: armWR > 0.3 ? 0.09 : 0.045, k: 5, m: [8, 6, 10], wear: 0.16 }), L - armWR / 2, S.foot + ahR / 2, D / 2));
   // seat + back cushions
   const sw = (x1 - x0) / seats, zb = S.backT + (S.backTop - S.seatTop) * Math.tan(S.lean);
   for (let i = 0; i < seats; i++) {
@@ -151,7 +164,7 @@ function corner(M, D = 1.0, seed = 3) {
   const zb = S.backT + (S.backTop - S.seatTop) * Math.tan(S.lean), s0 = S.backT + G, s = L1 - s0 - G / 2;
   g.add(at(seatCushion(M, s, s, seed), s0 + s / 2, (S.baseTop + S.seatTop) / 2 + 0.002, s0 + s / 2));
   // north back cushion spans the full seat; the west one butts against its front face
-  const T = 0.2;
+  const T = 0.165;
   const b1 = backCushion(M, L1 - zb - G, seed + 5); b1.position.x = zb + (L1 - zb) / 2; g.add(b1);
   const w2 = L1 - (zb + T + 0.02);
   const b2 = backCushion(M, w2 - G, seed + 6);
@@ -172,6 +185,19 @@ function bumper(M, L, D = 1.0, seed = 31) {
   return g;
 }
 
+// backless chaise end of the return: deck + one long seat cushion, ending in a low, padded rolled arm (+x end)
+function chaiseEnd(M, L, { D = 1.0, armW = 0.34, armTop = 0.56, seed = 31 } = {}) {
+  const g = new THREE.Group(), G = S.gap;
+  g.add(contactShadow(L + 0.3, D + 0.34, L / 2, D / 2 + 0.02));
+  feet(M, g, L, D);
+  const bh = S.baseTop - S.foot, x0 = G / 2, x1 = L - armW - G;
+  g.add(at(frame(M, x1 - x0, bh, D, { r: 0.022 }), (x0 + x1) / 2, S.foot + bh / 2, D / 2));
+  g.add(at(seatCushion(M, x1 - x0 - 0.004, D - 0.01, seed), (x0 + x1) / 2, (S.baseTop + S.seatTop) / 2 + 0.002, D / 2));
+  const ah = armTop - S.foot;
+  g.add(at(frame(M, armW, ah, D, { crown: 0.035, r: 0.1, k: 5, m: [8, 6, 10], wear: 0.16 }), L - armW / 2, S.foot + ah / 2, D / 2));
+  return g;
+}
+
 // Builds the L-sectional at round 5's footprint: corner at (cx,cz), section A south along x=cx..cx+D,
 // section B east along z=cz..cz+D to xB1, then the chaise end to xB2.
 export function buildSectional(M, { D = 1.0, cx = -0.3, cz = -1.55, zA1 = 1.64, xB1 = 1.75, xB2 = 2.32 } = {}) {
@@ -181,8 +207,10 @@ export function buildSectional(M, { D = 1.0, cx = -0.3, cz = -1.55, zA1 = 1.64, 
   const A = section(M, LA, { D, armL: true, seats: 2, seed: 11 });
   A.rotation.y = Math.PI / 2; A.position.set(cx, 0, cz + D + LA); g.add(A);
   // return: one seat and back cushion, ending in a wide, low arm (the photo's near end under the knit throw)
-  const B = section(M, xB2 - (cx + D), { D, seats: 1, seed: 21, lean: 0.42, armR: true, armTopR: 0.56, armWR: 0.55 });
+  // round 7: the backed part stops at xB1; a backless chaise end with a low rolled arm runs on to xB2
+  const B = section(M, xB1 - (cx + D), { D, seats: 1, seed: 21, lean: 0.24 });
   B.position.set(cx + D, 0, cz); g.add(B);
+  const C = chaiseEnd(M, xB2 - xB1, { D }); C.position.set(xB1, 0, cz); g.add(C);
   return g;
 }
 
@@ -213,7 +241,14 @@ export function clubChair(M, { W = 0.84, D = 0.9, H = 0.82, seatH = 0.47, armH =
   bc.position.set(0, seatH + 0.006 + (BT / 2) * sl + (BH / 2) * cl, -D / 2 + bt + 0.005 + (BT / 2) * cl - (BH / 2) * sl + 0.04);
   g.add(bc);
   // no clearcoat on the chairs: at their grazing view angle it mirrors the bright windows as a grey wash
-  M.chairLeather = M.chairLeather || Object.assign(M.sofaLeather.clone(), { clearcoat: 0, envMapIntensity: 0.3, specularIntensity: 0.3 });
-  g.traverse((o) => { if (o.material === M.sofaLeather) o.material = M.chairLeather; });
+  M.chairLeather = M.chairLeather || Object.assign(M.sofaLeather.clone(), { clearcoat: 0, envMapIntensity: 0.4, specularIntensity: 0.35, color: new THREE.Color(1.9, 1.6, 1.12),
+    onBeforeCompile: M.sofaLeather.onBeforeCompile, customProgramCacheKey: M.sofaLeather.customProgramCacheKey });
+  // lift the baked side/underside shade on the chairs: the photo's chair sides stay close to their tops in tone
+  g.traverse((o) => {
+    if (o.material !== M.sofaLeather) return;
+    o.material = M.chairLeather;
+    const c = o.geometry.attributes.color;
+    if (c) for (let i = 0; i < c.array.length; i++) c.array[i] = Math.pow(c.array[i], 0.62);
+  });
   return g;
 }

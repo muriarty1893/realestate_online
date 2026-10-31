@@ -78,11 +78,39 @@ export function makeMats() {
     color: new THREE.Color(1.86, 1.48, 0.8), metalness: 0, specularIntensity: 0.6, specularColor: new THREE.Color(1.0, 0.78, 0.55), envMapIntensity: 0.45,
     clearcoat: 0.14, clearcoatRoughness: 0.3, ...o,
   });
+  // hide variation (round 7): large worn/lighter patches and darker mottling from world-space 3D noise, lighter
+  // patches slightly desaturated toward tan; gloss varies in soft bands (lower roughness, more clearcoat on tops).
+  const hide = (m) => {
+    m.onBeforeCompile = (sh) => {
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vHideP; varying vec3 vHideN;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvHideP = (modelMatrix * vec4(transformed, 1.0)).xyz; vHideN = normalize(mat3(modelMatrix) * objectNormal);');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+varying vec3 vHideP; varying vec3 vHideN;
+float hh3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hh3(i), hh3(i + vec3(1, 0, 0)), f.x), mix(hh3(i + vec3(0, 1, 0)), hh3(i + vec3(1, 1, 0)), f.x), f.y),
+             mix(mix(hh3(i + vec3(0, 0, 1)), hh3(i + vec3(1, 0, 1)), f.x), mix(hh3(i + vec3(0, 1, 1)), hh3(i + vec3(1, 1, 1)), f.x), f.y), f.z); }`)
+        .replace('#include <map_fragment>', `#include <map_fragment>
+  float hm = 0.5 * hn3(vHideP * 3.1 + 7.0) + 0.32 * hn3(vHideP * 8.3) + 0.18 * hn3(vHideP * 23.0 + 3.0);
+  float hup = smoothstep(0.35, 0.95, vHideN.y);
+  float hk = mix(0.74, 1.24, smoothstep(0.2, 0.8, hm)) * (1.0 + 0.06 * hup);
+  vec3 hc = diffuseColor.rgb * hk;
+  diffuseColor.rgb = mix(hc, vec3(dot(hc, vec3(0.2126, 0.7152, 0.0722))), 0.12 * smoothstep(0.5, 0.85, hm));`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+  float hb = hn3(vHideP * vec3(2.2, 9.0, 2.2) + 11.0);
+  roughnessFactor *= mix(1.08, 0.72, hup * smoothstep(0.3, 0.75, hb)) * (0.92 + 0.16 * hn3(vHideP * 14.0));`);
+    };
+    m.customProgramCacheKey = () => 'hide1';
+    return m;
+  };
   M.leather = leatherMat();
   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
   M.leatherDark = leatherMat({ color: new THREE.Color(1.5, 1.18, 0.64) });
-  M.sofaLeather = leatherMat({ vertexColors: true });           // upholstery blocks carry baked under-cushion shade
-  M.leatherPipe = leatherMat({ color: new THREE.Color(1.25, 0.95, 0.52), clearcoat: 0.35 });
+  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.74, 1.4, 0.8) }));           // upholstery blocks carry baked under-cushion shade
+  M.leatherPipe = leatherMat({ color: new THREE.Color(1.1, 0.86, 0.5), clearcoat: 0.25 });
+  hide(M.leather); hide(M.leatherDark);
 
   // ---------------- reclaimed wood (coffee table)
   M.reclaimed = std({
@@ -118,7 +146,10 @@ export function makeMats() {
   M.cream = std({ color: 0xc4b498, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.22 });
   const knitMap = knitTex(); knitMap.repeat.set(1 / 0.34, 1 / 0.34);
-  M.knit = std({ map: knitMap, bumpMap: knitMap, bumpScale: 3.0, color: 0xb5ad9c, roughness: 1.0, side: THREE.DoubleSide });
+  // the throw: chunkier stitches (~1.3 cm) with a deeper bump so the knit reads at the camera's distance
+  const knitBig = ribKnitTex(); knitBig.repeat.set(1 / 0.3, 1 / 0.3);
+  M.knit = std({ map: knitBig, bumpMap: knitBig, bumpScale: 3.0, color: 0xc0b8a7, roughness: 1.0, side: THREE.DoubleSide });
+  M.knitFringe = std({ color: 0xc9c1b0, roughness: 1.0, side: THREE.DoubleSide });
   const kb = knitMap.clone(); kb.repeat.set(2.4, 1.2); kb.needsUpdate = true;   // chunky stitches around the ball
   M.knitBall = std({ map: kb, bumpMap: kb, bumpScale: 4.0, color: 0xddd6c9, roughness: 1.0 });
   M.pillowWhite = std({ color: 0xcdc4b3, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
@@ -231,6 +262,27 @@ function leatherTex() {
     const id = g.getImageData(0, 0, w, h), d = id.data;
     for (let i = 0; i < d.length; i += 4) { const n = (R() - 0.5) * 9; d[i] += n; d[i + 1] += n * 0.8; d[i + 2] += n * 0.6; }
     g.putImageData(id, 0, 0);
+  });
+}
+// throw knit (round 7): ribs of chevron stitches running along u with dark grooves between the ribs, slight
+// per-stitch tone jitter; ~1.7 cm ribs at a 0.42 m tile
+function ribKnitTex() {
+  return canvasTex(512, 512, (g, w, h) => {
+    const R = rng(17);
+    g.fillStyle = '#a49b8a'; g.fillRect(0, 0, w, h);
+    const rh = 512 / 24, sw = 512 / 32;
+    for (let r = 0; r < 24; r++) {
+      const y = r * rh;
+      for (let c = 0; c < 33; c++) {
+        const x = c * sw + (r % 2 ? sw / 2 : 0), j = Math.round((R() - 0.5) * 18);
+        for (const s of [-1, 1]) {
+          const cx = x, cy = y + rh / 2 + s * rh * 0.22;
+          const gr = g.createRadialGradient(cx, cy - 1, 0.5, cx, cy, sw * 0.62);
+          gr.addColorStop(0, `rgb(${246 + j},${240 + j},${226 + j})`); gr.addColorStop(0.55, `rgb(${222 + j},${214 + j},${198 + j})`); gr.addColorStop(1, 'rgba(150,141,124,0.0)');
+          g.fillStyle = gr; g.beginPath(); g.ellipse(cx, cy, sw * 0.62, rh * 0.26, s * 0.55, 0, 7); g.fill();
+        }
+      }
+    }
   });
 }
 // chunky knit: rows of rounded stitches (albedo + bump)

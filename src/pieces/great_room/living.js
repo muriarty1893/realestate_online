@@ -1,7 +1,7 @@
 // Living area: cognac leather L-sectional, two leather club chairs, reclaimed-wood coffee table with
 // decor, large distressed rug, throws, pillows, knit ball, side table, framed abstract art.
 import * as THREE from 'three';
-import { boxMM, cyl, mesh as mesh0, pillowGeo, rng, canvasTex, ASSET } from './util.js';
+import { boxMM, cyl, mesh as mesh0, pillowGeo, rng, canvasTex, ASSET, leafGeo as leafGeo0 } from './util.js';
 import { buildSectional, clubChair } from './sofa.js';
 
 const mesh = mesh0;
@@ -55,8 +55,7 @@ function branches(M, { n = 7, h = 0.45, spread = 0.22, leaf = [0.05, 0.012], lea
   const g = new THREE.Group();
   const R = rng(seed);
   const stemMat = M.stem;
-  const leafGeo = new THREE.PlaneGeometry(leaf[1] * 2, leaf[0]);
-  leafGeo.translate(0, leaf[0] / 2, 0);
+  const leafGeo = leafGeo0(leaf[0], leaf[1]);
   const total = n * perStem;
   const inst = new THREE.InstancedMesh(leafGeo, leafMat, total);
   inst.castShadow = true;
@@ -126,7 +125,7 @@ export function framedArt(M, w, h, kind, { depth = 0.035, frame = 0.025, frameMa
 
 // --------------------------------------------------------------- throws
 // a blanket draped over a horizontal bar: params in local frame (x along the bar)
-function drapeThrow(M, mat, { W = 0.5, front = 0.5, back = 0.3, top = 0.2, r = 0.06, seg = 30, seed = 1, fringe = false, fold = 0.012 } = {}) {
+function drapeThrow(M, mat, { W = 0.5, front = 0.5, back = 0.3, top = 0.2, r = 0.06, seg = 30, seed = 1, fringe = null, fold = 0.012, soft0 = 0 } = {}) {
   // cross-section path: from front bottom up to the top, across, down the back
   const R = rng(seed);
   const pts = [];
@@ -151,12 +150,34 @@ function drapeThrow(M, mat, { W = 0.5, front = 0.5, back = 0.3, top = 0.2, r = 0
     const wav = fold * (Math.sin(x * 23 + seed) + 0.6 * Math.sin(x * 41 + seed * 2.3 + y * 5)) * (0.25 + hang) + 0.006 * (R() - 0.5);
     const lift = fold * 0.5 * Math.sin(x * 9 + seed * 1.7 + y * 7) * (1 - hang * 0.7);
     const vlift = fold * 0.45 * (1.5 + Math.sin(x * 12 + z * 9 + seed) + 0.5 * Math.sin(x * 26 - z * 15 + seed * 2)) * (1 - hang);
-    p.setXYZ(i, x + wav * 0.5, y + vlift + (hang < 1 ? lift * 0.4 : 0), z + wav + lift);
+    // soft cloth: broad low-frequency folds on the hangs, the free corners droop and swing in
+    const ex = Math.pow(Math.abs(x) / (W / 2), 3);
+    const soft = soft0 * hang * (Math.sin(x * 7.5 + seed * 0.7) + 0.5 * Math.sin(x * 13 - seed));
+    const droop = soft0 * 1.6 * ex * hang;
+    p.setXYZ(i, x + wav * 0.5 - Math.sign(x) * droop * 0.5, y + vlift + (hang < 1 ? lift * 0.4 : 0) - droop * 0.6, z + wav + lift + Math.sign(z) * soft);
   }
   geo.computeVertexNormals();
   const uv = geo.attributes.uv;
   for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i), p.getY(i) + p.getZ(i));
-  return mesh(geo, mat);
+  const m = mesh(geo, mat);
+  if (fringe) {
+    // twisted-yarn fringe off the bottom edge of the back hang (row 0): pairs of crossed thin quads per tassel
+    const fp = [], idx = [], n = Math.round(W / 0.016), fl = 0.065;
+    for (let j = 0; j < n; j++) {
+      const f = (j + 0.5) / n * 12, i0 = Math.floor(f), t = f - i0;
+      const a = new THREE.Vector3().fromBufferAttribute(p, i0), b = new THREE.Vector3().fromBufferAttribute(p, Math.min(12, i0 + 1));
+      const q = a.lerp(b, t), len = fl * (0.85 + 0.3 * R()), sw = (R() - 0.5) * 0.012, hw = 0.0022;
+      for (const [dx, dz] of [[hw, 0], [0, hw]]) {
+        const k = fp.length / 3;
+        fp.push(q.x - dx, q.y + 0.004, q.z - dz, q.x + dx, q.y + 0.004, q.z + dz, q.x + dx + sw, q.y - len, q.z + dz + sw * 0.5, q.x - dx + sw, q.y - len, q.z - dz + sw * 0.5);
+        idx.push(k, k + 1, k + 2, k, k + 2, k + 3);
+      }
+    }
+    const fg = new THREE.BufferGeometry();
+    fg.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)); fg.setIndex(idx); fg.computeVertexNormals();
+    m.add(mesh(fg, fringe, { cast: false }));
+  }
+  return m;
 }
 
 // --------------------------------------------------------------- rug
@@ -178,7 +199,7 @@ export async function buildLiving(ctx, M, group) {
 
   // sectional: corner at the north-west, section A runs south along x≈-0.3..0.7, section B east along z≈-1.65..-0.65
   const D = 1.0, cx = -0.30, cz = -1.55;
-  const LA = 1.64 - (cz + D), xB1 = 1.75, xB2 = 2.32;
+  const LA = 1.64 - (cz + D), xB1 = 1.5, xB2 = 2.32;
   L.add(buildSectional(M, { D, cx, cz, zA1: 1.64, xB1, xB2 }));
   ctx.addCollider({ x0: cx, z0: cz, x1: cx + D, z1: cz + D + LA });
   ctx.addCollider({ x0: cx, z0: cz, x1: xB2, z1: cz + D });
@@ -201,8 +222,12 @@ export async function buildLiving(ctx, M, group) {
   t1.position.set(0.0, 0.875, 1.1); t1.rotation.y = Math.PI / 2; L.add(t1);
   // cream knit throw lying along the return's near arm, hanging off its front
   // draped across the arm's width: bar along the arm (z), hanging into the seat and down the outside
-  const t2 = drapeThrow(M, M.knit, { W: 0.84, front: 0.04, back: 0.3, top: 0.38, r: 0.07, seed: 5, fold: 0.045, seg: 40 });
-  t2.position.set(xB2 - 0.2, 0.6, cz + D / 2 - 0.06); t2.rotation.y = -Math.PI / 2 + 0.04; L.add(t2);
+  // the round-7 chaise end is a 0.4 m padded arm, top 0.58 m: the knit rolls over its crown into the seat and down the outside
+  const t2 = drapeThrow(M, M.knit, { W: 0.74, front: 0.08, back: 0.34, top: 0.3, r: 0.1, seed: 5, fold: 0.03, soft0: 0.035, seg: 48, fringe: M.knitFringe });
+  t2.position.set(xB2 - 0.17, 0.6, cz + D / 2 - 0.17); t2.rotation.y = -Math.PI / 2 + 0.06; t2.rotation.z = 0.03; L.add(t2);
+  // the throw's folded-over edge on the seat side: a soft knit roll
+  const roll = mesh(new THREE.CapsuleGeometry(0.03, 0.64, 6, 14), M.knit);
+  roll.rotation.z = Math.PI / 2; roll.scale.set(1, 1, 0.8); roll.position.set(0, -0.02, 0.15 + 0.05 + 0.02); t2.add(roll);
 
   // club chairs (face north, toward the sectional)
   const ch = clubChair(M);
@@ -236,7 +261,7 @@ export async function buildLiving(ctx, M, group) {
   } catch (e) {
     L.add(cyl(0.07, 0.09, 0.25, M.ceramic, vaseSpot.x, topY + 0.125, vaseSpot.z));
   }
-  const ol = branches(M, { n: 8, h: 0.42, leafMat: M.olive, seed: 5, perStem: 16 }); ol.position.copy(vaseSpot).add(new THREE.Vector3(0, 0.2, 0)); L.add(ol);
+  const ol = branches(M, { n: 9, h: 0.42, leafMat: M.olive, seed: 5, perStem: 34, leaf: [0.062, 0.011] }); ol.position.copy(vaseSpot).add(new THREE.Vector3(0, 0.2, 0)); L.add(ol);
 
   // round side table at the south end of section A
   const st = new THREE.Group();

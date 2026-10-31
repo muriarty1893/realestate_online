@@ -154,3 +154,18 @@ export function mergeByMaterial(group) {
   }
   return out;
 }
+
+// Lanceolate leaf (round 7): base at the origin, tip at +y, pointed both ends, folded along a raised midrib and
+// curved back along its length, so it reads as a thin 3D leaf instead of a flat card.
+export function leafGeo(len = 0.06, wid = 0.011, { fold = 0.35, curl = 0.18, seg = 6 } = {}) {
+  const pos = [], idx = [];
+  for (let i = 0; i <= seg; i++) {
+    const t = i / seg, w = wid * 0.5 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.08)), 0.75);
+    const y = len * t, z = curl * len * t * t;
+    pos.push(-w, y - w * fold * 0.3, z + w * fold, 0, y, z, w, y - w * fold * 0.3, z + w * fold);
+  }
+  for (let i = 0; i < seg; i++) { const a = i * 3; idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4, a + 1, a + 4, a + 2, a + 2, a + 4, a + 5); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}

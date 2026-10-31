@@ -314,3 +314,15 @@ orange with no interior; a bright green field and a beige block show through the
 *Regression check (blind, round 5 vs round 6): round 6 is closer* (canopy value variation and backlit warmth, grey moss, beige pavers). Both: the roof should be darker warm grey,
 the window glow more yellow, flowers in the beds, less red mulch.
 Walk-mode load is ~21–24 s locally (measured while another builder was rendering on the GPU; noisy).
+
+## Round 7, great_room (2026-10-31, Opus builder)
+Builder changes: a shader adds worn lighter patches, mottling and soft gloss bands to the leather; less saturated base; baked darks go brown, not rust (sampled tones now match the photo:
+darks 72,38,19 vs 71,38,18; mids 115,73,49 vs 119,75,46); slimmer back cushions (0.165 m), plumper seats with a sitting dip; a new low `chaiseEnd` with a padded rolled arm;
+a fringed ribbed knit throw over it; folded, curved olive and sprig leaves at twice the count. 294k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: still the sectional, now "a stack of oversized, sharp-edged boxes in one flat, saturated orange-red" with uniform plastic shine,
+and the right arm and back reading as separate blocks. Further: no contact shadows; the kitchen cabinets are pale orange with no grain, and the backsplash has no joints; stiff grey pillow, throw and ball;
+the dining window is a flat field, and the dining chairs are white blobs; a dull floor and a faint rug.
+*Regression check (blind, round 6 vs round 7): round 7 is closer* (the right return's back and arm, the slender olive leaves, the neatly draped front throw). Both lack the photo's warm
+under-cabinet and pendant glow and the rug's contrast.
+*Orchestrator:* the critic's "saturated orange" conflicts with the pixel-sampled match; the sofa probably reads orange next to the cool, flat surroundings. The global lighting
+(warm pools, contrast, contact shadows) is now the great room's main lever.

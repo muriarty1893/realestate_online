@@ -6,15 +6,16 @@ import { foliageAtlas, ATLAS, atlasUV, mossTexture, frondTexture, strapTexture }
 
 // ---------------------------------------------------------------- geometry accumulators
 class Acc {
-  constructor() { this.pos = []; this.nor = []; this.uv = []; this.idx = []; this.col = []; this.shade = 1; }
+  constructor() { this.pos = []; this.nor = []; this.uv = []; this.idx = []; this.col = []; this.glw = []; this.cards = []; this.shade = 1; }
   get n() { return this.pos.length / 3; }
-  vert(p, n, u, v) { this.pos.push(p.x, p.y, p.z); this.nor.push(n.x, n.y, n.z); this.uv.push(u, v); const k = this.shade; this.col.push(k, k, k); }
+  vert(p, n, u, v) { this.pos.push(p.x, p.y, p.z); this.nor.push(n.x, n.y, n.z); this.uv.push(u, v); const k = this.shade; this.col.push(k, k, k); this.glw.push(0); }
   geometry() {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
+    g.setAttribute('glow', new THREE.Float32BufferAttribute(this.glw, 1));
     g.setIndex(this.idx);
     g.computeBoundingSphere();
     return g;
@@ -61,6 +62,7 @@ function tube(acc, pts, rad, sides) {
 function card(acc, c, u, v, nrm, cell) {
   const { u0, u1, v0, v1 } = atlasUV(cell);
   const b = acc.n;
+  acc.cards.push(c.x, c.y, c.z, b);
   acc.vert(c.clone().sub(u).sub(v), nrm, u0, v0);
   acc.vert(c.clone().add(u).sub(v), nrm, u1, v0);
   acc.vert(c.clone().add(u).add(v), nrm, u1, v1);
@@ -80,6 +82,69 @@ function randomCardAxes(R, size, tiltUp = 0.4) {
   return { u: uu.multiplyScalar(size / 2), v: vv.multiplyScalar(size / 2) };
 }
 
+// ---------------------------------------------------------------- canopy light
+// Per-card occlusion and translucency from the card cloud itself: cards with many cards above them sit
+// in the canopy's shade (darker, cooler); cards in thin, sparse foliage let the low sun through
+// (warm yellow-green glow). Written into the vertex colour (tint * shade) and the `glow` attribute.
+function shadeCanopy(acc, seed, { dark = 0.22, warm = [1.0, 0.95, 0.7], cool = [0.64, 0.68, 0.52], glow = 1 } = {}) {
+  const R = rng(seed), C = acc.cards, N = C.length / 4, cell = 1.3, grid = new Map();
+  const key = (x, y, z) => `${Math.floor(x / cell)},${Math.floor(y / cell)},${Math.floor(z / cell)}`;
+  for (let i = 0; i < N; i++) { const k = key(C[i * 4], C[i * 4 + 1], C[i * 4 + 2]); (grid.get(k) ?? grid.set(k, []).get(k)).push(i); }
+  const dens = new Float32Array(N), above = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const x = C[i * 4], y = C[i * 4 + 1], z = C[i * 4 + 2];
+    const gx = Math.floor(x / cell), gy = Math.floor(y / cell), gz = Math.floor(z / cell);
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 2; b++) for (let c = -1; c <= 1; c++) {
+      const L = grid.get(`${gx + a},${gy + b},${gz + c}`); if (!L) continue;
+      for (const j of L) {
+        if (j === i) continue;
+        const dx = C[j * 4] - x, dy = C[j * 4 + 1] - y, dz = C[j * 4 + 2] - z, h = Math.hypot(dx, dz);
+        if (h < 1.3 && Math.abs(dy) < 1.3) dens[i] += 1;
+        if (dy > 0.15 && h < 0.5 + dy * 0.6) above[i] += 1;
+      }
+    }
+  }
+  const pct = (arr, q) => { const s = Array.from(arr).sort((p, q2) => p - q2); return Math.max(1, s[Math.floor(q * (s.length - 1))]); };
+  const dMax = pct(dens, 0.9), aMax = pct(above, 0.85);
+  for (let i = 0; i < N; i++) {
+    const e = 1 - Math.min(1, above[i] / aMax), sp = 1 - Math.min(1, dens[i] / dMax);
+    const sh = (dark + (1 - dark) * e * e) * (0.85 + R() * 0.3);
+    const t = THREE.MathUtils.clamp(e * 0.8 + (R() - 0.5) * 0.5, 0, 1);
+    const g = glow * Math.pow(sp, 1.3) * (0.35 + 0.65 * e) * (0.6 + R() * 0.8);
+    const b = C[i * 4 + 3];
+    for (let v = b; v < b + 4; v++) {
+      for (let k = 0; k < 3; k++) acc.col[v * 3 + k] = sh * (cool[k] + (warm[k] - cool[k]) * t);
+      acc.glw[v] = g;
+    }
+  }
+}
+
+// foliage material: two-sided cards without normal flipping (card normals point out of the crown, so
+// undersides seen from below fall into shade), mip-aware alpha so fine leaves don't thin out at a
+// distance, and a warm transmitted-light glow (`glow` attribute) scaled by the leaf's own albedo.
+function leafMaterial(atlas, name, glowCol, glowK) {
+  const m = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, vertexColors: true, name });
+  const uGlow = { value: new THREE.Color(glowCol).multiplyScalar(glowK) };
+  m.userData.uGlow = uGlow;
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uGlow = uGlow;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float glow;\nvarying float vGlow;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGlow = glow;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 uGlow;\nvarying float vGlow;')
+      .replace('#include <alphatest_fragment>', `{
+          vec2 sz = vec2(textureSize(map, 0));
+          vec2 dx = dFdx(vMapUv * sz), dy = dFdy(vMapUv * sz);
+          float lod = 0.5 * log2(max(max(dot(dx, dx), dot(dy, dy)), 1e-6));
+          diffuseColor.a *= 1.0 + max(lod, 0.0) * 0.28;
+          if (diffuseColor.a < alphaTest) discard;
+        }`)
+      .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * uGlow * vGlow;');
+  };
+  m.customProgramCacheKey = () => 'leafmat-v1';
+  return m;
+}
+
 // ---------------------------------------------------------------- live oak
 // limbs: [{az (deg, 0 = +x, 90 = +z), el0, el1 (deg), len, r}]
 function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs, leafScale = 1.25, leafDensity = 1, moss = 0, twigLen = 1, leafBand = [0.25, 1], bare = 0.3 }) {
@@ -92,10 +157,11 @@ function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs,
     const dc = p.clone().sub(center);
     leaves.shade = THREE.MathUtils.clamp(0.42 + 0.07 * dc.length() + 0.05 * dc.y + (R() - 0.5) * 0.2, 0.35, 1.05);
     const nrm = p.clone().sub(center).normalize().lerp(V3(0, 1, 0), 0.35).normalize();
-    card(leaves, p, u, v, nrm, leafCells[Math.floor(R() * leafCells.length)]);
+    // live-oak foliage sits on top of its limbs: lift the card so limbs read from below instead of being papered over
+    card(leaves, p.clone().add(V3(0, 0.3 * size * leafScale, 0)), u, v, nrm, leafCells[Math.floor(R() * leafCells.length)]);
   };
   const addMoss = (p) => {
-    const len = 0.5 + R() * 1.1, w = 0.14 + R() * 0.18;
+    const len = 0.9 + R() * 1.3, w = 0.6 + R() * 0.5;
     const a = R() * Math.PI;
     for (const k of [0, 1]) {
       const ang = a + k * Math.PI / 2;
@@ -193,7 +259,7 @@ function bgTree(seed, base, { h = 14, w = 10, lobes = 6, cards = 450, trunkR = 0
     const d = V3(R() - 0.5, R() - 0.4, R() - 0.5).normalize().multiplyScalar(w * (0.12 + R() * 0.22));
     const p = c.clone().add(d);
     leaves.shade = THREE.MathUtils.clamp(0.45 + 0.55 * (d.length() / (w * 0.34)) + 0.03 * (p.y - mid.y) + (R() - 0.5) * 0.2, 0.35, 1.1);
-    const { u, v } = randomCardAxes(R, 1.6 + R() * 1.6, 0.8);
+    const { u, v } = randomCardAxes(R, 1.2 + R() * 1.2, 0.8);
     const nrm = p.clone().sub(mid).normalize().lerp(V3(0, 1, 0), 0.3).normalize();
     card(leaves, p, u, v, nrm, R() < 0.5 ? ATLAS.bg[0] : ATLAS.oak[Math.floor(R() * 3)]);
   }
@@ -301,19 +367,20 @@ function scatter(poly, n, R, fn, filter = () => true) {
 export async function buildVegetation(ctx, M, parent, site) {
   const G = -0.45;
   const atlas = foliageAtlas();
-  const leafMat = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.85, metalness: 0,
-    emissive: 0x4a4a18, emissiveMap: atlas, emissiveIntensity: 0.35, vertexColors: true, name: 'veg.leaves' });
-  const bgLeafMat = leafMat.clone(); bgLeafMat.emissive = new THREE.Color(0x6a6a22); bgLeafMat.emissiveIntensity = 0.5; bgLeafMat.name = 'veg.bgleaves';
+  const leafMat = leafMaterial(atlas, 'veg.leaves', 0xffc870, 1.4);
+  const bgLeafMat = leafMaterial(atlas, 'veg.bgleaves', 0xffd890, 1.1);
   const shrubMat = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.8, vertexColors: true, name: 'veg.shrub' });
-  const mossMat = new THREE.MeshStandardMaterial({ map: mossTexture(), alphaTest: 0.35, side: THREE.DoubleSide, roughness: 0.95, color: 0xa9ae9e, name: 'veg.moss' });
+  // Spanish moss: soft blended grey veils (unlit so the hanging strands stay pale from both sides)
+  const mossMat = new THREE.MeshBasicMaterial({ map: mossTexture(), transparent: true, depthWrite: false, alphaTest: 0.02, side: THREE.DoubleSide, color: 0x8e8c7e, name: 'veg.moss' });
   const frondMat = new THREE.MeshStandardMaterial({ map: frondTexture(), alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.75, name: 'veg.frond' });
   const strapMat = new THREE.MeshStandardMaterial({ map: strapTexture(), alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.8, name: 'veg.strap' });
   const group = new THREE.Group(); group.name = 'vegetation'; parent.add(group);
 
-  const addTree = (t, name, lm) => {
+  const addTree = (t, name, lm, shadeOpts = {}) => {
+    shadeCanopy(t.leaves, name.length * 31 + t.leaves.cards.length, shadeOpts);
     const b = new THREE.Mesh(t.bark.geometry(), M.bark); b.castShadow = true; b.receiveShadow = true; b.name = name + ':bark'; group.add(b);
     const l = new THREE.Mesh(t.leaves.geometry(), lm); l.castShadow = true; l.receiveShadow = true; l.name = name + ':leaves'; group.add(l); skipInOverride(l);
-    if (t.moss && t.moss.idx.length) { const m = new THREE.Mesh(t.moss.geometry(), mossMat); m.name = name + ':moss'; m.castShadow = false; group.add(m); skipInOverride(m); }
+    if (t.moss && t.moss.idx.length) { const m = new THREE.Mesh(t.moss.geometry(), mossMat); m.name = name + ':moss'; m.castShadow = false; m.renderOrder = 2; group.add(m); skipInOverride(m); }
   };
 
   // left foreground live oak: trunk at the left edge of the frame, main limb arching right over the top
@@ -336,7 +403,7 @@ export async function buildVegetation(ctx, M, parent, site) {
       { path: [[16.5, 8, 2], [18.5, 10, 4], [20, 11, 7]], r: 0.32 },
       { path: [[16, 8, -2], [17.5, 10, -5], [18.5, 11, -8]], r: 0.3 },
       { path: [[14, 8.5, -2.5], [12.5, 10.5, -5], [11, 11.2, -7]], r: 0.3 },
-    ], leafScale: 1.15, leafDensity: 0.4, moss: 0.35, bare: 0.3,
+    ], leafScale: 1.15, leafDensity: 0.4, moss: 0.2, bare: 0.3,
   }), 'oakR', leafMat);
   // a tree just right of the frame whose limbs overhang the top-right corner
   addTree(liveOak(303, V3(18.0, G - 0.3, 21), {
@@ -345,7 +412,7 @@ export async function buildVegetation(ctx, M, parent, site) {
       { path: [[15.5, 6.0, 20.5], [12, 7.2, 20], [9, 7.6, 19.5], [6.5, 7.9, 19.2]], r: 0.34 },
       { path: [[16, 6.5, 18], [14, 8.5, 15], [12.5, 9.8, 12]], r: 0.3 },
       { path: [[19, 6.5, 23], [20, 8, 26]], r: 0.3 },
-    ], leafScale: 1.1, leafDensity: 0.6, moss: 0.35, bare: 0.2,
+    ], leafScale: 1.1, leafDensity: 0.6, moss: 0.22, bare: 0.2,
   }), 'oakTR', leafMat);
 
   // background trees behind and beside the house (sunlit from behind: warmer leaves)
@@ -354,8 +421,10 @@ export async function buildVegetation(ctx, M, parent, site) {
     [-24, -8, 13, 10], [-30, -18, 14, 12], [-34, -30, 15, 13],
     [19.5, 3, 7, 6], [20.5, 7.5, 6.5, 6], [24, -1, 9, 7], [22, 2, 10, 8], [24, 8, 9, 8], [21, 11, 8, 7], [26, -4, 12, 9], [16, -6, 13, 9], [18, -14, 15, 11], [14, -18, 13, 10], [17, -10, 14, 11], [31, -16, 16, 12], [9, -24, 11, 12], [3, -20, 9, 10],
   [16.5, 0, 11, 8], [17, -4, 12, 8],
+    // low, dense shrub masses filling the lawn gap right of the bedroom wing (dark round shrubs in the photo)
+    [15.9, 6.5, 4.2, 4.6], [16.8, 2.5, 5.0, 5.0],
   ];
-  bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat));
+  bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat, { dark: 0.35, glow: 2.6, cool: [0.62, 0.66, 0.52] }));
 
   // ---------------- foundation planting: real Poly Haven plants (instanced), low and layered
   const sagos = [], flowers = [];

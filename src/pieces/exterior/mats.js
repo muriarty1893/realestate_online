@@ -58,17 +58,18 @@ function paverTextures() {
   const hc = document.createElement('canvas'); hc.width = hc.height = S;
   const hg = hc.getContext('2d');
   const color = canvasTex(S, S, (g) => {
-    g.fillStyle = '#7d6a5a'; g.fillRect(0, 0, S, S);
+    g.fillStyle = '#6a6258'; g.fillRect(0, 0, S, S);
     hg.fillStyle = '#000'; hg.fillRect(0, 0, S, S);
-    const rows = 13, rowH = S / rows;
-    const cols = ['#c9a487', '#d4b294', '#bf957a', '#c7a58f', '#b8a08c', '#d8b99c', '#c49577', '#ad8f7c', '#cfae96', '#b99a86'];
+    const rows = 20, rowH = S / rows;
+    // muted tan, buff and grey concrete pavers (~10 x 15-30 cm)
+    const cols = ['#c4ad8e', '#d0b998', '#b8a184', '#c9b08f', '#ad9c86', '#d6c1a2', '#bea284', '#b3a48e', '#c8b393', '#a89884'];
     for (let r = 0; r < rows; r++) {
       let x = -R() * 0.3 * px;
       while (x < S) {
-        const L = (0.22 + R() * 0.25) * px;
+        const L = (0.15 + R() * 0.15) * px;
         const c = cols[Math.floor(R() * cols.length)];
         g.fillStyle = c;
-        const gap = 3;
+        const gap = 5;
         g.fillRect(x + gap / 2, r * rowH + gap / 2, L - gap, rowH - gap);
         // mottling
         for (let k = 0; k < 6; k++) { g.fillStyle = `rgba(${R() > 0.5 ? 255 : 60},${R() > 0.5 ? 220 : 50},${R() > 0.5 ? 190 : 40},${R() * 0.08})`; g.fillRect(x + R() * L, r * rowH + R() * rowH, 6 + R() * 18, 3 + R() * 8); }
@@ -157,11 +158,15 @@ export function makeMaterials(ctx) {
   M.doorWood = pbr(ctx, 'rosewood_veneer1', { repeat: 1.2, color: 0xb06a3c, roughness: 0.5, nor: null, name: 'ext.doorwood' });
   M.doorWood.roughness = 0.45;
   const pav = paverTextures();
-  M.pavers = new THREE.MeshStandardMaterial({ color: 0xe8d2b4, map: pav.color, normalMap: pav.normal, roughness: 0.88, name: 'ext.pavers' });
+  M.pavers = new THREE.MeshStandardMaterial({ color: 0xffe6c8, map: pav.color, normalMap: pav.normal, roughness: 0.88, name: 'ext.pavers' });
   M.brickStep = new THREE.MeshStandardMaterial({ map: pav.color, normalMap: pav.normal, roughness: 0.85, color: 0xd8b8a0, name: 'ext.bricksteps' });
   M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xc8d070, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
   M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x4a3526, roughness: 1, rough: null, name: 'ext.mulch' });
-  M.bark = pbr(ctx, 'bark_brown_02', { repeat: 1.2, color: 0xf0e6dc, roughness: 1, normalScale: 1.5, name: 'ext.bark' });
+  // live-oak bark: grey-brown furrowed oak with moss and lichen (Poly Haven jolcham_oak_bark_01, 1k is 1:2)
+  M.bark = pbr(ctx, 'jolcham_oak_bark', { repeat: 1, color: 0xe8e4dc, roughness: 1, normalScale: 1.6, name: 'ext.bark' });
+  for (const t of [M.bark.map, M.bark.normalMap, M.bark.roughnessMap]) t.repeat.set(1 / 0.9, 1 / 1.8);
+  // limbs are seen from below in shade: lift the bark by its own albedo so the grey-brown texture reads
+  M.bark.emissive = new THREE.Color(0x8a8278); M.bark.emissiveMap = M.bark.map; M.bark.emissiveIntensity = 1.0;
   M.concrete = pbr(ctx, 'white_stucco', { repeat: 1.5, color: 0xb9b1a4, roughness: 0.95, normalScale: 0.5, name: 'ext.walk' });
 
   // glass: clear (global, seen from inside) and warm-lit (front windows, outside face only)

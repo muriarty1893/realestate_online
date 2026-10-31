@@ -8,7 +8,7 @@ import { configureOpenings, buildOpenings } from './exterior/openings.js';
 import { installLensShift } from './exterior/camera.js';
 import { buildSite } from './exterior/site.js';
 import { buildVegetation } from './exterior/veg.js';
-import { makeGardenEnv, installEnvSwap } from './exterior/env.js';
+import { makeGardenEnv, installEnvSwap, addSkyGlow } from './exterior/env.js';
 import { sunVector } from '../lighting.js';
 
 // Camera matched to refs/front_view.webp: ~65 mm-equivalent from 32 m out, eye ~2.6 m, shift lens
@@ -55,6 +55,7 @@ export async function build(ctx) {
   installLensShift(ctx);
   const pv = views.front.preset;
   installEnvSwap(ctx, makeGardenEnv(ctx.renderer, sunVector(pv.sun.az, pv.sun.el)));
+  addSkyGlow(ctx);
 
   // warm porch lights washing columns, ceiling, floor and steps
   for (const [x, y, z, k] of [[3.4, 2.5, 7.2, 1], [5.8, 2.5, 7.2, 1], [4.6, 2.7, 8.2, 0.8]]) {

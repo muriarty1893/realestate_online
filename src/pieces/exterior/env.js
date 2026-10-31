@@ -51,3 +51,31 @@ export function installEnvSwap(ctx, envTex) {
     else if (ctx.scene.environment === envTex) ctx.scene.environment = ctx.lighting.roomEnv;
   });
 }
+
+// Warm sunset glow low in the sky behind the trees (right of the house in the front photo), added on top
+// of the engine's sky dome. Additive, behind everything, follows the camera; shown with the exterior
+// views and in walk mode, hidden for the interior pieces' views.
+export function addSkyGlow(ctx, dir = [0.62, 0.06, -0.78]) {
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, transparent: true, blending: THREE.AdditiveBlending, fog: false,
+    uniforms: { gdir: { value: new THREE.Vector3(...dir).normalize() } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: `
+      uniform vec3 gdir; varying vec3 vP;
+      void main(){
+        vec3 d = normalize(vP);
+        float h = d.y;
+        float ang = acos(clamp(dot(normalize(vec3(d.x, 0.0, d.z)), normalize(vec3(gdir.x, 0.0, gdir.z))), -1.0, 1.0));
+        float band = smoothstep(0.38, 0.0, h) * smoothstep(-0.05, 0.02, h);
+        vec3 c = vec3(1.0, 0.66, 0.3) * 1.3 * exp(-ang * ang / (2.0 * 0.3 * 0.3)) * band
+               + vec3(1.0, 0.8, 0.5) * 0.1 * smoothstep(0.15, 0.0, h) * smoothstep(-0.05, 0.02, h);
+        gl_FragColor = vec4(c, 1.0);
+      }`,
+  });
+  const m = new THREE.Mesh(new THREE.SphereGeometry(380, 32, 16), mat);
+  m.name = 'ext.skyglow'; m.renderOrder = -9; m.frustumCulled = false;
+  ctx.scene.add(m);
+  ctx.onUpdate(() => m.position.copy(ctx.camera.position));
+  addEventListener('viewchange', (e) => { const v = e.detail; m.visible = !v || v.piece === 'exterior'; });
+  return m;
+}

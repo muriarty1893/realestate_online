@@ -41,6 +41,20 @@ export async function buildSite(ctx, M, parent) {
   }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   const lawnMat = M.grass.clone(); lawnMat.vertexColors = true; lawnMat.name = 'ext.lawn';
+  lawnMat.color.set(0xffffff);
+  // mowing stripes (alternate 0.9 m passes running toward the house) and soft patchiness
+  lawnMat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWP = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        float st = smoothstep(-0.15, 0.15, sin(vWP.x * 3.14159 / 0.9));
+        float pt = sin(vWP.x * 0.9 + sin(vWP.z * 0.7) * 1.5) * sin(vWP.z * 1.1 + vWP.x * 0.3);
+        float lum = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));
+        diffuseColor.rgb = mix(lum * vec3(0.92, 1.1, 0.12) * 1.25, diffuseColor.rgb, 0.2);
+        diffuseColor.rgb *= (0.94 + 0.1 * st) * (0.93 + 0.07 * pt);`);
+  };
+  lawnMat.customProgramCacheKey = () => 'ext-lawn-v1';
   const lawn = new THREE.Mesh(g, lawnMat);
   lawn.position.y = G; lawn.receiveShadow = true; lawn.name = 'lawn';
   group.add(lawn);
@@ -61,16 +75,24 @@ export async function buildSite(ctx, M, parent) {
 
   // ---------------- walk (pavers with darker soldier border) and the side path
   const wx0 = 3.45, wx1 = 5.71, wz0 = 8.52, wz1 = 44;
-  const walk = new THREE.Mesh(new THREE.BoxGeometry(wx1 - wx0, 0.06, wz1 - wz0), M.pavers);
+  // the walk flares gently away from the steps (2.26 m at the steps, ~2.9 m by z 30), as in the photo
+  const wcx = (wx0 + wx1) / 2, flare = (geo) => {
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) p.setX(i, wcx + (p.getX(i) - wcx) * (1 + Math.max(0, p.getZ(i) - wz0) * 0.03 / (wx1 - wx0)));
+    geo.computeBoundingSphere();
+  };
+  const wgeo = new THREE.BoxGeometry(wx1 - wx0, 0.06, wz1 - wz0, 1, 1, 12).translate(wcx, G - 0.02, (wz0 + wz1) / 2);
+  flare(wgeo);
+  const walk = new THREE.Mesh(wgeo, M.pavers);
   const wuv = walk.geometry.attributes.uv, wpos = walk.geometry.attributes.position;
-  for (let i = 0; i < wuv.count; i++) wuv.setXY(i, wpos.getX(i) + (wx0 + wx1) / 2, -(wpos.getZ(i) + (wz0 + wz1) / 2));
-  walk.position.set((wx0 + wx1) / 2, G - 0.02, (wz0 + wz1) / 2);
+  for (let i = 0; i < wuv.count; i++) wuv.setXY(i, wpos.getX(i), -wpos.getZ(i));
   walk.receiveShadow = true; walk.name = 'walk';
   group.add(walk); ctx.addWalkable(walk);
-  const border = new THREE.MeshStandardMaterial({ color: 0x9c7c66, roughness: 0.9, name: 'ext.walkborder' });
+  const border = new THREE.MeshStandardMaterial({ color: 0xa08a74, roughness: 0.9, name: 'ext.walkborder' });
   for (const x of [wx0, wx1]) {
-    const b = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.065, wz1 - wz0), border);
-    b.position.set(x + (x === wx0 ? 0.065 : -0.065), G - 0.018, (wz0 + wz1) / 2); b.receiveShadow = true; group.add(b);
+    const bg = new THREE.BoxGeometry(0.13, 0.065, wz1 - wz0, 1, 1, 12).translate(x + (x === wx0 ? 0.065 : -0.065), G - 0.018, (wz0 + wz1) / 2);
+    flare(bg);
+    const b = new THREE.Mesh(bg, border); b.receiveShadow = true; group.add(b);
   }
   const path = new THREE.Mesh(new THREE.BoxGeometry(16, 0.05, 1.05), M.concrete);
   const puv = path.geometry.attributes.uv, ppos = path.geometry.attributes.position;

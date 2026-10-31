@@ -302,3 +302,15 @@ the floor at the bottom right is still orange with oversized planks; the right-e
 *Regression check (blind, round 8 vs round 10): round 10 is closer, narrowly* (clean upholstered base with no plinth, a tidier duvet edge, a warmer cream rug). Round 8's bench
 throw draped further down the front. Neither has the photo's pale layered throw over the lower half; the pillows are too dark and uniform.
 *Orchestrator:* rounds 6–10 have circled the duvet without solving it; the next attempt should rebuild the bedding as separate layered meshes (Opus), the way the sofa rebuild worked.
+
+## Round 6, exterior (2026-10-31, Opus builder)
+Builder changes: a fine leaf-clump texture (26–40 clumps per cell, 18% warm leaves); a crown-depth pass darkens inner cards and gives outer cards a warm backlight glow;
+two-sided leaf shading; leaf cards lifted off the limbs so the arching limbs read; Poly Haven oak bark (CC0) with moss; wispy grey Spanish moss; a sunset glow sphere low on the
+right (exterior views only); smaller muted pavers with joints and a border; the walk widens toward the camera (2.26 -> ~2.9 m); a yellow-green lawn with mowing stripes. 377k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: lighting — flat and even across facade, roof and lawn, with no direction, no shade under the eaves, porch roof and awnings,
+and no canopy dapple. It needs a low warm key from the side, canopy shadow and contact shadows. Further: the roof is flat grey-lavender without shingle relief or variation;
+the foreground beds are dark, blurry ferns plus bare mulch strips, with no pink and white perennials; the trunks on the right look like straight poles; the windows are a uniform
+orange with no interior; a bright green field and a beige block show through the trees at the right edge (~x 1700, y 600).
+*Regression check (blind, round 5 vs round 6): round 6 is closer* (canopy value variation and backlit warmth, grey moss, beige pavers). Both: the roof should be darker warm grey,
+the window glow more yellow, flowers in the beds, less red mulch.
+Walk-mode load is ~21–24 s locally (measured while another builder was rendering on the GPU; noisy).

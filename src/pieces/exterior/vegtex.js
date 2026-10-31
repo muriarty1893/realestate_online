@@ -50,11 +50,54 @@ function oakSpray(g, ox, oy, S, R, dense) {
   for (let i = 0; i < nT; i++) twig(cx + (R() - 0.5) * S * 0.2, cy + (R() - 0.5) * S * 0.1, -Math.PI / 2 + (R() - 0.5) * 2.4, S * (0.32 + R() * 0.12), 3, 0);
 }
 
+// fine live-oak foliage: several small leaf clumps on thin twigs with sky gaps between them.
+// Leaves are tiny (7-12 px in a 512 cell, ~2-3 cm on a 1 m card) so the canopy reads as fine texture.
+// Colours are muted olive; ~20% are lighter yellow-green (sun through the leaf). The shader adds
+// per-card tint, occlusion and the backlit glow on top.
+function oakFine(g, ox, oy, S, R, bg) {
+  const cx = ox + S / 2, cy = oy + S / 2;
+  g.lineCap = 'round';
+  const nC = bg ? 40 : 26 + Math.floor(R() * 8);
+  const clumps = [];
+  for (let i = 0; i < nC; i++) {
+    const a = R() * Math.PI * 2, d = Math.sqrt(R()) * S * 0.38;
+    clumps.push([cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.85, S * (0.028 + R() * 0.035) * (bg ? 1.15 : 1)]);
+  }
+  // twigs from the lower centre out to each clump
+  for (const [x, y] of clumps) {
+    if (R() < 0.6) continue;
+    g.strokeStyle = hsl(30, 10, 20 + R() * 10, 0.55); g.lineWidth = 0.8 + R() * 0.8;
+    g.beginPath(); g.moveTo(cx + (R() - 0.5) * S * 0.1, cy + S * 0.36);
+    g.quadraticCurveTo((cx + x) / 2 + (R() - 0.5) * S * 0.15, (cy + S * 0.36 + y) / 2, x, y); g.stroke();
+  }
+  const leaf = (x, y, rot, l, lift) => {
+    let h = 70 + R() * 24, sat = 18 + R() * 16, li = 18 + R() * 14 + lift * 10;
+    if (R() < 0.18) { h = 56 + R() * 10; sat = 30 + R() * 12; li = 44 + R() * 14; }
+    if (bg) { h += 6; li += 2; }
+    g.fillStyle = hsl(h, sat, li);
+    g.beginPath(); g.ellipse(x, y, l / 2, l * 0.2, rot, 0, Math.PI * 2); g.fill();
+  };
+  for (const [x0, y0, r] of clumps) {
+    const n = Math.round((r * r) / 14);
+    for (let k = 0; k < n; k++) {
+      const a = R() * Math.PI * 2, d = Math.pow(R(), 0.75) * r;
+      const x = x0 + Math.cos(a) * d, y = y0 + Math.sin(a) * d * 0.8;
+      if (Math.hypot(x - cx, y - cy) > S * 0.47) continue;
+      leaf(x, y, R() * Math.PI, 7 + R() * 6, (y0 - y) / r);
+    }
+  }
+  // a few stray leaves between clumps
+  for (let k = 0; k < 60; k++) {
+    const a = R() * Math.PI * 2, d = Math.sqrt(R()) * S * 0.42;
+    leaf(cx + Math.cos(a) * d, cy + Math.sin(a) * d, R() * Math.PI, 6 + R() * 5, 0);
+  }
+}
+
 // leaf cluster in a cell. kind: 'oak' | 'box' | 'dark' | 'flower' | 'bg'
 function cluster(g, ox, oy, S, R, kind) {
   if (kind === 'oak' || kind === 'bg') {
     g.save(); g.beginPath(); g.rect(ox + 2, oy + 2, S - 4, S - 4); g.clip();
-    oakSpray(g, ox, oy, S, R, kind === 'bg');
+    oakFine(g, ox, oy, S, R, kind === 'bg');
     g.restore();
     return;
   }
@@ -122,18 +165,29 @@ export const ATLAS = { oak: [[0, 0], [1, 0], [0, 1]], bg: [[1, 1]], box: [[0, 2]
 export const atlasUV = (cell) => ({ u0: cell[0] / 2, u1: (cell[0] + 1) / 2, v0: 1 - (cell[1] + 1) / 4, v1: 1 - cell[1] / 4 });
 
 export function mossTexture() {
+  // Spanish moss beard: 3-5 locks of different lengths hang from a tuft at the top; each lock is a bundle
+  // of hair-thin wavy grey strands that narrows to a ragged tip. Drawn for alpha blending (soft veil).
   const W = 256, H = 1024, c = canvas(W, H), g = c.getContext('2d');
   const R = rng(77);
   g.lineCap = 'round';
-  for (let i = 0; i < 260; i++) {
-    let x = W * (0.15 + R() * 0.7), y = R() * H * 0.08;
-    const len = H * (0.35 + R() * 0.6) * (1 - Math.abs(x / W - 0.5));
-    g.strokeStyle = hsl(75 + R() * 25, 5 + R() * 8, 48 + R() * 18, 0.5 + R() * 0.4);
-    g.lineWidth = 1 + R() * 2.2;
-    g.beginPath(); g.moveTo(x, y);
-    const steps = 18;
-    for (let k = 0; k < steps; k++) { x += (R() - 0.5) * 9; y += len / steps; g.lineTo(x, y); }
-    g.stroke();
+  const locks = 3 + Math.floor(R() * 3);
+  for (let l = 0; l < locks; l++) {
+    const x0 = W * (0.3 + R() * 0.4), len = H * (0.35 + R() * 0.6), wid = W * (0.12 + R() * 0.14);
+    const bend = (R() - 0.5) * W * 0.25, tipX = x0 + bend;
+    for (let i = 0; i < 90; i++) {
+      const off = (R() - 0.5) * wid, sl = len * (0.5 + R() * 0.5);
+      const li = 60 + R() * 26, a0 = 0.3 + R() * 0.5, w = 0.8 + R() * 1.4, ph = R() * 6.28;
+      const steps = 26;
+      let px = x0 + off, py = H * 0.01 + R() * H * 0.04;
+      for (let k = 1; k <= steps; k++) {
+        const t = k / steps, taper = 1 - 0.75 * t;
+        const nx = x0 + off * taper + bend * t * t + Math.sin(t * 9 + ph) * 3, ny = H * 0.02 + sl * t;
+        g.strokeStyle = hsl(60 + R() * 20, 5 + R() * 6, li, a0 * Math.min(1, t * 5 + 0.4) * (1 - t * 0.7));
+        g.lineWidth = w * (1 - t * 0.4);
+        g.beginPath(); g.moveTo(px, py); g.lineTo(nx, ny); g.stroke();
+        px = nx; py = ny;
+      }
+    }
   }
   return tex(c);
 }

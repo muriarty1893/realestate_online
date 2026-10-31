@@ -1,4 +1,4 @@
-# Status: paused 2026-10-27 ~05:45 UTC (weekly usage 87%, guard 90%), after round 5
+# Status: paused 2026-10-31 ~21:00 UTC (5-hour usage 86%, weekly 24%), after exterior r6, great room r7, master r10
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -13,29 +13,30 @@
   - master_suite: bedroom, bath and tray ceiling
   - rest: all 11 views, furnished
 
-## Critic loop (the photo has won every blind A/B so far; latest round per piece)
-| piece | latest | live in commit | biggest gap left (critiques/LOG.md has all of them) |
-|---|---|---|---|
-| exterior | round 4 (beat round 3 in the regression check) | df2909a | beds too empty: fill with low mounds, ferns and pink/white blooms below the sills; warm the siding to cream; lighten the roof |
-| great_room | round 5 (beat round 4, narrowly) | df2909a | the sectional still reads as matte clay; parameter tweaks failed in rounds 2–5, so rebuild the cushions or use a CC0 model |
-| master_suite | round 5 (round 4 was narrowly closer) | df2909a | orange-tan white balance and flat fill; take back round 4's bright ceiling, lit right-edge sheer and draped throw |
-| rest | QA pass done | df2909a | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
+## Critic loop (the photo has won every blind A/B so far; latest round per piece, all pushed)
+| piece | latest (beat its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
+|---|---|---|
+| exterior | round 6 (Opus): layered backlit canopy, bark, grey moss, sunset glow, finer pavers | flat facade light (no eave/awning shade, no canopy dapple); flowers in the beds; darker warm-grey roof; yellower window glow |
+| great_room | round 7 (Opus): rebuilt sectional (`sofa.js`), worn cognac leather, chaise end | the sofa still reads as boxy next to flat lighting; add warm pendant and under-cabinet pools, contact shadows, contrast; cabinet grain |
+| master_suite | round 10: upholstered base, softer right-edge linen, finer oak and jute | the duvet (rounds 6–10 circled it); rebuild the bedding as separate layered meshes, Opus |
+| rest | QA pass done | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
 
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
 as PNGs with metadata stripped, and each critic reads only those two files.
 
 ## Next steps (in order)
-1. Exterior: bake the simplified plants to small .glb files offline and load those instead of the full-res models
-   (walk-mode load went from ~17 s to ~27 s locally). Then the round 4 critique: denser low beds, cream siding, a lighter roof.
-2. Master suite: round 4's take-backs (above), then neutral white balance with directional sun on the bed and rug.
-3. Great room: rebuild the sectional (see the round 5 orchestrator note in LOG.md).
-4. After each builder: a blind critic **and** a blind regression check against the previous round (they caught 3 regressions).
+1. Great room: lighting pass (warm pendant and under-cabinet pools, contact shadows, corner falloff), then cabinet grain and backsplash joints.
+2. Exterior: directional low warm key light with canopy dapple and soft shade under the eaves and awnings; flowering accents; roof tone.
+3. Master suite: rebuild the bedding as layered meshes (Opus), the way the sofa rebuild worked.
+4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), probably a shadow-map gap at the `w_wicS2` junction.
 
 ## Lessons from 2026-10-27
 - Builders regress about half the time. The regression check (photo plus two of our renders, blind) is worth its cost.
 - Single critics are noisy and sometimes contradict each other (the coffee table, bed density). Prefer pixel-measurable claims and the overlay check.
 - Builders on Sonnet stop early (20–35 of 60 tool calls) and are cheap: a builder round costs ~0.5–1% of the weekly budget.
 - Always run `node tools/tris.mjs` after a builder adds models (one round went to 12.6M triangles).
+- Commit each piece's round locally as soon as its checks pass, so a regression can be reverted (round 4 and round 6 of the master were lost that way; round 9 was reverted cleanly).
+- Hard modelling problems (the sofa, the canopy) needed an Opus builder and a rebuild, not parameter tweaks; Sonnet is fine for incremental fixes.
 
 ## To resume
 1. `npm install` (node_modules is untracked now), then `npm start` and open http://localhost:8080

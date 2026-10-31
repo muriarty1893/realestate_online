@@ -30,20 +30,20 @@ function bed(ctx, M, g, P) {
   b.add(rbox(hbW, hbH, 0.11, 0.035, M.upholstery, 0, hbH / 2 + 0.02, -0.055, { segs: 4 }));
   // platform base with recessed plinth
   const baseH = 0.34, baseW = W + 0.06, baseL = L + 0.12;
-  b.add(rbox(baseW, baseH - 0.07, baseL, 0.03, M.upholstery, 0, 0.07 + (baseH - 0.07) / 2, baseL / 2, { segs: 3 }));
+  b.add(rbox(baseW - 0.1, baseH - 0.07, baseL - 0.1, 0.03, M.bedBase, 0, 0.07 + (baseH - 0.07) / 2, baseL / 2, { segs: 3 }));
   b.add(box(baseW - 0.12, 0.07, baseL - 0.12, M.blackMatte, 0, 0.035, baseL / 2, { cast: false }));
   // mattress
   const mT = 0.3, mTop = baseH + mT;
-  b.add(rbox(W - 0.06, mT, L - 0.06, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
+  b.add(rbox(W - 0.2, mT, L - 0.2, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
   // duvet: one thick continuous shape, broad soft undulations, rounded edges draping over the sides and foot
   const duvTop = mTop + 0.045;
-  const duv = mesh(drapeGeo({ W: W - 0.02, L: L - 0.05, z0: 0.6, top: duvTop, side: 0.34, foot: 0.3, r: 0.14, segX: 120, segZ: 110, wrinkle: 0.006, fold: 0.035, foldFreq: 4.5, undul: 0.055, crumple: 0.011, seed: 2, floorY: 0.08 }), M.duvet);
+  const duv = mesh(drapeGeo({ W: W - 0.02, L: L - 0.05, z0: 0.6, top: duvTop, side: 0.5, foot: 0.42, r: 0.14, segX: 120, segZ: 110, wrinkle: 0.006, fold: 0.035, foldFreq: 4.5, undul: 0.055, crumple: 0.011, seed: 2, floorY: 0.08 }), M.duvet);
   b.add(duv);
   // folded-back top edge showing the sheet
   b.add(rbox(W + 0.0, 0.05, 0.28, 0.025, M.sheet, 0, duvTop + 0.012, 0.68, { segs: 4 }));
   // cream blanket laid across the lower third, draping over both sides
-  const tW = W + 0.02, tz0 = 1.2;
-  const thr = mesh(drapeGeo({ W: tW, L: L - 0.5, z0: tz0, top: duvTop + 0.085, side: 0.6, foot: 0.12, r: 0.12, segX: 110, segZ: 70, wrinkle: 0.008, fold: 0.075, foldFreq: 3.4, undul: 0.045, crumple: 0.009, seed: 5, sideMask: [0.5, 1.5], floorY: 0.06, skew: 1.7 }), M.throwCream);
+  const tW = W, tz0 = L - 0.8;
+  const thr = mesh(drapeGeo({ W: tW, L: L - 0.12, z0: tz0, top: duvTop + 0.12, side: 0.62, foot: 0.1, r: 0.12, segX: 110, segZ: 70, wrinkle: 0.004, fold: 0.07, foldFreq: 3.4, undul: 0.02, crumple: 0.003, seed: 5, sideMask: [-1.25, 1.0], floorY: 0.06, skew: 0.5 }), M.throwCream);
   b.add(thr);
   // pillows (euro shams, sleepers, decoratives)
   const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0) => {
@@ -131,11 +131,10 @@ function bench(ctx, M, g, P) {
   b.add(box(Lb - 2 * legT, 0.025, D - 0.08, M.oakSoft, 0, H - cushT - 0.0125, 0, { grain: 'x' }));
   b.add(rbox(Lb, cushT, D, 0.03, M.benchFab, 0, H - cushT / 2, 0, { segs: 4 }));
   // chunky knit throw draped over the east half, hanging toward the floor in front
-  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.03, side: 0.1, foot: 0.43, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.022, fold: 0.08, foldFreq: 8, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
+  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.06, side: 0.1, foot: 0.46, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.01, fold: 0.02, foldFreq: 8, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
   th.position.set(0.12, 0, -D / 2 + 0.01); th.rotation.y = 0.14;
   const th2 = mesh(drapeGeo({ W: 0.5, L: 0.2, z0: 0, top: H + 0.075, side: 0.05, foot: 0.1, r: 0.04, segX: 30, segZ: 20, wrinkle: 0.015, fold: 0.02, foldFreq: 18, seed: 13, floorY: H }), M.knit);
   th2.position.set(0.1, 0, -0.08); th2.rotation.y = 0.3;
-  b.add(th2);
   b.add(th);
   P.bench = { z: zc, D };
   ctx.addCollider({ x0: BED.x - Lb / 2, z0: zc - D / 2, x1: BED.x + Lb / 2, z1: zc + D / 2 });

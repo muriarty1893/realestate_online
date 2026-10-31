@@ -253,3 +253,17 @@ Further: (1) The bench knit is a rigid chunky plastic shell. (2) The light is fl
 like the photo's; round 7's is bunched near the pillows, with a stiff white sheet panel at the right corner, plus a notch artifact on the bench knit (≈ x 800,
 y 830). Round 7 is better on the right-edge curtain (light linen; round 6 had a dark strip) and the duvet's fine wrinkle texture. Round 6's code was not committed,
 so round 7 stays and round 8 restores the blanket layout. From now on, each piece's round is committed locally as soon as it finishes.
+
+## Round 8 (2026-10-31)
+
+### master_suite: photo won (critic saw ours as B)
+Builder changes: the blanket is back across the middle, draping off the right side; the round-7 sheet panel is gone (narrower, hidden mattress); a matte duvet
+(roughness 1, no sheen, lighter taupe 0xc6b49d) with finer creases, draping 0.5 m at the sides and 0.42 m at the foot; a paler inset bed base; the bench-knit notch is fixed.
+**Biggest gap:** the bed. The duvet is a stiff, uniformly quilted shell; at the foot-right corner it pokes out into a sharp triangular flap hanging in mid-air; the base
+shows as a black plinth band. It should be soft linen with loose, irregular folds falling naturally over the sides, and a base upholstered like the headboard that sits
+flat on the floor with no dark gap. A second throw layered at the foot would help.
+Further: (1) Flat, washed-out light with no contact shadows, darker corners or window light on the floor and bedding. (2) The window views (the exterior's). (3) The right
+edge: the sheer is blown out and smeared. (4) The rug repeats like a grid; the planks are too orange and evenly striped. (5) The bench throw is a flat cable-knit decal;
+stray dots near the barn-door rail.
+*Regression check (blind, round 6 vs round 8): round 8 is closer, narrowly* (light right-edge linen, woven duvet texture). Round 6 had the better throw layout
+(over the right half, spilling to the floor) and a cleaner front-right duvet corner. Both need a less orange floor and a richer rug weave.

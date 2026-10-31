@@ -84,8 +84,9 @@ export function makeMats(ctx) {
       sheen, sheenRoughness: 0.8, sheenColor: c.clone().lerp(new THREE.Color(0xffffff), 0.45), side: THREE.DoubleSide,
     });
   };
-  M.duvet = Object.assign(bedLinen(0xb9a58d, { tile: 1.1, seed: 21, crease: { n: 110, dir: 0.5, spread: 1.1, seed: 4, amount: 1.1 }, ns: 0.9, sheen: 0.7 }), { name: 'ms.duvet' });
-  M.throwCream = Object.assign(bedLinen(0xf0e6d4, { tile: 0.9, seed: 22, crease: { n: 90, dir: 0.3, spread: 1.3, seed: 8, amount: 1.0 }, ns: 0.85 }), { name: 'ms.throwCream' });
+  M.duvet = Object.assign(bedLinen(0xc6b49d, { tile: 1.1, seed: 21, crease: { n: 170, dir: 0.5, spread: 1.1, seed: 4, amount: 1.0 }, ns: 0.8, rough: 1.0, sheen: 0 }), { name: 'ms.duvet' });
+  M.throwCream = Object.assign(bedLinen(0xf0e6d4, { tile: 0.9, seed: 22, crease: { n: 90, dir: 0.3, spread: 1.3, seed: 8, amount: 1.0 }, ns: 0.7, rough: 1.0, sheen: 0 }), { name: 'ms.throwCream' });
+  M.bedBase = fab(0xb09a82, 0.22, 0.95, 0.7, { name: 'ms.bedBase' });
   M.sheet = Object.assign(bedLinen(0xece6dc, { tile: 0.9, seed: 23, crease: { n: 120, dir: 1.2, spread: 1.0, seed: 3, amount: 0.8 }, ns: 0.6 }), { name: 'ms.sheet' });
   const pillowMat = (color, seed, name) => Object.assign(bedLinen(color, { tile: 0.8, seed, crease: { n: 160, dir: 0.0, spread: 1.6, seed: 12 + seed, amount: 1.5 }, ns: 1.3, rough: 0.97, sheen: 0.3 }), { name, side: THREE.FrontSide });
   M.pillowA = pillowMat(0xb6a089, 24, 'ms.pillowA');

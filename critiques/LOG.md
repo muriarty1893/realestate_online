@@ -207,3 +207,32 @@ bath doorway, with stray white specks by the barn door.
 at the right edge, and the cream throw cascading down the bed's side. Round 5 has the better chunky rug, the sun sheen on the front-left floor and the
 turned-down sheet. Round 4's code was never committed, so round 5 stays; take those three things back from round 4 next round (its fills
 were hemi 0.62, bounce 0.4, glow point 0.8).
+
+## Round 6 (2026-10-31)
+
+### master_suite: photo won (critic saw ours as B)
+Builder changes: warm-white walls and ceiling with a faint ceiling lift; bounce 0.4, glow 0.8; the right-edge sheer relit; the cream throw cascades down
+the bed's right side; a matte floor (no clearcoat, roughness 0.85). Kept: the jute rug, the floor sun sheen, the turned-down sheet, the narrow planks.
+**Biggest gap:** the bedding. The duvet is a smooth, evenly shaded tan slab with no wrinkles or fabric texture; the white throw is a thin, stiff ribbon
+hanging straight down the right side toward the floor; the pillows look plastic. It should be soft linen with loose folds and creases, a layered throw
+that drapes and bunches at the foot, slubby, slightly crushed pillows, and soft shadows between the layers.
+Further: (1) The window views (the exterior's). (2) Hazy and low-contrast, and the furniture floats; it needs deeper corners and contact shadows. (3) The floor is too
+orange and saturated, with a visibly repeating plank pattern. (4) The rug and the bench throw are oversized and tiled; the throw is a stiff shell. (5) **The right-edge
+curtain is a dark, smeared, blurry column**; it should be light, translucent linen.
+*Regression check (blind, round 4 vs round 6): round 6 is closer* (contrast, the rug sun patch, the warm golden-cream tone, the tucked layered bedding, the floor).
+Round 4 wins only on the right-edge curtain (pale, sheer); round 6's turns dark and heavy. Round 4's diagonal throw fall matched the photo slightly better.
+The master builder raycast two non-master defects: the floating plant at the top of the bath doorway is the exterior's `bg0` tree (sent to the exterior
+builder), and a 1–2 px white speck on the west wall at (-8.93, 2.25, -7.82) near the door track (cause unconfirmed; maybe a shell seam leak).
+
+### exterior round 5: photo won (critic saw ours as A)
+Builder changes: plants baked offline (`tools/bake_plants.mjs` -> `assets/exterior/models_baked/`, no runtime simplify; load ~24.5 s -> ~18.7 s local);
+periwinkle rendered for the first time (runtime simplify used to give 0 tris); boxwood-like mounds over the stone band; blooming mounds and hosta clumps
+in the front beds; cream siding and batten; a lighter warm roof; background trees at the right; an amber porch ceiling; `bg0` moved out of the master bath. 372k tris.
+**Biggest gap:** the light and foliage. The oak canopy (top and both sides) is flat, saturated cutout leaves with no depth or light passing through; the trunks
+are smooth dark tubes; the ferns and shrubs are noisy uniform clumps. The photo's canopy has fine layered leaves with warm sunset light through them, soft
+background trees, mossy bark, and planting with varied leaf shapes and pink and white flowers.
+Further: (1) Flat, uniform light with no warm sky glow or soft eave shadows. (2) The pavers are large, orange and blurry with no joints, and the walk narrows
+too sharply; they should be small, crisp, muted tan and grey. (3) The lawn is flat neon green with a hard edge. (4) The roof is a tiled texture without shingle
+courses. (5) The windows are a flat orange glow, and the spot over the door looks artificial.
+*Regression check (blind, round 4 vs round 5): round 5 is clearly closer* (beds, cream siding, the lighter roof, the right-side trees). Round 4's warm sunset glow
+low in the sky is better; take it back.

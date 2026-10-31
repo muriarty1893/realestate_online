@@ -2,8 +2,6 @@
 // background tree masses, foundation shrubs, flowering mounds, sago palms, liriope, ferns (glTF).
 import * as THREE from 'three';
 import { rng, V3, ASSET } from './util.js';
-import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
 import { foliageAtlas, ATLAS, atlasUV, mossTexture, frondTexture, strapTexture } from './vegtex.js';
 
 // ---------------------------------------------------------------- geometry accumulators
@@ -352,9 +350,10 @@ export async function buildVegetation(ctx, M, parent, site) {
 
   // background trees behind and beside the house (sunlit from behind: warmer leaves)
   const bgList = [
-    [-15, -8, 12.5, 11], [-9, -16, 12.5, 12], [-2, -24, 12, 13], [-20, 0, 13, 10], [-19, 11, 12, 9], [-27, -12, 16, 12], [-15, -28, 14, 13],
+    [-22, -8, 12.5, 11], [-9, -16, 12.5, 12], [-2, -24, 12, 13], [-20, 0, 13, 10], [-19, 11, 12, 9], [-27, -12, 16, 12], [-15, -28, 14, 13],
     [-24, -8, 13, 10], [-30, -18, 14, 12], [-34, -30, 15, 13],
     [19.5, 3, 7, 6], [20.5, 7.5, 6.5, 6], [24, -1, 9, 7], [22, 2, 10, 8], [24, 8, 9, 8], [21, 11, 8, 7], [26, -4, 12, 9], [16, -6, 13, 9], [18, -14, 15, 11], [14, -18, 13, 10], [17, -10, 14, 11], [31, -16, 16, 12], [9, -24, 11, 12], [3, -20, 9, 10],
+  [16.5, 0, 11, 8], [17, -4, 12, 8],
   ];
   bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat));
 
@@ -369,7 +368,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   const add = (k, x, z, s, o = {}) => {
     if (k === 'shrub1') k = 'shrub2';
     if (R() > KEEP || (k === 'calathea' && R() < 0.65)) return;
-    if (k === 'fern') k = R() < 0.5 ? 'fern' : 'fern';
+    if (k === 'periw' && R() < 0.6) return;
     const g = U(1.1, 1.8), h = g * U(0.85, 1.1);
     (P[k] ??= []).push({ p: [x, G, z], s: [g, h, g], rot: R() * 6.28, tint: o.tint ?? U(0.85, 1.1), hue: o.hue ?? 0 });
   };
@@ -395,7 +394,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   for (const sx of [-1, 1]) for (let i = 0; i < 12; i++) add(i % 2 ? 'shrub1' : 'periw', 4.58 + sx * (1.5 + R() * 2.4), 9.6 + R() * 2.0, i % 2 ? 1 : 2.4);
   // foreground beds
   const [bedF, bedL, bedR, bedE] = site.beds;
-  scatter(bedL, 230, R, (x, z) => add('fern', x, z, U(1.7, 2.6)), (x) => x < -0.5);
+  scatter(bedL, 300, R, (x, z) => add('fern', x, z, U(1.7, 2.6)), (x) => x < -0.5);
   scatter(bedL, 70, R, (x, z) => add('calathea', x, z, U(1.3, 1.9)), (x) => x < 1);
   scatter(bedL, 28, R, (x, z) => add('shrub2', x, z, U(0.6, 0.9)), (x) => x > -9);
   scatter(bedL, 40, R, (x, z) => add('shrub4', x, z, U(2, 3)));
@@ -405,7 +404,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   scatter(bedR, 36, R, (x, z) => add('shrub1', x, z, U(1, 1.5)));
   scatter(bedR, 60, R, (x, z) => add('periw', x, z, U(2.4, 3.2)));
   scatter(bedR, 28, R, (x, z) => add('calathea', x, z, U(1.3, 1.8)));
-  scatter(bedR, 24, R, (x, z) => add('fern', x, z, U(1.4, 2)));
+  scatter(bedR, 90, R, (x, z) => add('fern', x, z, U(1.4, 2)));
   scatter(bedR, 20, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
   scatter(bedE, 28, R, (x, z) => add('shrub2', x, z, U(0.9, 1.5)));
   for (const [x, z, k] of [[13.4, 8.5, 1.5], [14.6, 6.5, 1.7], [12.8, 10.8, 1.2], [15.8, 9.5, 1.4], [16.6, 6, 1.6]]) add('shrub2', x, z, k);
@@ -422,37 +421,35 @@ export async function buildVegetation(ctx, M, parent, site) {
     }
   }
 
+  // dense, low boxwood-like mounds hugging the stone band (below the sills), blooming mounds and strap clumps in the beds
+  const boxes = [], blooms = [], straps = [];
+  for (let x = -12.7; x < 13.2; x += U(0.45, 0.75)) {
+    if (onWalk(x, 0.35) || R() < 0.1) continue;
+    const h = U(0.75, 1.15);
+    boxes.push({ p: [x, G - 0.02, front(x) + U(0.45, 0.8)], s: [U(0.9, 1.3), h, U(0.9, 1.3)], rot: R() * 6.28 });
+    if (R() < 0.5) boxes.push({ p: [x + U(-0.3, 0.3), G - 0.02, front(x) + U(1.2, 1.7)], s: [U(0.7, 1), h * 0.7, U(0.7, 1)], rot: R() * 6.28 });
+  }
+  for (const sx of [-1, 1]) for (let i = 0; i < 9; i++) boxes.push({ p: [4.58 + sx * (1.0 + i * 0.28 + U(0, .15)), G - 0.02, 9.9 + U(0, 1)], s: [0.8, 0.7, 0.8], rot: R() * 6.28 });
+  for (const bed of [bedL, bedR, bedE]) {
+    scatter(bed, bed === bedE ? 10 : 90, R, (x, z) => blooms.push({ p: [x, G, z], s: [U(0.8, 1.3), U(0.7, 1.1), U(0.8, 1.3)], rot: R() * 6.28 }));
+    scatter(bed, bed === bedE ? 10 : 70, R, (x, z) => straps.push({ p: [x, G, z], s: [U(0.9, 1.5), U(0.9, 1.6), U(0.9, 1.5)], rot: R() * 6.28 }));
+  }
+  scatter(site.beds[0], 30, R, (x, z) => blooms.push({ p: [x, G, z], s: [0.7, 0.6, 0.7], rot: R() * 6.28 }), (x, z) => z > front(x) + 1.3 && !onWalk(x, 0.6));
+  for (const [geo, mat, list, nm] of [[shrubGeo(31, ATLAS.box, { cards: 100, rx: 0.4, ry: 0.4, size: 0.4 }), shrubMat, boxes, 'boxwood'],
+    [shrubGeo(32, [...ATLAS.box, ...ATLAS.flower, ...ATLAS.flower], { cards: 110, rx: 0.35, ry: 0.3, size: 0.36 }), shrubMat, blooms, 'blooms'],
+    [strapGeo(0.6, 0.85), strapMat, straps, 'hosta']]) { const im = instanced(geo, mat, list, nm); group.add(im); skipInOverride(im); }
+
   for (const im of [instanced(sagoGeo(21), frondMat, sagos, 'sagos')]) { group.add(im); skipInOverride(im); }
 
   // ---------------- load the glTF plant kinds and instance them (per-instance tint)
   const KINDS = { fern: 'fern_02', shrub1: 'shrub_01', shrub2: 'shrub_02', shrub4: 'shrub_04', calathea: 'calathea_orbifolia_01', periw: 'periwinkle_plant' };
-  const HEIGHT = { fern: 0.6, calathea: 0.5, shrub2: 0.75, shrub4: 0.8, periw: 0.4 };
-  const TARGET = { fern: 450, calathea: 500, shrub2: 600, shrub4: 900, periw: 400 };
   for (const [kind, list] of Object.entries(P)) {
     const id = KINDS[kind];
     try {
-      const gltf = await ctx.loadGLTF(ASSET + `models/${id}/${id}.gltf`);
-      gltf.scene.updateMatrixWorld(true);
+      const gltf = await ctx.loadGLTF(ASSET + `models_baked/${id}.glb`);   // pre-simplified, normalised, centred (tools/bake_plants.mjs)
       const parts = [];
       gltf.scene.traverse((o) => { if (o.isMesh) parts.push(o); });
-      const T0 = performance.now();
-      const geos = parts.map((m) => {
-        let g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld);
-        g.computeBoundingBox(); let bb = g.boundingBox;
-        const sc = HEIGHT[kind] / Math.max(0.05, bb.max.y - bb.min.y);
-        g.scale(sc, sc, sc);
-        const tris = (g.index ? g.index.count : g.attributes.position.count) / 3;
-        const want = Math.min(tris, TARGET[kind]);
-        if (want < tris) {
-          if (!g.index) g = mergeVertices(g);
-          g = new SimplifyModifier().modify(g, Math.floor(g.attributes.position.count * (1 - want / tris)));
-          g.computeVertexNormals();
-        }
-        g.computeBoundingBox(); bb = g.boundingBox;
-        g.translate(-(bb.min.x + bb.max.x) / 2, -bb.min.y, -(bb.min.z + bb.max.z) / 2);
-        return g;
-      });
-      console.log('[veg] simplified', kind, geos.map((g) => (g.index.count / 3) | 0).join(','), (performance.now() - T0) | 0, 'ms');
+      const geos = parts.map((m) => m.geometry);
       // variants are separate meshes (fern/shrub_02/calathea): split the list among them; single meshes get all
       const per = geos.map(() => []);
       list.forEach((it, i) => per[i % geos.length].push(it));

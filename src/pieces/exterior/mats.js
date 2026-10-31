@@ -136,12 +136,13 @@ export function makeMaterials(ctx) {
   M.stucco = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xe6ded0, roughness: 1, normalScale: 0.8, name: 'ext.stucco' });
   M.porchWall = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xe0d9cc, roughness: 0.95, normalScale: 0.3, name: 'ext.porchwall' });
   const board = battenBoardTextures();
-  M.board = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, map: board, roughness: 0.82, name: 'ext.board' });
-  M.batten = new THREE.MeshStandardMaterial({ color: 0xf8f6f0, roughness: 0.8, name: 'ext.batten' });
+  M.board = new THREE.MeshStandardMaterial({ color: 0xe3dac3, map: board, roughness: 0.82, name: 'ext.board' });
+  M.batten = new THREE.MeshStandardMaterial({ color: 0xe9e0ca, roughness: 0.8, name: 'ext.batten' });
   M.stone = pbr(ctx, 'castle_wall_slates', { repeat: 1.6, color: 0xa89c8c, roughness: 1, normalScale: 1.2, name: 'ext.stone' });
   M.stoneCap = new THREE.MeshStandardMaterial({ color: 0x9d9184, roughness: 0.9, name: 'ext.stonecap' });
   const shg = shingleTextures();
-  M.shingle = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.92, color: 0xdcd8d2, name: 'ext.shingle' });
+  M.shingle = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.92, name: 'ext.shingle' });
+  M.shingle.color.setRGB(1.35, 1.25, 1.1);
   M.shingle.envMapIntensity = 0.35;
   M.ridgeCap = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.9, color: 0x9aa0ab, name: 'ext.ridgecap' });
   M.bronze = new THREE.MeshStandardMaterial({ color: 0x3b3128, roughness: 0.55, metalness: 0.25, name: 'ext.bronze' });
@@ -152,14 +153,14 @@ export function makeMaterials(ctx) {
   M.metalRoof.normalMap.repeat.set(1 / 0.45, 1);
   M.metalRoof.normalScale.set(1.2, 1.2);
   M.white = new THREE.MeshStandardMaterial({ color: 0xf0ece2, roughness: 0.6, name: 'ext.white' });
-  M.porchCeiling = new THREE.MeshStandardMaterial({ color: 0xe9dcc4, roughness: 0.7, name: 'ext.porchceiling' });
+  M.porchCeiling = new THREE.MeshStandardMaterial({ color: 0xc9a974, roughness: 0.8, name: 'ext.porchceiling' });
   M.doorWood = pbr(ctx, 'rosewood_veneer1', { repeat: 1.2, color: 0xb06a3c, roughness: 0.5, nor: null, name: 'ext.doorwood' });
   M.doorWood.roughness = 0.45;
   const pav = paverTextures();
   M.pavers = new THREE.MeshStandardMaterial({ color: 0xe8d2b4, map: pav.color, normalMap: pav.normal, roughness: 0.88, name: 'ext.pavers' });
   M.brickStep = new THREE.MeshStandardMaterial({ map: pav.color, normalMap: pav.normal, roughness: 0.85, color: 0xd8b8a0, name: 'ext.bricksteps' });
   M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xc8d070, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
-  M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x5e4432, roughness: 1, rough: null, name: 'ext.mulch' });
+  M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x4a3526, roughness: 1, rough: null, name: 'ext.mulch' });
   M.bark = pbr(ctx, 'bark_brown_02', { repeat: 1.2, color: 0xf0e6dc, roughness: 1, normalScale: 1.5, name: 'ext.bark' });
   M.concrete = pbr(ctx, 'white_stucco', { repeat: 1.5, color: 0xb9b1a4, roughness: 0.95, normalScale: 0.5, name: 'ext.walk' });
 

@@ -12,24 +12,24 @@ export function buildLights(ctx, M, group, { pendants = [], chandelier = [0.79, 
   const add = (l) => { L.add(l); ctx.addInteriorLight(l); return l; };
 
   // 1. daylight through the north french doors (soft, slightly cool), facing south into the room
-  const day = new THREE.RectAreaLight(0xf3f1ec, 2.2, 6.2, 2.3);
+  const day = new THREE.RectAreaLight(0xf3e8d8, 1.5, 6.2, 2.3);
   day.position.set(3.1, 1.2, -2.55); day.lookAt(3.1, 1.0, 3.0);
   add(day);
   // 2. warm ceiling fill over the living area (stands in for the can lights + warm bounce)
-  const fill = new THREE.RectAreaLight(0xffe2bf, 1.6, 4.5, 4.5);
+  const fill = new THREE.RectAreaLight(0xffd9b0, 1.6, 4.5, 4.5);
   fill.position.set(2.2, 3.3, 0.6); fill.lookAt(2.2, 0, 0.6);
   add(fill);
   // 3. under-cabinet strip on the west wall
-  const uc = new THREE.RectAreaLight(0xffcf96, 14.0, 3.2, 0.12);
+  const uc = new THREE.RectAreaLight(0xffc080, 18.0, 3.2, 0.12);
   uc.position.set(-4.2, 1.37, 0.75); uc.lookAt(-4.6, 0, 0.75);
   add(uc);
   // 4. island pendants (one warm point light at their centre)
   const pc = pendants.length ? pendants.reduce((a, p) => a.add(new THREE.Vector3(...p)), new THREE.Vector3()).multiplyScalar(1 / pendants.length) : new THREE.Vector3(-1.68, 1.95, 1.1);
-  const pl = new THREE.PointLight(0xffc88e, 3.5, 0, 2);
+  const pl = new THREE.PointLight(0xffbb77, 9.0, 0, 2);
   pl.position.copy(pc).setY(1.7);
   add(pl);
   // 5. dining chandelier
-  const dl = new THREE.PointLight(0xffc88e, 3.0, 0, 2);
+  const dl = new THREE.PointLight(0xffbb77, 4.5, 0, 2);
   dl.position.set(chandelier[0], chandelier[1] + 0.05, chandelier[2]);
   add(dl);
   // 6. butler pantry (lit shelving)
@@ -64,9 +64,9 @@ export function buildLights(ctx, M, group, { pendants = [], chandelier = [0.79, 
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: glowTex, color, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: true }));
     m.position.set(...pos); m.rotation.set(...rot); m.renderOrder = 3; m.castShadow = m.receiveShadow = false; m.userData.noProbe = true; L.add(m);
   };
-  glow(3.6, 0.9, [-4.395, 1.12, 0.75], [0, Math.PI / 2, 0], 0xffb766, 0.55);   // range wall backsplash wash
-  glow(4.0, 3.2, [1.4, 0.016, 0.8], [-Math.PI / 2, 0, 0], 0xffc27a, 0.1);     // living pool
-  glow(2.6, 2.6, [-1.68, 0.02, 1.0], [-Math.PI / 2, 0, 0], 0xffbb70, 0.1);     // island pool
+  glow(3.6, 0.9, [-4.395, 1.12, 0.75], [0, Math.PI / 2, 0], 0xffa850, 0.45);   // range wall backsplash wash
+  glow(4.0, 3.2, [1.4, 0.016, 0.8], [-Math.PI / 2, 0, 0], 0xffb066, 0.16);     // living pool
+  glow(2.6, 2.6, [-1.68, 0.02, 1.0], [-Math.PI / 2, 0, 0], 0xffa860, 0.2);     // island pool
   glow(2.2, 2.2, [0.79, 0.016, 5.75], [-Math.PI / 2, 0, 0], 0xffc27a, 0.07);   // dining pool
   group.add(L);
   return L;

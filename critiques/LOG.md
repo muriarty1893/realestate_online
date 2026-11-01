@@ -326,3 +326,13 @@ the dining window is a flat field, and the dining chairs are white blobs; a dull
 under-cabinet and pendant glow and the rug's contrast.
 *Orchestrator:* the critic's "saturated orange" conflicts with the pixel-sampled match; the sofa probably reads orange next to the cool, flat surroundings. The global lighting
 (warm pools, contrast, contact shadows) is now the great room's main lever.
+
+## Round 8, great_room (2026-11-01, Sonnet builder): lighting pass
+Builder changes: lower, warmer fill (hemi 0.45, env 0.42, exposure 1.02); AO 1.9 / radius 0.55; warmer under-cabinet strip, island and dining lights; darker, redder cabinet stain with a finer grain;
+backsplash joints (normal 2.2, less emissive); a striped rug border and medallion (reverted, see below). Lights and triangles unchanged (6 lights, 294k).
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the sectional still reads as a pile of separate blocks: back cushions at different heights, thick boxy backs and arms, a slab-like chaise arm
+at bottom centre, hard seams. The photo's is one continuous L with a low, even, tight back, slim rounded arms, slightly sagging creased cushions and an unbroken seat line around the corner.
+Further: flat saturated orange leather with uniform sheen (should be tan/cognac patina with varying highlights); no light direction (the photo has bright window daylight, under-cabinet glow, soft furniture shadows);
+the rug's hard striped border; a chunky plank coffee table (photo: thinner reclaimed top on trestle legs); a flat green dining window, no curtains or window-seat cushions.
+*Regression check (blind, round 7 vs round 8): round 7 closer, narrowly*, on the rug only (round 8's stripes look synthetic); every other area a tie (the lighting change is barely visible at this size).
+*Orchestrator:* reverted the rug hunk and kept the rest as round 8. Next: an Opus rebuild of the sectional's silhouette as one continuous L, plus a stronger lighting change than this round's.

@@ -47,8 +47,8 @@ export function makeMats() {
 
   // ---------------- cabinet wood (warm medium-brown shaker, cherry/hickory look)
   M.cab = std({
-    map: tex('oak_veneer_01_diff_1k.jpg', { srgb: true, tile: 0.9 }),
-    color: col(1.12, 0.72, 0.42), roughness: 0.48,
+    map: tex('oak_veneer_01_diff_1k.jpg', { srgb: true, tile: 0.55 }),
+    color: col(1.0, 0.62, 0.34), roughness: 0.48,
   });
   M.cabDark = std({ map: M.cab.map, color: col(0.8, 0.5, 0.3), roughness: 0.55 });
 
@@ -64,8 +64,8 @@ export function makeMats() {
     map: tex('Tiles009_Color.jpg', { srgb: true, tile: 0.61, tileV: 0.305 }),
     normalMap: tex('Tiles009_NormalGL.jpg', { tile: 0.61, tileV: 0.305 }),
     roughnessMap: tex('Tiles009_Roughness.jpg', { tile: 0.61, tileV: 0.305 }),
-    color: col(0.8, 0.79, 0.76), roughness: 0.25, normalScale: new THREE.Vector2(0.8, 0.8),
-    emissive: 0xffa94d, emissiveMap: glowTex(), emissiveIntensity: 0.55,
+    color: col(0.74, 0.72, 0.68), roughness: 0.25, normalScale: new THREE.Vector2(2.2, 2.2),
+    emissive: 0xffa94d, emissiveMap: glowTex(), emissiveIntensity: 0.3,
   });
 
   // ---------------- cognac leather: Poly Haven brown_leather (CC0) PBR set, albedo tinted to the photo's cognac.

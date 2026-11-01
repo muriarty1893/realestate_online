@@ -459,24 +459,24 @@ export async function buildVegetation(ctx, M, parent, site) {
   }
   // palms by the steps and left of the dining bay, big fan palm
   sagos.push({ p: [2.3, G, 9.1], s: [0.9, 0.9, 0.9], rot: 0.3 }, { p: [6.9, G, 9.2], s: [0.9, 0.9, 0.9], rot: 1.2 });
-  sagos.push({ p: [-2.1, G, 7.4], s: [1.6, 1.7, 1.6], rot: 0.7 });
+  sagos.push({ p: [-2.1, G, 7.4], s: [1.6, 1.7, 1.6], rot: 0.7 }, { p: [1.0, G, 8.4], s: [1.9, 2.1, 1.9], rot: 2.0 });
   // flowers bordering the walk near the steps
-  for (const sx of [-1, 1]) for (let i = 0; i < 12; i++) add(i % 2 ? 'shrub1' : 'periw', 4.58 + sx * (1.5 + R() * 2.4), 9.6 + R() * 2.0, i % 2 ? 1 : 2.4);
+  for (const sx of [-1, 1]) for (let i = 0; i < 8; i++) add(i % 2 ? 'shrub1' : 'periw', 4.58 + sx * (1.5 + R() * 2.4), 9.6 + R() * 2.0, i % 2 ? 1 : 2.4);
   // foreground beds
   const [bedF, bedL, bedR, bedE] = site.beds;
-  scatter(bedL, 32, R, (x, z) => add('fern', x, z, U(1.1, 1.5)), (x) => x < -9 || x > -3);
-  scatter(bedL, 68, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
-  scatter(bedL, 60, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
+  scatter(bedL, 75, R, (x, z) => add('fern', x, z, U(1.8, 2.6)), (x) => x < -9 || x > -3);
+  scatter(bedL, 80, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
+  scatter(bedL, 40, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
   scatter(bedL, 28, R, (x, z) => add('shrub4', x, z, U(1.0, 1.6)));
-  scatter(bedL, 120, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
-  scatter(bedL, 200, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
+  scatter(bedL, 70, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
+  scatter(bedL, 0, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
   scatter(bedR, 48, R, (x, z) => add('shrub1', x, z, U(0.6, 0.9)));
-  scatter(bedR, 100, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
-  scatter(bedR, 28, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
-  scatter(bedR, 16, R, (x, z) => add('fern', x, z, U(1.1, 1.4)), (x) => x > 12);
-  scatter(bedR, 28, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
-  scatter(bedR, 200, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
-  scatter(bedE, 28, R, (x, z) => add('shrub2', x, z, U(0.9, 1.5)));
+  scatter(bedR, 60, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
+  scatter(bedR, 50, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
+  scatter(bedR, 30, R, (x, z) => add('fern', x, z, U(1.4, 2.0)));
+  scatter(bedR, 45, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
+  scatter(bedR, 0, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
+  scatter(bedE, 20, R, (x, z) => add('shrub2', x, z, U(0.9, 1.5)));
   for (const [x, z, k] of [[13.4, 8.5, 1.5], [14.6, 6.5, 1.7], [12.8, 10.8, 1.2], [15.8, 9.5, 1.4], [16.6, 6, 1.6]]) add('shrub2', x, z, k);
   void bedF;
   // low stacked-stone wainscot along the base of the front walls
@@ -504,11 +504,37 @@ export async function buildVegetation(ctx, M, parent, site) {
     scatter(bed, bed === bedE ? 10 : 90, R, (x, z) => blooms.push({ p: [x, G, z], s: [U(0.8, 1.3), U(0.7, 1.1), U(0.8, 1.3)], rot: R() * 6.28 }));
     scatter(bed, bed === bedE ? 10 : 70, R, (x, z) => straps.push({ p: [x, G, z], s: [U(0.9, 1.5), U(0.9, 1.6), U(0.9, 1.5)], rot: R() * 6.28 }));
   }
-  scatter(site.beds[0], 30, R, (x, z) => blooms.push({ p: [x, G, z], s: [0.7, 0.6, 0.7], rot: R() * 6.28 }), (x, z) => z > front(x) + 1.3 && !onWalk(x, 0.6));
+  scatter(site.beds[0], 0, R, (x, z) => blooms.push({ p: [x, G, z], s: [0.7, 0.6, 0.7], rot: R() * 6.28 }), (x, z) => z > front(x) + 1.3 && !onWalk(x, 0.6));
   for (const [geo, mat, list, nm] of [[shrubGeo(31, ATLAS.box, { cards: 100, rx: 0.4, ry: 0.4, size: 0.4 }), shrubMat, boxes, 'boxwood'],
     [shrubGeo(32, [...ATLAS.box, ...ATLAS.flower, ...ATLAS.flower], { cards: 110, rx: 0.35, ry: 0.3, size: 0.36 }), shrubMat, blooms, 'blooms'],
     [strapGeo(0.6, 0.85), strapMat, straps, 'hosta']]) { const im = instanced(geo, mat, list, nm); group.add(im); skipInOverride(im); }
 
+  // flower clusters: hydrangea/impatiens-like heads of 5 cm blooms on stems, grouped 20-40 cm wide
+  {
+    const fr = rng(777), acc = []; const cols = [[1, .55, .7], [.95, .35, .55], [1, .92, .95], [1, .75, .82], [.55, .8, .45]];
+    const pos = [], col = [], idx = []; let vn = 0;
+    const o = new THREE.OctahedronGeometry(1, 0); const op = o.attributes.position;
+    for (let h = 0; h < 3; h++) {
+      const base = [[1, .55, .7], [1, .93, .96], [.95, .4, .6]][h];
+      for (let b = 0; b < 26; b++) {
+        const a = fr() * 6.28, rr = Math.sqrt(fr()) * 0.17, c = [Math.cos(a) * rr, 0.32 + (0.12 - rr * 0.4) + fr() * 0.07, Math.sin(a) * rr], sz = 0.028 + fr() * 0.015;
+        const k = 0.85 + fr() * 0.25;
+        for (let i = 0; i < op.count; i++) { pos.push(c[0] + op.getX(i) * sz, c[1] + op.getY(i) * sz * 0.8, c[2] + op.getZ(i) * sz); col.push(base[0] * k, base[1] * k, base[2] * k); }
+      }
+      for (let st = 0; st < 0; st++) { // leaves/stem fill: dark-green tufts under the head
+        const a = fr() * 6.28, rr = fr() * 0.15; const c = [Math.cos(a) * rr, 0.14 + fr() * 0.12, Math.sin(a) * rr], sz = 0.07 + fr() * 0.04;
+        for (let i = 0; i < op.count; i++) { pos.push(c[0] + op.getX(i) * sz, c[1] + op.getY(i) * sz, c[2] + op.getZ(i) * sz); col.push(.25, .5, .2); }
+      }
+      void vn; void idx; void acc;
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos.splice(0), 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col.splice(0), 3)); g.computeVertexNormals();
+      const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, emissive: 0x401a20, emissiveIntensity: 0.25, flatShading: true, name: 'veg.flowerhead' });
+      const list = [];
+      const place = (x, z, sc) => list.push({ p: [x, G, z], s: [sc, sc * U(0.9, 1.3), sc], rot: R() * 6.28 });
+      for (const bed of [bedL, bedR]) scatter(bed, 22, R, (x, z) => place(x, z, U(0.8, 1.3)), (x, z) => !onWalk(x, 0.5));
+      if (h === 0) for (let x = -12.4; x < 13; x += U(1.2, 2.2)) if (!onWalk(x, 0.4)) place(x, front(x) + U(1.5, 2.2), U(1, 1.5));
+      const im = instanced(g, m, list, 'flowerheads' + h); group.add(im);
+    }
+  }
   for (const im of [instanced(sagoGeo(21), frondMat, sagos, 'sagos')]) { group.add(im); skipInOverride(im); }
 
   // ---------------- load the glTF plant kinds and instance them (per-instance tint)

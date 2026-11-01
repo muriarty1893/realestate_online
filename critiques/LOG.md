@@ -378,3 +378,13 @@ It should be one continuous duvet folded back below the pillows, a throw draped 
 the bench throw a stiff tent with a flat repeating knit; dark high-contrast planks at the right.
 *Regression check (blind, round 10 vs round 11): round 11 closer* (greige palette near the photo, rumpled linen, the throw down the right side hanging off the edge, lighter base, the bench throw's lower drape).
 Round 11's centre seam (two twin duvets) is its giveaway; round 10's duvet was one continuous surface.
+
+## Round 10, exterior (2026-11-01, Sonnet builder): planting
+Builder changes (veg.js): the speckle mounds (~200 per bed) and most periwinkle/calathea/shrub clutter removed; instanced flower heads (~26 faceted 3–4 cm blooms, clusters 20–35 cm, pink/white/rose);
+larger ferns (1.8–2.6x; 75 left, 30 right) below the lawn line; a taller sago palm left of the entry (barely visible from this camera). 303k tris (from 372k).
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the canopy across the top third: thin smooth dark limbs with sparse flat cut-out leaf clusters, a big empty pale sky above the roof, the left trunk a smooth
+dark blob. The photo: a dense layered live-oak canopy filling the top, thick twisting limbs with rough grey bark and shaded undersides, thousands of small overlapping leaves, foliage in front of the ridge and chimney,
+only small sky patches. Further: sparse foundation beds over bare mulch (photo: full mixed-height planting hugging the stone); flat peach-white windows; harsh even leaf dapple and pinkish walls;
+sprite-like ferns and uniform pink clusters; flat roof and lawn.
+*Regression check (blind, round 9 vs round 10): round 10 closer, slightly* (readable fern fronds, broad leaves and flowers in the foreground; cleaner lawn edges). Round 9's fuller mounded foundation shrubs
+(covering the mulch under the windows) should come back; the flowers should be smaller, mixed pink and white, looser.

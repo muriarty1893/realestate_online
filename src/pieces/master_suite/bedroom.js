@@ -106,7 +106,7 @@ function bench(ctx, M, g, P) {
   b.add(rbox(Lb, cushT, D, 0.03, M.benchFab, 0, H - cushT / 2, 0, { segs: 4 }));
   // chunky knit throw draped over the east half, hanging toward the floor in front
   const th = mesh(clothGeo({ x0: -0.16, x1: 0.42, z0: -D / 2 + 0.03, z1: D / 2 - 0.02, top: H + 0.03, r: 0.045,
-    hang: { w: 0.07, e: 0.12, h: 0.05, f: 0.52 }, density: 90, flare: 0.22, maxDrop: H + 0.02, floorY: 0.015, hem: 0.03, hemIn: 0.02,
+    hang: { w: 0.05, e: 0.05, h: 0.05, f: 0.5 }, density: 90, flare: 0.22, maxDrop: H + 0.02, floorY: 0.015, hem: 0.03, hemIn: 0.02,
     field: (s, t, drop) => 0.02 * Math.sin(s * 8 + t * 4) * Math.sin(t * 6 - s * 3) + (drop > 0 ? 0.015 + 0.03 * Math.sin(drop * 9 + s * 5) * Math.min(1, drop * 4) : 0.012), foldAmp: 0.07, foldSeed: 13, foldScale: 10,
     shade: (s, t, drop, disp) => { const band = s > 0.1 && s < 0.3 ? 1.0 : 0.8; return band * (1 - 0.25 * Math.min(1, drop / 0.45)) * (1 + Math.max(-0.2, Math.min(0.1, disp * 6))); } }), M.knit);
   th.rotation.y = 0.1;
@@ -300,10 +300,15 @@ function grounding(ctx, M, g, P) {
   // bed: wide soft occlusion + tight dark core under the platform
   softShadow(g, { x: BED.x, y: f, z: bz + 0.02, w: W + 0.7, d: L + 0.75, blur: 0.3, r: 0.25, opacity: 0.62 });
   softShadow(g, { x: BED.x, y: f + 0.002, z: bz + 0.02, w: W + 0.2, d: L + 0.25, blur: 0.12, r: 0.08, opacity: 0.5 });
+  // tight contact line where the upholstered base meets the rug
+  softShadow(g, { x: BED.x, y: f + 0.003, z: bz + 0.02, w: W + 0.1, d: L + 0.2, blur: 0.045, r: 0.04, opacity: 0.6, order: 3 });
   // bench
   const bzc = P.bench.z, bD = P.bench.D;
   softShadow(g, { x: BED.x, y: f, z: bzc + 0.03, w: 1.62 + 0.4, d: bD + 0.4, blur: 0.18, r: 0.12, opacity: 0.64 });
   for (const s of [-1, 1]) softShadow(g, { x: BED.x + s * (0.81 - 0.04), y: f + 0.002, z: bzc, w: 0.2, d: bD + 0.08, blur: 0.05, r: 0.02, opacity: 0.78 });
+  for (const s of [-1, 1]) softShadow(g, { x: BED.x + s * (0.81 - 0.0375), y: f + 0.004, z: bzc, w: 0.1, d: bD + 0.02, blur: 0.022, r: 0.01, opacity: 0.85, order: 3 });
+  // where the knit throw reaches the rug in front of the bench
+  softShadow(g, { x: BED.x + 0.15, y: f + 0.004, z: bzc + bD / 2 + 0.06, w: 0.75, d: 0.22, blur: 0.08, r: 0.08, opacity: 0.55, rotY: -0.1, order: 3 });
   // rug edge on the floor
   softShadow(g, { x: BED.x + 0.03, y: 0.004, z: -5.35 - 1.37, w: 3.66 + 0.1, d: 2.74 + 0.1, blur: 0.12, r: 0.04, opacity: 0.3 });
   // nightstands: floor + wall shadows below the floating cabinets, tops under lamps / decor

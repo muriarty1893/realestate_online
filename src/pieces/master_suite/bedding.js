@@ -56,63 +56,95 @@ export function creaseField(seed, n, area, { len = [0.12, 0.5], width = [0.008, 
 // Points beyond the rect wrap over the rounded edge along the radial direction and fall vertically,
 // flaring out by `flare` per metre of drop; the drop is softly clamped at `maxDrop`.
 // field(s, t, drop) returns a displacement along the base-surface normal.
-export function clothGeo({ x0, x1, z0, z1, top, r = 0.08, hang, density = 70, flare = 0.1, maxDrop = 0.5, floorY = 0.02,
-  hem = 0.03, hemIn = 0.012, field = () => 0, foldAmp = 0.012, foldSeed = 1, foldScale = 9, shade = null }) {
-  const S0 = x0 - hang.w, S1 = x1 + hang.e, T0 = z0 - hang.h, T1 = z1 + hang.f;
-  const nx = Math.max(8, Math.round((S1 - S0) * density)), nz = Math.max(8, Math.round((T1 - T0) * density));
-  const pos = new Float32Array((nx + 1) * (nz + 1) * 3), col = shade ? new Float32Array((nx + 1) * (nz + 1) * 3) : null, uv = new Float32Array((nx + 1) * (nz + 1) * 2);
+export function makeDrape({ x0, x1, z0, z1, top, r = 0.08, flare = 0.1, maxDrop = 0.5, floorY = 0.02, field = () => 0, foldAmp = 0.012, foldSeed = 1, foldScale = 9 }) {
   const arcL = (Math.PI / 2) * r;
-  let k = 0;
-  for (let j = 0; j <= nz; j++) {
-    const t = T0 + ((T1 - T0) * j) / nz;
-    for (let i = 0; i <= nx; i++) {
-      const s = S0 + ((S1 - S0) * i) / nx;
-      const cx = Math.min(x1, Math.max(x0, s)), cz = Math.min(z1, Math.max(z0, t));
-      const dx = s - cx, dz = t - cz, d = Math.hypot(dx, dz);
-      let px = s, py = top, pz = t, nX = 0, nY = 1, nZ = 0, drop = 0;
-      if (d > 1e-6) {
-        const ux = dx / d, uz = dz / d;
-        let h, v;
-        if (d <= arcL) { const th = d / r; h = r * Math.sin(th); v = r * (1 - Math.cos(th)); nX = ux * Math.sin(th); nZ = uz * Math.sin(th); nY = Math.cos(th); }
-        else {
-          let e = d - arcL;
-          // soft clamp of the drop so corners don't spear down
-          const lim = maxDrop - r, kk = 0.08;
-          if (e > lim - kk) e = lim - kk * Math.exp(-(e - (lim - kk)) / kk);
-          h = r + e * flare; v = r + e; nX = ux; nZ = uz; nY = 0; drop = e;
-        }
-        px = cx + ux * h; pz = cz + uz * h; py = top - v;
-        if (py < floorY) { const ex = floorY - py; py = floorY; px += ux * ex; pz += uz * ex; }
-        // vertical hanging folds: vary along the edge, constant down the drop, growing with depth
-        if (drop > 0) {
-          const wx = (dx * dx) / (d * d), along = wx * t + (1 - wx) * s;
-          const grow = Math.min(1, drop / 0.18);
-          const f = foldAmp * grow * (Math.sin(along * foldScale + vnoise(along * 3, 0, foldSeed) * 2.2) * 0.6 + fbm(along * foldScale * 0.45, drop * 1.5, foldSeed + 5) * 0.9);
-          px += ux * f; pz += uz * f;
-        }
+  const o = { x: 0, y: 0, z: 0, nX: 0, nY: 1, nZ: 0, drop: 0, disp: 0 };
+  return (s, t) => {
+    const cx = Math.min(x1, Math.max(x0, s)), cz = Math.min(z1, Math.max(z0, t));
+    const dx = s - cx, dz = t - cz, d = Math.hypot(dx, dz);
+    let px = s, py = top, pz = t, nX = 0, nY = 1, nZ = 0, drop = 0;
+    if (d > 1e-6) {
+      const ux = dx / d, uz = dz / d;
+      let h, v;
+      if (d <= arcL) { const th = d / r; h = r * Math.sin(th); v = r * (1 - Math.cos(th)); nX = ux * Math.sin(th); nZ = uz * Math.sin(th); nY = Math.cos(th); }
+      else {
+        let e = d - arcL;
+        // soft clamp of the drop so corners don't spear down
+        const lim = maxDrop - r, kk = 0.08;
+        if (e > lim - kk) e = lim - kk * Math.exp(-(e - (lim - kk)) / kk);
+        h = r + e * flare; v = r + e; nX = ux; nZ = uz; nY = 0; drop = e;
       }
-      const disp = field(s, t, drop);
-      px += nX * disp; py += nY * disp; pz += nZ * disp;
-      // rolled hem: the last few cm curl back under, giving the edge visible thickness
-      const ed = Math.min(s - S0 + (hang.w > 0 ? 0 : 9), S1 - s + (hang.e > 0 ? 0 : 9), t - T0 + (hang.h > 0 ? 0 : 9), T1 - t + (hang.f > 0 ? 0 : 9));
-      if (ed < hem) { const q = 1 - ed / hem, c = q * q; px -= nX * hemIn * c; py -= nY * hemIn * c; pz -= nZ * hemIn * c; }
-      pos[k * 3] = px; pos[k * 3 + 1] = py; pos[k * 3 + 2] = pz;
-      if (col) { const c = shade(s, t, drop, disp, py); col[k * 3] = c; col[k * 3 + 1] = c; col[k * 3 + 2] = c * 0.985; }
-      uv[k * 2] = s; uv[k * 2 + 1] = t; k++;
+      px = cx + ux * h; pz = cz + uz * h; py = top - v;
+      if (py < floorY) { const ex = floorY - py; py = floorY; px += ux * ex; pz += uz * ex; }
+      // vertical hanging folds: vary along the edge, constant down the drop, growing with depth
+      if (drop > 0) {
+        const wx = (dx * dx) / (d * d), along = wx * t + (1 - wx) * s;
+        const grow = Math.min(1, drop / 0.18);
+        const f = foldAmp * grow * (Math.sin(along * foldScale + vnoise(along * 3, 0, foldSeed) * 2.2) * 0.6 + fbm(along * foldScale * 0.45, drop * 1.5, foldSeed + 5) * 0.9);
+        px += ux * f; pz += uz * f;
+      }
     }
+    const disp = field(s, t, drop);
+    o.x = px + nX * disp; o.y = py + nY * disp; o.z = pz + nZ * disp;
+    o.nX = nX; o.nY = nY; o.nZ = nZ; o.drop = drop; o.disp = disp;
+    return o;
+  };
+}
+
+function gridGeo(nu, nv, vert) {
+  const n = (nu + 1) * (nv + 1);
+  const pos = new Float32Array(n * 3), col = new Float32Array(n * 3), uv = new Float32Array(n * 2);
+  let k = 0, hasCol = false;
+  for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) {
+    const r = vert(i / nu, j / nv);
+    pos[k * 3] = r[0]; pos[k * 3 + 1] = r[1]; pos[k * 3 + 2] = r[2];
+    uv[k * 2] = r[3]; uv[k * 2 + 1] = r[4];
+    if (r[5] !== undefined) { hasCol = true; col[k * 3] = r[5]; col[k * 3 + 1] = r[5]; col[k * 3 + 2] = r[5] * 0.985; }
+    k++;
   }
   const idx = [];
-  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
-    const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) {
+    const a = j * (nu + 1) + i, b = a + 1, c = a + nu + 1, d = c + 1;
     idx.push(a, c, b, b, c, d);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-  if (col) g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  if (hasCol) g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   g.setIndex(idx);
   g.computeVertexNormals();
   return g;
+}
+
+export function clothGeo(opts) {
+  const { x0, x1, z0, z1, hang, density = 70, hem = 0.03, hemIn = 0.012, shade = null } = opts;
+  const P = makeDrape(opts);
+  const S0 = x0 - hang.w, S1 = x1 + hang.e, T0 = z0 - hang.h, T1 = z1 + hang.f;
+  const nx = Math.max(8, Math.round((S1 - S0) * density)), nz = Math.max(8, Math.round((T1 - T0) * density));
+  return gridGeo(nx, nz, (u, v) => {
+    const s = S0 + (S1 - S0) * u, t = T0 + (T1 - T0) * v;
+    const q = P(s, t);
+    let px = q.x, py = q.y, pz = q.z;
+    // rolled hem: the last few cm curl back under, giving the edge visible thickness
+    const ed = Math.min(s - S0 + (hang.w > 0 ? 0 : 9), S1 - s + (hang.e > 0 ? 0 : 9), t - T0 + (hang.h > 0 ? 0 : 9), T1 - t + (hang.f > 0 ? 0 : 9));
+    if (ed < hem) { const c = (1 - ed / hem) ** 2; px -= q.nX * hemIn * c; py -= q.nY * hemIn * c; pz -= q.nZ * hemIn * c; }
+    return [px, py, pz, s, t, shade ? shade(s, t, q.drop, q.disp, py) : undefined];
+  });
+}
+
+// A layer lying on a drape `P`, defined in P's cloth coordinates: map(u, v) -> [s, t] over the unit square.
+// It follows P's surface (folds and all) but bridges its valleys, sits `thick` above it, adds its own
+// creases (lift >= 0), and every free edge rolls down onto the surface below so it shows its thickness.
+export function overlayGeo(P, { map, nu, nv, sizeU, sizeV, thick = 0.014, lift = () => 0, hem = 0.035, shade = null }) {
+  return gridGeo(nu, nv, (u, v) => {
+    const [s, t] = map(u, v);
+    const q = P(s, t);
+    const own = lift(s, t, q);
+    const ed = Math.min(u * sizeU, (1 - u) * sizeU, v * sizeV, (1 - v) * sizeV);
+    const roll = ed < hem ? (1 - ed / hem) ** 2 : 0;
+    const off = (Math.max(0, 0.004 - 0.5 * q.disp) + thick + own) * (1 - roll) + 0.003 * roll;
+    return [q.x + q.nX * off, q.y + q.nY * off, q.z + q.nZ * off, s, t, shade ? shade(s, t, q.drop, q.disp + own * (1 - roll), u, v) : undefined];
+  });
 }
 
 // ---------------------------------------------------------------- the bed's layers
@@ -139,9 +171,28 @@ export function buildBedding(ctx, M, b, { W, L, mTop }) {
     const edgeSoft = drop > 0 ? 0.5 : 1;
     return loft + edgeSoft * (fine(s, t) + broad(s, t)) + 0.0015 * fbm(s * 14, t * 14, 9);
   };
-  const duv = mesh(clothGeo({ x0: -hw, x1: hw, z0: zHead, z1: zFoot, top: duvTop, r: 0.1,
+  const duvOpts = { x0: -hw, x1: hw, z0: zHead, z1: zFoot, top: duvTop, r: 0.1,
     hang: { w: 0.5, e: 0.5, h: 0, f: 0.46 }, density: 92, flare: 0.1, maxDrop: 0.42, hem: 0.035, hemIn: 0.02,
-    field: duvField, foldAmp: 0.026, foldSeed: 3, foldScale: 19, shade: shadeFn(0) }), M.bedDuvet, { name: 'ms.duvet' });
+    field: duvField, foldAmp: 0.026, foldSeed: 3, foldScale: 19 };
+  const duvP = makeDrape(duvOpts);
+  // throw footprint in duvet cloth coords: an angled top edge, a west edge running diagonally from upper
+  // left to lower middle, the east part hanging down the side with the duvet
+  const lerp = (a, b, x) => a + (b - a) * x;
+  const sWest = (v) => lerp(-0.86, 0.06, v * (0.8 + 0.2 * v)) + 0.05 * Math.sin(v * 6.5 + 0.7) + 0.025 * Math.sin(v * 15);
+  const thrMap = (u, v) => { const sW = sWest(v), sE = 1.42; const s = lerp(sW, sE, u); return [s, lerp(lerp(0.93, 1.16, u), lerp(2.02, 2.16, u), v)]; };
+  const duvShade = shadeFn(0);
+  // duvet darkens softly just outside the throw's west and top edges (contact shadow)
+  const thrEdgeShade = (s, t) => {
+    if (t < 0.85 || t > 2.2) return 1;
+    const v = Math.min(1, Math.max(0, (t - 0.93) / 1.11)), dW = sWest(v) - s;
+    const uu = Math.min(1, Math.max(0, (s + 0.86) / 2.28)), dT = lerp(0.93, 1.16, uu) - t;
+    let k = 1;
+    if (dW > -0.01 && dW < 0.07 && t > 0.9) k *= 0.8 + 0.2 * Math.min(1, Math.max(0, dW) / 0.07);
+    if (dT > -0.01 && dT < 0.07 && s > -0.86) k *= 0.82 + 0.18 * Math.min(1, Math.max(0, dT) / 0.07);
+    return k;
+  };
+  duvOpts.shade = (s, t, drop, disp, py) => duvShade(s, t, drop, disp, py) * thrEdgeShade(s, t);
+  const duv = mesh(clothGeo(duvOpts), M.bedDuvet, { name: 'ms.duvet' });
   b.add(duv);
 
   // 2. turned-down top edge: the duvet folded back on itself, a band with horizontal creases and a rolled lip
@@ -151,35 +202,30 @@ export function buildBedding(ctx, M, b, { W, L, mTop }) {
     field: (s, t, drop) => bandCr(s, t) + 0.008 * fbm(s * 3, t * 3, 44) * (drop > 0 ? 0.4 : 1), foldAmp: 0.014, foldSeed: 5, foldScale: 10, shade: shadeFn(0) }), M.bedBand, { name: 'ms.duvetBand' });
   b.add(band);
 
-  // 3. pale layered throw lengthwise over the east half, spilling down the east side
-  const thrCr = creaseField(51, 260, { x0: -0.4, x1: 1.6, z0: 0.6, z1: 2.3 }, { len: [0.15, 0.6], width: [0.008, 0.022], amp: [0.003, 0.009], dir: 0.15, spread: 0.9 });
-  const tThr = duvTop + 0.022;
-  const thr = mesh(clothGeo({ x0: -0.12, x1: hw, z0: 1.02, z1: 2.14, top: tThr, r: 0.12,
-    hang: { w: 0.05, e: 0.56, h: 0.05, f: 0.05 }, density: 80, flare: 0.16, maxDrop: 0.5, hem: 0.03, hemIn: 0.012,
-    field: (s, t, drop) => thrCr(s, t) + 0.006 * fbm(s * 3.5, t * 3.5, 52) + (drop > 0 ? 0.01 : 0), foldAmp: 0.03, foldSeed: 7, foldScale: 16, shade: shadeFn(0.004) }), M.bedThrow, { name: 'ms.throw' });
+  // 3. pale throw laid loosely over the east half, following the duvet's own folds, spilling down the east side
+  const thrCr = creaseField(51, 240, { x0: -0.8, x1: 1.6, z0: 0.8, z1: 2.3 }, { len: [0.15, 0.6], width: [0.01, 0.025], amp: [0.002, 0.007], dir: 0.15, spread: 0.9 });
+  const thrShade = shadeFn(0.004);
+  const thr = mesh(overlayGeo(duvP, { map: thrMap, nu: 150, nv: 110, sizeU: 1.8, sizeV: 1.1, thick: 0.014,
+    lift: (s, t, q) => Math.max(0, thrCr(s, t) + 0.004) + 0.006 * (fbm(s * 3, t * 3, 52) * 0.5 + 0.5),
+    shade: (s, t, drop, disp) => thrShade(s, t, drop, disp) }), M.bedThrow, { name: 'ms.throw' });
   b.add(thr);
-  // its folded-over top layer (a second, shorter thickness of the same throw)
-  const thr2 = mesh(clothGeo({ x0: -0.1, x1: hw, z0: 0.98, z1: 1.3, top: tThr + 0.018, r: 0.14,
-    hang: { w: 0.05, e: 0.36, h: 0.06, f: 0.04 }, density: 80, flare: 0.18, maxDrop: 0.42, hem: 0.03, hemIn: 0.014,
-    field: (s, t, drop) => thrCr(s + 0.3, t + 0.2) * 0.8 + 0.005 * fbm(s * 3, t * 5, 58), foldAmp: 0.022, foldSeed: 9, foldScale: 18, shade: shadeFn(0) }), M.bedThrow, { name: 'ms.throwFold' });
-  b.add(thr2);
 
-  // 4. pillows: lighter and varied; euro shams, sleepers, a white sleeper, two decoratives and a lumbar
+  // 4. pillows: three euro shams, two sleepers, one accent (the photo's count), in neat rows
   const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0, o = {}) => {
     const m = mesh(pillowGeo(w, h, d, { segs: 30, seed, puff: 1.0, pinch: 0.12, shape: 0.55, crumple: 0.12, sag: 0.05, ...o }), mat);
     m.position.set(x, y, z); m.rotation.set(-tilt, yaw, 0, 'YXZ');
     b.add(m); return m;
   };
   const yb = mTop + 0.03;
-  pil(0.7, 0.62, 0.3, M.pilEuro, -0.66, yb + 0.28, 0.16, 0.3, 0.05, 1);
-  pil(0.7, 0.62, 0.3, M.pilEuro2, 0.0, yb + 0.29, 0.15, 0.27, -0.02, 2);
-  pil(0.7, 0.62, 0.3, M.pilEuro, 0.66, yb + 0.28, 0.16, 0.31, -0.06, 3);
-  pil(0.86, 0.5, 0.26, M.pilSleepL, -0.44, yb + 0.19, 0.38, 0.52, 0.06, 4);
-  pil(0.86, 0.5, 0.26, M.pilSleepR, 0.36, yb + 0.19, 0.38, 0.5, -0.06, 5);
-  pil(0.66, 0.46, 0.24, M.pilWhite, 0.78, yb + 0.18, 0.33, 0.45, -0.14, 9);
-  pil(0.48, 0.46, 0.2, M.pilDecoL, -0.48, yb + 0.18, 0.58, 0.58, 0.14, 6, { crumple: 0.08 });
-  pil(0.48, 0.46, 0.2, M.pilDecoR, 0.45, yb + 0.18, 0.58, 0.58, -0.16, 7, { crumple: 0.08 });
-  pil(0.58, 0.32, 0.17, M.pilLumbar, -0.02, yb + 0.13, 0.66, 0.62, 0.02, 8, { crumple: 0.06 });
+  // back row: three euro shams standing against the headboard, slight lean
+  pil(0.68, 0.66, 0.22, M.pilEuro, -0.67, yb + 0.31, 0.17, 0.17, 0.0, 1, { crumple: 0.08, sag: 0.03 });
+  pil(0.68, 0.66, 0.22, M.pilEuro2, 0.0, yb + 0.315, 0.17, 0.15, 0.0, 2, { crumple: 0.08, sag: 0.03 });
+  pil(0.68, 0.66, 0.22, M.pilWhite, 0.67, yb + 0.31, 0.17, 0.18, 0.0, 3, { crumple: 0.08, sag: 0.03 });
+  // sleeping pillows leaning on them
+  pil(0.92, 0.5, 0.2, M.pilSleepL, -0.47, yb + 0.21, 0.43, 0.42, 0.0, 4, { crumple: 0.1 });
+  pil(0.92, 0.5, 0.2, M.pilSleepR, 0.47, yb + 0.21, 0.43, 0.44, 0.0, 5, { crumple: 0.1 });
+  // one accent square, slightly left of centre
+  pil(0.5, 0.5, 0.16, M.pilDecoL, -0.2, yb + 0.2, 0.63, 0.55, 0.04, 6, { crumple: 0.06 });
   return { duvTop };
 }
 
@@ -195,7 +241,7 @@ export function beddingMats(M) {
   M.bedBand = tint(M.duvet, 0xdfd2c4, { name: 'ms.bedBand' });
   withMaps(M.bedDuvet, fineLinen, 0.8); withMaps(M.bedBand, fineLinen, 0.8);
   for (const m of [M.bedDuvet, M.bedBand]) m.vertexColors = true;
-  M.bedThrow = withMaps(tint(M.throwCream, 0xeee6da, { name: 'ms.bedThrow' }), throwWeave, 0.9);
+  M.bedThrow = withMaps(tint(M.throwCream, 0xf4eee5, { name: 'ms.bedThrow' }), throwWeave, 0.9);
   M.bedThrow.vertexColors = true;
   // bench throw: finer, softer chunky knit (~3 cm loops, lower contrast), two-tone via vertex colours
   const km = knitMaps({ size: 512, repeatM: 0.25, cols: 6, rows: 8, seed: 5, lo: 0.64, nStrength: 4.2 });

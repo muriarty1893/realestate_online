@@ -399,3 +399,14 @@ piping, creases or wrinkles, no sheen variation. Should be warmer tan cognac, da
 Further: flat, even light (window daylight, contact shadows, corner falloff); a flat beige rug and a washed-out floor; a blank green/grey dining window; stiff throw and pillows; uniformly orange cabinets and an overall orange cast.
 *Regression check (blind, round 8 vs round 9): round 9 clearly closer* (the front run reads as one long continuous sofa with three back cushions and an arm with the cream throw; more trestle base visible).
 Round 8's crisper seat seams could come back; round 9's loose corner back cushion looks a little like a pillow.
+
+## Round 12, master_suite (2026-11-01, Opus builder, continuing round 11)
+Builder changes: the "seam" was round 11's throw edge running straight down the bed near the centreline plus a second folded layer; the throw is rebuilt with `overlayGeo` over the duvet's surface (`makeDrape`):
+it follows the folds, sits 1.4 cm above, has an angled top and a diagonal wavy west edge, rolled free edges, a soft contact darkening on the duvet; 6 pillows in rows (three euro shams, two king pillows, one knit accent);
+contact shadows at the bed base, bench legs and the bench throw; shorter bench-throw side overhangs. 271k tris.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: **the floor** (bottom left and right of the bed): blurry, stretched, oversized planks with smeared grain, too orange-red, no sheen. It should be light-to-mid white oak,
+~7 in planks, crisp grain, varied board lengths with seams, a soft satin sheen catching the window light. Further: cut-out leaf sprites in the window views; the smeared right-edge curtain; a flat yellow-sepia cast
+(needs neutral whites, sun across bed and floor, occlusion under furniture); the duvet and throw look like crinkled plastic with a busy wrinkle texture; a flat printed rug with no pile or edge.
+*Regression check (blind, round 11 vs round 12): round 12 closer* (one continuous duvet with the diagonal throw draping over the right edge, tidier euro row, the throw layered like R's). Take back round 11's small muted lumbar pillow at front centre
+in place of the knit square. Both: floor too dark and orange-red; bench throw should be chunkier and piled.
+*Orchestrator:* the first round since round 6 where the critic's biggest gap is not the bed.

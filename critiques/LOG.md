@@ -410,3 +410,13 @@ contact shadows at the bed base, bench legs and the bench throw; shorter bench-t
 *Regression check (blind, round 11 vs round 12): round 12 closer* (one continuous duvet with the diagonal throw draping over the right edge, tidier euro row, the throw layered like R's). Take back round 11's small muted lumbar pillow at front centre
 in place of the knit square. Both: floor too dark and orange-red; bench throw should be chunkier and piled.
 *Orchestrator:* the first round since round 6 where the critic's biggest gap is not the bed.
+
+## Round 10, great_room (2026-11-01, Sonnet builder): leather saturation, rug, floor; **rejected, reverted to round 9**
+Builder found the cause of the orange: the Poly Haven brown_leather albedo itself is 81,45,16 (B/R 0.2), so tints could not lift blue. The hide() shader now desaturated 30% toward luminance, wider mottling
+(0.5–1.5); a warmer floor tint; a procedural `rugTexV2` (blue-grey cloudy field, soft medallion). Leather at the return's back cushion: 118,64,33 -> 111,71,48 (photo 102,67,47).
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the leather is now a flat, muddy reddish-brown with blotchy noise and no sheen, like clay or vinyl; the photo's is lighter caramel/cognac with soft
+highlights along arm tops, seat fronts and back cushions, welt seams, creasing and dark crevices. Further: a flat solid grey rug; even lighting with weak shadows; a flat window backdrop; stiff throws and pillows; a uniform backsplash, sparse counters.
+*Regression check (blind, round 9 vs round 10): round 9 closer* (warmer tan-cognac leather vs round 10's duller muddy red-brown; round 9's lighter mottled rug vs a flat grey slab). It could tone down saturation only in the highlights.
+Both: the sofa throw doesn't drape over the left arm; the chaise throw is a bulky block; dining chairs too white; range hood too thick; no creases or seams.
+*Orchestrator:* the per-patch saturation match lost to the look: desaturating the whole hide killed its warmth and sheen. The diff is in `shots/great_room/rejected/round_10.patch`.
+A next try should desaturate only the shadows/mids (keep warm, glossy highlights) and add sheen variation and crease/seam shading, not flatten the hide.

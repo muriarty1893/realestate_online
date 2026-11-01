@@ -1,0 +1,103 @@
+diff --git a/src/pieces/great_room/mats.js b/src/pieces/great_room/mats.js
+index 02dd450..12db812 100644
+--- a/src/pieces/great_room/mats.js
++++ b/src/pieces/great_room/mats.js
+@@ -34,7 +34,7 @@ export function makeMats() {
+   M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.5,
+     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
+     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
+-    color: col(0.36, 0.45, 0.68), roughness: 0.72, envMapIntensity: 0.6, clearcoat: 0.08, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
++    color: col(0.34, 0.39, 0.55), roughness: 0.68, envMapIntensity: 0.4, clearcoat: 0.04, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
+   });
+ 
+   // ---------------- rough-sawn beam wood
+@@ -75,7 +75,7 @@ export function makeMats() {
+     map: tex('brown_leather_albedo_1k.jpg', { srgb: true, tile: LT }),
+     normalMap: tex('brown_leather_nor_gl_1k.jpg', { tile: LT }), normalScale: new THREE.Vector2(0.28, 0.28),
+     roughnessMap: tex('brown_leather_rough_1k.jpg', { tile: LT }), roughness: 0.82,
+-    color: new THREE.Color(1.86, 1.48, 0.8), metalness: 0, specularIntensity: 0.6, specularColor: new THREE.Color(1.0, 0.78, 0.55), envMapIntensity: 0.45,
++    color: new THREE.Color(1.95, 1.75, 1.3), metalness: 0, specularIntensity: 0.6, specularColor: new THREE.Color(1.0, 0.78, 0.55), envMapIntensity: 0.45,
+     clearcoat: 0.14, clearcoatRoughness: 0.3, ...o,
+   });
+   // hide variation (round 7): large worn/lighter patches and darker mottling from world-space 3D noise, lighter
+@@ -93,9 +93,10 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
+   return mix(mix(mix(hh3(i), hh3(i + vec3(1, 0, 0)), f.x), mix(hh3(i + vec3(0, 1, 0)), hh3(i + vec3(1, 1, 0)), f.x), f.y),
+              mix(mix(hh3(i + vec3(0, 0, 1)), hh3(i + vec3(1, 0, 1)), f.x), mix(hh3(i + vec3(0, 1, 1)), hh3(i + vec3(1, 1, 1)), f.x), f.y), f.z); }`)
+         .replace('#include <map_fragment>', `#include <map_fragment>
++  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722))), 0.3);
+   float hm = 0.5 * hn3(vHideP * 3.1 + 7.0) + 0.32 * hn3(vHideP * 8.3) + 0.18 * hn3(vHideP * 23.0 + 3.0);
+   float hup = smoothstep(0.35, 0.95, vHideN.y);
+-  float hk = mix(0.64, 1.3, smoothstep(0.15, 0.85, hm)) * (1.0 + 0.08 * hup);
++  float hk = mix(0.5, 1.5, smoothstep(0.15, 0.85, hm)) * (1.0 + 0.08 * hup);
+   vec3 hc = diffuseColor.rgb * hk;
+   diffuseColor.rgb = mix(hc, vec3(dot(hc, vec3(0.2126, 0.7152, 0.0722))), 0.22 * smoothstep(0.45, 0.85, hm));`)
+         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+@@ -107,9 +108,9 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
+   };
+   M.leather = leatherMat();
+   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
+-  M.leatherDark = leatherMat({ color: new THREE.Color(1.5, 1.18, 0.64) });
+-  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.74, 1.35, 0.62), specularColor: new THREE.Color(1.0, 0.88, 0.72), normalScale: new THREE.Vector2(0.48, 0.48) }));           // upholstery blocks carry baked under-cushion shade
+-  M.leatherPipe = leatherMat({ color: new THREE.Color(1.1, 0.86, 0.5), clearcoat: 0.25 });
++  M.leatherDark = leatherMat({ color: new THREE.Color(1.6, 1.45, 1.05) });
++  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.9, 1.62, 1.12), specularColor: new THREE.Color(1.0, 0.9, 0.78), normalScale: new THREE.Vector2(0.48, 0.48) }));           // upholstery blocks carry baked under-cushion shade
++  M.leatherPipe = leatherMat({ color: new THREE.Color(0.95, 0.92, 0.62), clearcoat: 0.25 });
+   hide(M.leather); hide(M.leatherDark);
+ 
+   // ---------------- reclaimed wood (coffee table)
+@@ -159,7 +160,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
+   M.throwStripe = std({ map: throwTex(), roughness: 0.98, bumpMap: knitMap, bumpScale: 1.5, side: THREE.DoubleSide });
+ 
+   // ---------------- rug: large distressed gray/beige vintage rug
+-  M.rug = std({ map: rugTex(7), color: col(0.42, 0.395, 0.38), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.4, 0.4) });
++  M.rug = std({ map: rugTexV2(), color: col(0.5, 0.49, 0.48), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.4, 0.4) });
+ 
+   // ---------------- fireplace plaster / stone
+   M.plasterStone = std({
+@@ -397,3 +398,33 @@ function vintageRugTex() {
+     g.putImageData(id, 0, 0);
+   });
+ }
++
++// distressed low-pile vintage rug: faded blue-grey field with soft medallion, darker blurred border, wear
++function rugTexV2() {
++  return canvasTex(1024, 1368, (g, w, h) => {
++    const R = rng(55);
++    g.fillStyle = '#8f8d88'; g.fillRect(0, 0, w, h);
++    const blob = (n, r0, r1, pal, a) => { for (let i = 0; i < n; i++) { const x = R() * w, y = R() * h, r = r0 + R() * (r1 - r0), c = pal[(R() * pal.length) | 0];
++      const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c + a); gr.addColorStop(1, c + '00'); g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, r * (1 + R()), r, R() * 3, 0, 7); g.fill(); } };
++    blob(120, 90, 260, ['#a7a8a8', '#7d8794', '#b9b3a6', '#6c7683', '#9a9690'], '99');
++    g.save(); g.filter = 'blur(9px)';
++    // central medallion + corner spandrels (soft, faded)
++    g.strokeStyle = 'rgba(64,78,96,0.55)'; g.lineWidth = 16;
++    for (const [rx, ry, a] of [[300, 440, 0.55], [220, 330, 0.5], [130, 200, 0.45]]) { g.globalAlpha = a + 0.2; g.beginPath(); g.ellipse(w / 2, h / 2, rx, ry, 0, 0, 7); g.stroke(); }
++    g.globalAlpha = 0.4; g.fillStyle = '#566678'; g.beginPath(); g.ellipse(w / 2, h / 2, 110, 170, 0, 0, 7); g.fill();
++    g.fillStyle = '#c9c1b0'; g.globalAlpha = 0.35; g.beginPath(); g.ellipse(w / 2, h / 2, 60, 100, 0, 0, 7); g.fill();
++    for (const [cx, cy] of [[190, 250], [w - 190, 250], [190, h - 250], [w - 190, h - 250]]) { g.globalAlpha = 0.35; g.fillStyle = '#5d6d80'; g.beginPath(); g.moveTo(cx, cy - 120); g.lineTo(cx + 90, cy); g.lineTo(cx, cy + 120); g.lineTo(cx - 90, cy); g.fill(); }
++    // border: darker band, pale guard stripe, outer band, all blurred and uneven
++    g.globalAlpha = 0.7; g.fillStyle = '#4f5d6e';
++    const bw = 95; g.fillRect(0, 0, w, bw); g.fillRect(0, h - bw, w, bw); g.fillRect(0, 0, bw, h); g.fillRect(w - bw, 0, bw, h);
++    g.globalAlpha = 0.5; g.strokeStyle = '#cfc8b8'; g.lineWidth = 14; g.strokeRect(bw + 14, bw + 14, w - 2 * bw - 28, h - 2 * bw - 28);
++    g.globalAlpha = 0.35; g.fillStyle = '#7b6f66'; for (let t = 0; t < 30; t++) { const x = bw + 30 + R() * (w - 2 * bw - 60); g.fillRect(x, 20 + R() * 20, 30 + R() * 40, 30); g.fillRect(x, h - 50 - R() * 20, 30 + R() * 40, 30); }
++    g.restore();
++    // wear: pale patches and abrasion
++    blob(70, 40, 140, ['#d8d2c4', '#b8b2a6'], '55');
++    for (let i = 0; i < 1500; i++) { const x = R() * w, y = R() * h; g.strokeStyle = `rgba(${200 + R() * 40},${196 + R() * 40},${186 + R() * 40},${0.05 + R() * 0.12})`; g.lineWidth = 1 + R() * 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (R() - 0.5) * 50, y + (R() - 0.5) * 10); g.stroke(); }
++    const id = g.getImageData(0, 0, w, h), d = id.data;
++    for (let i = 0; i < d.length; i += 4) { const n = (R() - 0.5) * 24; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
++    g.putImageData(id, 0, 0);
++  });
++}
+diff --git a/src/pieces/great_room/sofa.js b/src/pieces/great_room/sofa.js
+index d10b648..a236e00 100644
+--- a/src/pieces/great_room/sofa.js
++++ b/src/pieces/great_room/sofa.js
+@@ -219,7 +219,7 @@ export function clubChair(M, { W = 0.84, D = 0.9, H = 0.82, seatH = 0.47, armH =
+   bc.position.set(0, seatH + 0.006 + (BT / 2) * sl + (BH / 2) * cl, -D / 2 + bt + 0.005 + (BT / 2) * cl - (BH / 2) * sl + 0.04);
+   g.add(bc);
+   // no clearcoat on the chairs: at their grazing view angle it mirrors the bright windows as a grey wash
+-  M.chairLeather = M.chairLeather || Object.assign(M.sofaLeather.clone(), { clearcoat: 0, envMapIntensity: 0.4, specularIntensity: 0.35, color: new THREE.Color(1.9, 1.6, 1.12),
++  M.chairLeather = M.chairLeather || Object.assign(M.sofaLeather.clone(), { clearcoat: 0, envMapIntensity: 0.4, specularIntensity: 0.35, color: new THREE.Color(2.1, 1.95, 1.5),
+     onBeforeCompile: M.sofaLeather.onBeforeCompile, customProgramCacheKey: M.sofaLeather.customProgramCacheKey });
+   // lift the baked side/underside shade on the chairs: the photo's chair sides stay close to their tops in tone
+   g.traverse((o) => {

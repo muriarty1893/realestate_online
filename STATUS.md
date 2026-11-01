@@ -1,4 +1,4 @@
-# Status: paused 2026-11-01 (5-hour usage ~85%, weekly 35%), after exterior r11, great room r11, master r13
+# Status: paused 2026-11-01 (5-hour usage 88%, weekly 35%), after exterior r11, great room r11, master r13
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The

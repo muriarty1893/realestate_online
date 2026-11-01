@@ -30,23 +30,31 @@ export function contactShadow(w, d, x = 0, z = 0, { y = 0.0135, opacity = 1 } = 
 function coffeeTable(M, L = 1.27, W = 0.9, H = 0.46) {
   // local: long axis x, centred at origin
   const g = new THREE.Group();
-  const t = 0.075;
+  // round 9: a thinner reclaimed top (5 cm) with a slight overhang on a slim apron, on trestle ends
+  // (two square legs joined by a foot runner) and a low centre stretcher
+  const t = 0.05, lw = 0.075, lx = L / 2 - 0.13, lz = W / 2 - 0.1;
   g.add(contactShadow(L + 0.3, W + 0.3, 0, 0, { opacity: 0.9 }));
-  // plank top: 5 planks with small gaps
+  // plank top: 5 planks, hairline gaps, slightly uneven
   const n = 5, pw = W / n;
   for (let i = 0; i < n; i++) {
-    const p = boxMM(-L / 2, H - t, -W / 2 + i * pw + 0.003, L / 2, H - 0.002 * (i % 2), -W / 2 + (i + 1) * pw - 0.003, M.reclaimed, { grain: 'x' });
+    const p = boxMM(-L / 2 + 0.004 * (i % 3), H - t, -W / 2 + i * pw + 0.0015, L / 2 - 0.003 * ((i + 1) % 2), H - 0.0025 * (i % 2), -W / 2 + (i + 1) * pw - 0.0015, M.reclaimed, { grain: 'x' });
     g.add(p);
   }
+  // breadboard ends under the plank ends
+  for (const sx of [-1, 1]) g.add(boxMM(sx * (L / 2 - 0.005) - 0.035, H - t - 0.012, -W / 2 + 0.01, sx * (L / 2 - 0.005) + 0.035, H - t, W / 2 - 0.01, M.reclaimed, { grain: 'z' }));
   // apron
-  g.add(boxMM(-L / 2 + 0.08, H - t - 0.08, -W / 2 + 0.07, L / 2 - 0.08, H - t, -W / 2 + 0.11, M.reclaimed, { grain: 'x' }));
-  g.add(boxMM(-L / 2 + 0.08, H - t - 0.08, W / 2 - 0.11, L / 2 - 0.08, H - t, W / 2 - 0.07, M.reclaimed, { grain: 'x' }));
-  // chunky legs at each end, joined by a foot runner and a long stretcher
+  const ah = 0.075;
+  g.add(boxMM(-lx, H - t - ah, -lz - 0.01, lx, H - t, -lz + 0.015, M.reclaimed, { grain: 'x' }));
+  g.add(boxMM(-lx, H - t - ah, lz - 0.015, lx, H - t, lz + 0.01, M.reclaimed, { grain: 'x' }));
   for (const sx of [-1, 1]) {
-    for (const sz of [-1, 1]) g.add(boxMM(sx * (L / 2 - 0.2) - 0.06, 0.06, sz * (W / 2 - 0.12) - 0.06, sx * (L / 2 - 0.2) + 0.06, H - t, sz * (W / 2 - 0.12) + 0.06, M.reclaimed, { grain: 'y' }));
-    g.add(boxMM(sx * (L / 2 - 0.2) - 0.07, 0, -W / 2 + 0.03, sx * (L / 2 - 0.2) + 0.07, 0.08, W / 2 - 0.03, M.reclaimed, { grain: 'z' }));
+    g.add(boxMM(sx * lx - 0.012, H - t - ah, -lz, sx * lx + 0.012, H - t, lz, M.reclaimed, { grain: 'z' }));
+    // trestle end: two legs on a foot runner, with a cross rail just above it
+    for (const sz of [-1, 1]) g.add(boxMM(sx * lx - lw / 2, 0.055, sz * lz - lw / 2, sx * lx + lw / 2, H - t, sz * lz + lw / 2, M.reclaimed, { grain: 'y' }));
+    g.add(boxMM(sx * lx - 0.045, 0, -W / 2 + 0.04, sx * lx + 0.045, 0.06, W / 2 - 0.04, M.reclaimed, { grain: 'z' }));
+    g.add(boxMM(sx * lx - 0.025, 0.1, -lz, sx * lx + 0.025, 0.16, lz, M.reclaimed, { grain: 'z' }));
   }
-  g.add(boxMM(-L / 2 + 0.2, 0.12, -0.05, L / 2 - 0.2, 0.22, 0.05, M.reclaimed, { grain: 'x' }));
+  // low centre stretcher between the trestles
+  g.add(boxMM(-lx, 0.11, -0.03, lx, 0.17, 0.03, M.reclaimed, { grain: 'x' }));
   return g;
 }
 
@@ -199,7 +207,7 @@ export async function buildLiving(ctx, M, group) {
 
   // sectional: corner at the north-west, section A runs south along x≈-0.3..0.7, section B east along z≈-1.65..-0.65
   const D = 1.0, cx = -0.30, cz = -1.55;
-  const LA = 1.64 - (cz + D), xB1 = 1.5, xB2 = 2.32;
+  const LA = 1.64 - (cz + D), xB1 = 1.78, xB2 = 2.32;   // round 9: the backed return runs on to 1.78 (overlay)
   L.add(buildSectional(M, { D, cx, cz, zA1: 1.64, xB1, xB2 }));
   ctx.addCollider({ x0: cx, z0: cz, x1: cx + D, z1: cz + D + LA });
   ctx.addCollider({ x0: cx, z0: cz, x1: xB2, z1: cz + D });
@@ -224,7 +232,8 @@ export async function buildLiving(ctx, M, group) {
   // draped across the arm's width: bar along the arm (z), hanging into the seat and down the outside
   // the round-7 chaise end is a 0.4 m padded arm, top 0.58 m: the knit rolls over its crown into the seat and down the outside
   const t2 = drapeThrow(M, M.knit, { W: 0.74, front: 0.08, back: 0.34, top: 0.3, r: 0.1, seed: 5, fold: 0.03, soft0: 0.035, seg: 48, fringe: M.knitFringe });
-  t2.position.set(xB2 - 0.17, 0.6, cz + D / 2 - 0.17); t2.rotation.y = -Math.PI / 2 + 0.06; t2.rotation.z = 0.03; L.add(t2);
+  // round 9: the end roll is 0.2 m wide, top 0.53
+  t2.position.set(xB2 - 0.15, 0.57, cz + D / 2 - 0.17); t2.rotation.y = -Math.PI / 2 + 0.06; t2.rotation.z = 0.03; L.add(t2);
   // the throw's folded-over edge on the seat side: a soft knit roll
   const roll = mesh(new THREE.CapsuleGeometry(0.03, 0.64, 6, 14), M.knit);
   roll.rotation.z = Math.PI / 2; roll.scale.set(1, 1, 0.8); roll.position.set(0, -0.02, 0.15 + 0.05 + 0.02); t2.add(roll);

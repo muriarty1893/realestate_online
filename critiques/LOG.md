@@ -388,3 +388,14 @@ only small sky patches. Further: sparse foundation beds over bare mulch (photo: 
 sprite-like ferns and uniform pink clusters; flat roof and lawn.
 *Regression check (blind, round 9 vs round 10): round 10 closer, slightly* (readable fern fronds, broad leaves and flowers in the foreground; cleaner lawn edges). Round 9's fuller mounded foundation shrubs
 (covering the mulch under the windows) should come back; the flowers should be smaller, mixed pink and white, looser.
+
+## Round 9, great_room (2026-11-01, Opus builder): the sectional as one continuous L
+Builder changes (sofa.js, living.js, mats.js): one unbroken back rail around the corner (0.72 m, 0.115 m thick, rounded top, welt), a continuous deck, a slim 0.17 m far arm flowing into the rail, a low rolled
+chaise end (0.2 x 0.53 m); all back cushions at one height and lean, softer; seat cushions overlap 12 mm (soft creased seams), more sag, piping on the top edge only; three back cushions on the return, the end one
+overhanging the rail; the return's end moved from x 1.5 to 1.78 (edge overlay); a yellower, less blue leather with tan highlights, more mottling and grain; a thinner coffee table on trestle ends. 308k tris.
+Not matched: the photo's return is turned ~4–5° (or lens distortion), so our back corner sits ~60 px right.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the leather (sectional and armchairs, ~40% of the frame): one smooth saturated orange-red, plastic-like, swollen blobby cushion edges, no seams,
+piping, creases or wrinkles, no sheen variation. Should be warmer tan cognac, darker creases at seat backs and joins, soft highlights along tops and rolls, stitching, piping, sag, lighter wear.
+Further: flat, even light (window daylight, contact shadows, corner falloff); a flat beige rug and a washed-out floor; a blank green/grey dining window; stiff throw and pillows; uniformly orange cabinets and an overall orange cast.
+*Regression check (blind, round 8 vs round 9): round 9 clearly closer* (the front run reads as one long continuous sofa with three back cushions and an arm with the cream throw; more trestle base visible).
+Round 8's crisper seat seams could come back; round 9's loose corner back cushion looks a little like a pillow.

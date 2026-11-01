@@ -95,9 +95,9 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
         .replace('#include <map_fragment>', `#include <map_fragment>
   float hm = 0.5 * hn3(vHideP * 3.1 + 7.0) + 0.32 * hn3(vHideP * 8.3) + 0.18 * hn3(vHideP * 23.0 + 3.0);
   float hup = smoothstep(0.35, 0.95, vHideN.y);
-  float hk = mix(0.74, 1.24, smoothstep(0.2, 0.8, hm)) * (1.0 + 0.06 * hup);
+  float hk = mix(0.64, 1.3, smoothstep(0.15, 0.85, hm)) * (1.0 + 0.08 * hup);
   vec3 hc = diffuseColor.rgb * hk;
-  diffuseColor.rgb = mix(hc, vec3(dot(hc, vec3(0.2126, 0.7152, 0.0722))), 0.12 * smoothstep(0.5, 0.85, hm));`)
+  diffuseColor.rgb = mix(hc, vec3(dot(hc, vec3(0.2126, 0.7152, 0.0722))), 0.22 * smoothstep(0.45, 0.85, hm));`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
   float hb = hn3(vHideP * vec3(2.2, 9.0, 2.2) + 11.0);
   roughnessFactor *= mix(1.08, 0.72, hup * smoothstep(0.3, 0.75, hb)) * (0.92 + 0.16 * hn3(vHideP * 14.0));`);
@@ -108,7 +108,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
   M.leather = leatherMat();
   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
   M.leatherDark = leatherMat({ color: new THREE.Color(1.5, 1.18, 0.64) });
-  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.74, 1.4, 0.8) }));           // upholstery blocks carry baked under-cushion shade
+  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.74, 1.35, 0.62), specularColor: new THREE.Color(1.0, 0.88, 0.72), normalScale: new THREE.Vector2(0.48, 0.48) }));           // upholstery blocks carry baked under-cushion shade
   M.leatherPipe = leatherMat({ color: new THREE.Color(1.1, 0.86, 0.5), clearcoat: 0.25 });
   hide(M.leather); hide(M.leatherDark);
 
@@ -117,7 +117,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
     map: tex('wood_planks_dirt_diff_1k.jpg', { srgb: true, tile: 1.3 }),
     normalMap: tex('wood_planks_dirt_nor_gl_1k.jpg', { tile: 1.3 }),
     roughnessMap: tex('wood_planks_dirt_rough_1k.jpg', { tile: 1.3 }),
-    color: col(0.86, 0.78, 0.7), roughness: 0.85,
+    color: col(0.92, 0.86, 0.8), roughness: 0.88,
   });
   M.tableWood = std({ map: tex('wood_table_worn_diff_1k.jpg', { srgb: true, tile: 1.2 }), color: col(0.9, 0.76, 0.62), roughness: 0.55 });
 

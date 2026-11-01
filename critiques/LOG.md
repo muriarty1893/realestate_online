@@ -346,3 +346,13 @@ the foreground ferns fill the bottom quarter (should be clipped lawn both sides 
 the right edge (x 1650–1750) shows a pale wall and a flat green plane instead of layered backlit trees; the stone water table is too thin and dark, the fascia near-black instead of bronze-brown.
 *Regression check (blind, round 6 vs round 7): round 7 closer, narrowly* (warm directional sun with depth, window colour, warmer pavers). Round 6 wins the roof (even soft grey; round 7's leaf shadow is camouflage-like)
 and the walls (round 7's sun patches wash out the stucco/batten contrast).
+
+## Round 8, exterior (2026-11-01, Sonnet builder): roof, stone, trim, windows (not committed as a round)
+Builder changes: small even shingles (40 courses x 24 tabs per 2 m tile), roof stops receiving leaf shadows, lighter ridge/hip caps; stone water table 0.42 -> 0.66 m and lighter; bronze-brown fascia, gutters, soffit;
+window glass with a ceiling-light glow, a sky streak and a vertical gradient.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the bottom third: dark, muddy, identical fern clumps on black mulch swallow the lawn. It should be low, lit, layered beds with varied leaves,
+scattered pink and white flowers, light ferns at the edges, bright lawn on both sides of the path, stepping down toward the camera. Further: flat dark canopy and straight black trunks on the right;
+the roof flat grey-mauve with no shingle texture; uniform beige window glow; blobby foundation shrubs on bare mulch; a blank green void at the right edge.
+*Regression check (blind, round 7 vs round 8): round 7 closer, narrowly*, on the roof: the photo's is cool blue-grey with visible texture; round 8's is flat warm mauve-grey. Round 7 had the right hue but its patchy
+variation should drop to about a third. Round 8 wins the stone band (taller, greyer). Everything else tied.
+*Orchestrator:* kept round 8 in the working tree and sent the roof back to the builder (round 7's cool blue-grey, visible fine texture, low variation) plus the beds.

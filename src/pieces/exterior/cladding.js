@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { Geo, V3, wallUV, polyNormal } from './util.js';
 
-export const STONE_TOP = 0.42;     // top of the stone wainscot (world y)
+export const STONE_TOP = 0.66;     // top of the stone wainscot (world y)
 const STONE_T = 0.045;              // stone veneer thickness
 const BB_OFF = 0.008;               // board plane offset off the shell face
 const BATTEN = { w: 0.065, t: 0.022, pitch: 0.4064 };

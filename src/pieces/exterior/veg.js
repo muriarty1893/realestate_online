@@ -428,7 +428,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat, { dark: 0.35, glow: 2.6, cool: [0.62, 0.66, 0.52] }));
 
   // ---------------- foundation planting: real Poly Haven plants (instanced), low and layered
-  const sagos = [], flowers = [];
+  const sagos = [], flowers = [], blooms = [];
   const R = rng(4242);
   const front = (x) => (x < -8.1 ? 8.6 : x < -4.42 ? (x > -7.4 && x < -5.2 ? 9.7 : 9.2) : x < -1.14 ? 6.2 : x < 2.72 ? (x > -0.3 && x < 1.8 ? 8.3 : 7.8) : x < 6.44 ? 8.6 : x < 10.25 ? (x > 7.3 && x < 9.5 ? 8.3 : 7.8) : 6.2);
   const U = (a, b) => a + R() * (b - a);
@@ -464,18 +464,18 @@ export async function buildVegetation(ctx, M, parent, site) {
   for (const sx of [-1, 1]) for (let i = 0; i < 12; i++) add(i % 2 ? 'shrub1' : 'periw', 4.58 + sx * (1.5 + R() * 2.4), 9.6 + R() * 2.0, i % 2 ? 1 : 2.4);
   // foreground beds
   const [bedF, bedL, bedR, bedE] = site.beds;
-  scatter(bedL, 300, R, (x, z) => add('fern', x, z, U(1.7, 2.6)), (x) => x < -0.5);
-  scatter(bedL, 70, R, (x, z) => add('calathea', x, z, U(1.3, 1.9)), (x) => x < 1);
-  scatter(bedL, 28, R, (x, z) => add('shrub2', x, z, U(0.6, 0.9)), (x) => x > -9);
-  scatter(bedL, 40, R, (x, z) => add('shrub4', x, z, U(2, 3)));
-  scatter(bedL, 36, R, (x, z) => add('periw', x, z, U(2.4, 3.4)));
-  scatter(bedL, 40, R, (x, z) => add('periw', x, z, U(2.4, 3.4)), (x) => x > -4);
-  scatter(bedL, 14, R, (x, z) => add('fern', x, z, U(1.2, 1.7)), (x) => x > -4);
-  scatter(bedR, 36, R, (x, z) => add('shrub1', x, z, U(1, 1.5)));
-  scatter(bedR, 60, R, (x, z) => add('periw', x, z, U(2.4, 3.2)));
-  scatter(bedR, 28, R, (x, z) => add('calathea', x, z, U(1.3, 1.8)));
-  scatter(bedR, 90, R, (x, z) => add('fern', x, z, U(1.4, 2)));
-  scatter(bedR, 20, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
+  scatter(bedL, 32, R, (x, z) => add('fern', x, z, U(1.1, 1.5)), (x) => x < -9 || x > -3);
+  scatter(bedL, 68, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
+  scatter(bedL, 60, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
+  scatter(bedL, 28, R, (x, z) => add('shrub4', x, z, U(1.0, 1.6)));
+  scatter(bedL, 120, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
+  scatter(bedL, 200, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
+  scatter(bedR, 48, R, (x, z) => add('shrub1', x, z, U(0.6, 0.9)));
+  scatter(bedR, 100, R, (x, z) => add('periw', x, z, U(2.2, 3.0)));
+  scatter(bedR, 28, R, (x, z) => add('calathea', x, z, U(1.0, 1.5)));
+  scatter(bedR, 16, R, (x, z) => add('fern', x, z, U(1.1, 1.4)), (x) => x > 12);
+  scatter(bedR, 28, R, (x, z) => add('shrub2', x, z, U(0.5, 0.8)));
+  scatter(bedR, 200, R, (x, z) => blooms.push({ p: [x, G + 0.1, z], s: [U(0.9, 1.4), U(0.7, 1.1), U(0.9, 1.4)], rot: R() * 6.28 }));
   scatter(bedE, 28, R, (x, z) => add('shrub2', x, z, U(0.9, 1.5)));
   for (const [x, z, k] of [[13.4, 8.5, 1.5], [14.6, 6.5, 1.7], [12.8, 10.8, 1.2], [15.8, 9.5, 1.4], [16.6, 6, 1.6]]) add('shrub2', x, z, k);
   void bedF;
@@ -492,7 +492,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   }
 
   // dense, low boxwood-like mounds hugging the stone band (below the sills), blooming mounds and strap clumps in the beds
-  const boxes = [], blooms = [], straps = [];
+  const boxes = [], straps = [];
   for (let x = -12.7; x < 13.2; x += U(0.45, 0.75)) {
     if (onWalk(x, 0.35) || R() < 0.1) continue;
     const h = U(0.75, 1.15);
@@ -500,7 +500,7 @@ export async function buildVegetation(ctx, M, parent, site) {
     if (R() < 0.5) boxes.push({ p: [x + U(-0.3, 0.3), G - 0.02, front(x) + U(1.2, 1.7)], s: [U(0.7, 1), h * 0.7, U(0.7, 1)], rot: R() * 6.28 });
   }
   for (const sx of [-1, 1]) for (let i = 0; i < 9; i++) boxes.push({ p: [4.58 + sx * (1.0 + i * 0.28 + U(0, .15)), G - 0.02, 9.9 + U(0, 1)], s: [0.8, 0.7, 0.8], rot: R() * 6.28 });
-  for (const bed of [bedL, bedR, bedE]) {
+  for (const bed of [bedE]) {
     scatter(bed, bed === bedE ? 10 : 90, R, (x, z) => blooms.push({ p: [x, G, z], s: [U(0.8, 1.3), U(0.7, 1.1), U(0.8, 1.3)], rot: R() * 6.28 }));
     scatter(bed, bed === bedE ? 10 : 70, R, (x, z) => straps.push({ p: [x, G, z], s: [U(0.9, 1.5), U(0.9, 1.6), U(0.9, 1.5)], rot: R() * 6.28 }));
   }

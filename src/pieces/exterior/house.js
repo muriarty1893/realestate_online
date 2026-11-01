@@ -215,6 +215,7 @@ export function buildHouse(ctx, M, parent) {
   }
 
   const meshes = geo.toMeshes(parent, { name: 'house' });
+  for (const m of meshes) if (m.material === M.shingle || m.material === M.ridgeCap) m.receiveShadow = false;
   metal.toMeshes(parent, { name: 'metal' });
   return { gables, meshes, blocks: { main, west, dining, bed, bump } };
 }

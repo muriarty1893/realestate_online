@@ -356,3 +356,14 @@ the roof flat grey-mauve with no shingle texture; uniform beige window glow; blo
 *Regression check (blind, round 7 vs round 8): round 7 closer, narrowly*, on the roof: the photo's is cool blue-grey with visible texture; round 8's is flat warm mauve-grey. Round 7 had the right hue but its patchy
 variation should drop to about a third. Round 8 wins the stone band (taller, greyer). Everything else tied.
 *Orchestrator:* kept round 8 in the working tree and sent the roof back to the builder (round 7's cool blue-grey, visible fine texture, low variation) plus the beds.
+
+## Round 9, exterior (2026-11-01, Sonnet builder, continuing round 8)
+Builder changes on top of round 8: a cool blue-grey roof (20 courses x 14 tabs per 2 m tile, granule speckle, stronger course shadows, low variation, no leaf shadow on the roof); the foreground mulch beds cut back
+to low beds stepping toward the camera with open bright lawn both sides of the walk; the 390 identical fern clumps cut to a few at the edges; calathea, small shrubs, periwinkle and ~200 flowering mounds per bed. 372k tris.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the planting: the foreground clumps read as speckled noise (pink dots over a dark green mass, flat fern sprites on top) and the foundation beds as one
+uniform dark lumpy hedge. The photo has layered beds: ferns and broad-leaf plants in front, shrubs of varied height and shape, a palm and agave-like accents, clusters of pink and white flowers, the stone base partly visible.
+Further: a flat untextured bright lawn (needs grass texture, tone variation, soft shade under the trees); a thin, sparse canopy with a big empty sky (photo: a dense layered live-oak canopy across the top);
+the roof a flat grey with a tiny repeating pattern; low contrast, pinkish flat walls (needs cooler shadows, warmer highlights); blank gradient windows and doors (interior hints, wood-stained doors).
+*Regression check (blind, round 7 vs round 9): round 9 closer* (an even fine-grained roof, the taller lighter stone base, cleaner bed edges, more open lawn). Round 7's larger defined foreground ferns at the lower left are worth taking back,
+kept below the lawn line. Neither has the photo's tall palm-like plant left of the entry or full flower-filled beds.
+*Orchestrator:* the intermittent `requestfailed` lines are Chromium `net::ERR_ABORTED` on duplicate fetches; every load still resolved. `ctx.loadGLTF` now retries up to 3 times (with a warning) and shot.mjs hides ERR_ABORTED.

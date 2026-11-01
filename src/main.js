@@ -103,7 +103,16 @@ const ctx = {
   hiddenWalls: new Set(), customCeilings: new Set(), noBaseboard: new Set(),
   colliders: [], walkables: [],
   getMat, setMat, loadTex, loadTexAsync,
-  loadGLTF: (url) => gltfLoader.loadAsync(url),
+  // retry: under load (parallel headless shots) a model fetch is occasionally aborted, and the piece would silently drop it
+  loadGLTF: async (url) => {
+    for (let i = 0; ; i++) {
+      try { return await gltfLoader.loadAsync(url); } catch (e) {
+        if (i >= 3) throw e;
+        console.warn(`loadGLTF retry ${i + 1}: ${url}`);
+        await new Promise((r) => setTimeout(r, 300 * (i + 1)));
+      }
+    }
+  },
   loadHDR: (url) => rgbeLoader.loadAsync(url),
   room(id) {
     const r = P.rooms.find((x) => x.id === id);

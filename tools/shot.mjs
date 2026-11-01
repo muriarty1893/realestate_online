@@ -46,14 +46,15 @@ try {
   const logs = [];
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(`${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
-  page.on('requestfailed', (r) => logs.push('requestfailed: ' + r.url()));
+  page.on('requestfailed', (r) => logs.push(`requestfailed (${r.failure()?.errorText}): ${r.url()}`));
   page.on('response', (r) => { if (r.status() >= 400 && !r.url().endsWith('favicon.ico')) logs.push(`http ${r.status()}: ${r.url()}`); });
   await page.goto(`http://127.0.0.1:${port}/index.html?${qs}`);
   await page.waitForFunction('window.__shotReady === true', null, { timeout: (+opt.timeout || 180) * 1000, polling: 250 });
   const info = await page.evaluate(() => ({ errors: window.__errors, info: window.__info }));
   await page.screenshot({ path: out, clip: { x: 0, y: 0, width: w, height: h } });
   console.log(`saved ${path.relative(process.cwd(), out)} (${w}x${h}) in ${((Date.now() - t0) / 1000).toFixed(1)}s`, JSON.stringify(info.info));
-  const uniq = [...new Set([...info.errors, ...logs])].filter((l) => !/favicon|status of 404 \(Not Found\)$|KHR_parallel_shader_compile|GPU stall due to ReadPixels|WebGL: INVALID_VALUE: texImage|Automatic fallback to software/.test(l));
+  // ERR_ABORTED: Chromium reports aborted duplicate fetches even when the load succeeds; real failures show as loadGLTF retry warnings or errors
+  const uniq = [...new Set([...info.errors, ...logs])].filter((l) => !/favicon|status of 404 \(Not Found\)$|KHR_parallel_shader_compile|GPU stall due to ReadPixels|WebGL: INVALID_VALUE: texImage|Automatic fallback to software|requestfailed \(net::ERR_ABORTED\)/.test(l));
   if (uniq.length) { console.log('--- page errors/warnings ---'); for (const l of uniq.slice(0, 40)) console.log(l.slice(0, 600)); }
 
   if (opt.compare) {

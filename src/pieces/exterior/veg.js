@@ -2,7 +2,7 @@
 // background tree masses, foundation shrubs, flowering mounds, sago palms, liriope, ferns (glTF).
 import * as THREE from 'three';
 import { rng, V3, ASSET } from './util.js';
-import { foliageAtlas, ATLAS, atlasUV, mossTexture, frondTexture, strapTexture } from './vegtex.js';
+import { foliageAtlas, oakDenseAtlas, DENSE, ATLAS, atlasUV, mossTexture, frondTexture, strapTexture } from './vegtex.js';
 
 // ---------------------------------------------------------------- geometry accumulators
 class Acc {
@@ -23,7 +23,7 @@ class Acc {
 }
 
 // tube along a polyline with per-point radius (parallel transport frames), bark UVs in metres
-function tube(acc, pts, rad, sides) {
+function tube(acc, pts, rad, sides, furrow = 0) {
   const N = pts.length;
   const T = [], Nn = [];
   for (let i = 0; i < N; i++) {
@@ -49,12 +49,14 @@ function tube(acc, pts, rad, sides) {
     for (let k = 0; k <= sides; k++) {
       const a = (k / sides) * Math.PI * 2;
       const dir = Nn[i].clone().multiplyScalar(Math.cos(a)).addScaledVector(B, Math.sin(a));
-      acc.vert(pts[i].clone().addScaledVector(dir, rad[i]), dir, (k / sides) * Math.max(0.3, circ), vlen);
+      // furrowed bark: irregular vertical ridges that drift around the trunk
+      const fr = furrow ? 1 + furrow * (0.5 * Math.sin(7 * a + 0.9 * Math.sin(i * 0.6)) + 0.3 * Math.sin(13 * a + i * 0.4) + 0.2 * Math.sin(3 * a + 1.7)) : 1;
+      acc.vert(pts[i].clone().addScaledVector(dir, rad[i] * fr), dir, (k / sides) * Math.max(0.3, circ), vlen);
     }
   }
   for (let i = 0; i < N - 1; i++) for (let k = 0; k < sides; k++) {
     const a = base + i * (sides + 1) + k, b = a + sides + 1;
-    acc.idx.push(a, b, a + 1, b, b + 1, a + 1);
+    acc.idx.push(a, a + 1, b, b, a + 1, b + 1);   // outward-facing (counter-clockwise seen from outside)
   }
 }
 
@@ -148,9 +150,9 @@ function leafMaterial(atlas, name, glowCol, glowK) {
 
 // ---------------------------------------------------------------- live oak
 // limbs: [{az (deg, 0 = +x, 90 = +z), el0, el1 (deg), len, r}]
-function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs, leafScale = 1.25, leafDensity = 1, moss = 0, twigLen = 1, leafBand = [0.25, 1], bare = 0.3 }) {
+function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs, leafScale = 1.25, leafDensity = 1, moss = 0, twigLen = 1, leafBand = [0.25, 1], bare = 0.3, furrow = 0.1 }) {
   const R = rng(seed);
-  const bark = new Acc(), leaves = new Acc(), mossA = new Acc();
+  const bark = new Acc(), leaves = new Acc(), mossA = new Acc(), trunk = new Acc();
   const center = base.clone().add(V3(0, trunkH + 3, 0));
   const leafCells = ATLAS.oak;
   const addLeaves = (p, size) => {
@@ -162,7 +164,7 @@ function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs,
     card(leaves, p.clone().add(V3(0, 0.3 * size * leafScale, 0)), u, v, nrm, leafCells[Math.floor(R() * leafCells.length)]);
   };
   const addMoss = (p) => {
-    const len = 0.9 + R() * 1.3, w = 0.6 + R() * 0.5;
+    const len = 1.3 + R() * 1.8, w = 0.3 + R() * 0.3;
     const a = R() * Math.PI;
     for (const k of [0, 1]) {
       const ang = a + k * Math.PI / 2;
@@ -185,8 +187,9 @@ function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs,
       const curve = new THREE.CatmullRomCurve3([p0.clone(), ...path.map((q) => V3(...q))], false, 'centripetal');
       len = curve.getLength();
       const n = Math.max(4, Math.ceil(len / seg));
-      pts = curve.getSpacedPoints(n).map((q, i) => (i ? q.add(V3((R() - 0.5) * 0.12, (R() - 0.5) * 0.12, (R() - 0.5) * 0.12)) : q));
-      rad = pts.map((q, i) => Math.max(0.03, r0 * (1 - 0.8 * (i / n))));
+      pts = curve.getSpacedPoints(n).map((q, i) => (i ? q.add(V3((R() - 0.5) * 0.2, (R() - 0.5) * 0.2, (R() - 0.5) * 0.2)) : q));
+      // live-oak limbs stay thick far out, then thin quickly at the tip
+      rad = pts.map((q, i) => { const t = i / n; return Math.max(0.04, r0 * (1 - 0.45 * t - 0.4 * t * t * t)); });
       const d = new THREE.Vector3().subVectors(pts[n], pts[n - 1]);
       az0 = THREE.MathUtils.radToDeg(Math.atan2(d.z, d.x));
     } else {
@@ -204,7 +207,7 @@ function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs,
         rad.push(Math.max(0.012, r0 * (1 - 0.82 * t)));
       }
     }
-    tube(bark, pts, rad, depth === 0 ? 10 : depth === 1 ? 7 : 4);
+    tube(bark, pts, rad, depth === 0 ? 12 : depth === 1 ? 7 : 4, depth === 0 ? 0.06 : 0);
     if (depth >= 2) {
       // twig: leaves along it
       for (let i = 1; i < pts.length; i++) {
@@ -234,17 +237,17 @@ function liveOak(seed, base, { trunkH = 3.8, trunkR = 0.6, lean = [0, 0], limbs,
   // trunk
   const tp = [], tr = [];
   const top = base.clone().add(V3(lean[0], trunkH, lean[1]));
-  for (let i = 0; i <= 8; i++) {
-    const t = i / 8;
-    const q = base.clone().lerp(top, t).add(V3((R() - 0.5) * 0.15 * t, 0, (R() - 0.5) * 0.15 * t));
+  for (let i = 0; i <= 14; i++) {
+    const t = i / 14;
+    const q = base.clone().lerp(top, t).add(V3(0.22 * Math.sin(t * Math.PI * 1.4) + (R() - 0.5) * 0.08, 0, (R() - 0.5) * 0.08));
     tp.push(q); tr.push(trunkR * (1.35 - 0.45 * t + (t < 0.12 ? 0.35 * (0.12 - t) / 0.12 : 0)));
   }
-  tube(bark, tp, tr, 14);
+  tube(trunk, tp, tr, 28, furrow);
   for (const L of limbs) {
     const start = top.clone().add(V3(0, -0.4 * R(), 0));
     branch(start, L.az ?? 0, L.el0 ?? 0, L.el1 ?? 0, L.len ?? 0, L.r ?? trunkR * 0.55, 0, L.path ?? null, L.leafy ?? 1);
   }
-  return { bark, leaves, moss: mossA };
+  return { bark, leaves, moss: mossA, trunk };
 }
 
 // background tree mass: trunk + many leaf cards on a few ellipsoid lobes
@@ -364,6 +367,91 @@ function scatter(poly, n, R, fn, filter = () => true) {
   }
 }
 
+// ---------------------------------------------------------------- canopy traced from the photo
+// The front view's camera (views.front in exterior.js: pos [4.6, 2.6, 36], fov 31.2, shift [0.149, 0.097],
+// 1789x1013 frame). px2w maps a photo pixel and a world depth z back to the world point that lands there,
+// so limbs, foliage masses and moss can be laid out where refs/front_view.webp has them.
+const CAM = { x: 4.6, y: 2.6, z: 36, W: 1789, H: 1013 };
+CAM.f = CAM.H / 2 / Math.tan(THREE.MathUtils.degToRad(31.2) / 2);
+CAM.cx = CAM.W * (0.5 + 0.149); CAM.cy = CAM.H * (0.5 + 0.097);
+const px2w = (px, py, z) => { const d = CAM.z - z; return V3(CAM.x + (px - CAM.cx) * d / CAM.f, CAM.y + (CAM.cy - py) * d / CAM.f, z); };
+const wpx = (z) => (CAM.z - z) / CAM.f;   // metres per pixel at depth z
+
+// foliage coverage of the photo's top 456 px in 24 px cells (0 = sky / roof, 9 = solid leaves)
+const CANOPY = [
+  '964998417996999999932400174445989998079779999999997999996877322003728999999',
+  '999999999999965999979231193698957999368259976778856725498971261029899999999',
+  '979999999999734799997986875898863598112016983588999585597994122349999699999',
+  '989999999999713999987650555156641698600012795585886059955755736769999899999',
+  '999999999999759689617916884027786142140002841568966297206121578899999999999',
+  '999999999999996169989978998635539674696463311379860383001330039998899999999',
+  '999999999999998889999989878866529993799943000298832854300110139999899999999',
+  '999999999999999999997837588811379987599988225257531857600000289999999999899',
+  '999999999999999999998489999810379845698899799511033124500004899999999999999',
+  '999999999999999999999697999940296932664599977910174311100116999999999999999',
+  '999999999999999999999999999986699932924996499900284943001779999999999999999',
+  '999999999999999999999999999999994425963995999971267773124589999999999999999',
+  '999999999999999999999899999999995658999999999981137300000069999999999999999',
+  '999999999999976999999899999999999889999799999820002000000012526599999999999',
+  '999999999999996999999999999999999859887499999500000000000000404199999999999',
+  '999999999999999999999999999998899528971299983000000000000000100079999999999',
+  '999999999999835999999999999779882029430016940000000000000043000039999999999',
+  '999999999999845899999999999969731001462000330111100000000599400008999999999',
+  '999999999999899999999971222201100004998200000001110100004999840005999999999',
+];
+// lowest photo row the near canopy may reach at each x (above the roofs, gables and the lit trees behind)
+function canopyFloor(px) {
+  const L = (x0, y0, x1, y1) => y0 + (y1 - y0) * (px - x0) / (x1 - x0);
+  if (px < 150) return 456;
+  if (px < 330) return L(150, 420, 330, 250);
+  if (px < 790) return 260;
+  if (px < 1010) return 430;     // foliage hanging in front of the main ridge and chimney
+  if (px < 1520) return 250;
+  return 280;                    // right edge: lit trees and moss further back
+}
+function canopyFill(seed, { k = 0.62 } = {}) {
+  const R = rng(seed), acc = new Acc(), C = 24;
+  CANOPY.forEach((row, j) => {
+    for (let i = 0; i < row.length; i++) {
+      const f = +row[i] / 9;
+      if (!f) continue;
+      let n = Math.pow(f, 1.4) * k * (i * C > 1250 ? 0.45 : 1); n = Math.floor(n) + (R() < n % 1 ? 1 : 0);
+      for (let c = 0; c < n; c++) {
+        const px = (i + R()) * C, py = (j + R()) * C;
+        if (py > canopyFloor(px) - 30) continue;
+        // depth: left oak crown, overhanging middle, right trees
+        // (low on the left edge they belong to trees behind the big trunk)
+        const z = px < 260 && py > 200 ? 10 + R() * 4 : px < 450 ? 14 + R() * 5 : px > 1350 ? 13.5 + R() * 6 : 11 + R() * 6;
+        const p = px2w(px, py, z);
+        const size = (55 + R() * 70) * wpx(z);
+        const nf = V3((R() - 0.5) * 1.1, (R() - 0.5) * 0.9 + 0.1, 0.85).normalize();
+        let t = V3(0, 1, 0); const u = new THREE.Vector3().crossVectors(nf, t).normalize(); const v = new THREE.Vector3().crossVectors(u, nf).normalize();
+        const rot = R() * Math.PI * 2;
+        const uu = u.clone().multiplyScalar(Math.cos(rot)).addScaledVector(v, Math.sin(rot)).multiplyScalar(size / 2);
+        const vv = new THREE.Vector3().crossVectors(nf, uu).normalize().multiplyScalar(size / 2);
+        acc.shade = 0.75 + R() * 0.3;
+        const nrm = V3(nf.x * 0.5, 0.35 + (R() - 0.5) * 0.6, 0.6).normalize();
+        card(acc, p, uu, vv, nrm, DENSE[Math.floor(R() * DENSE.length)]);
+      }
+    }
+  });
+  return acc;
+}
+// Spanish moss strand pair (two crossed blended cards) hanging from p
+function mossStrand(acc, R, p, len, w) {
+  const a = R() * Math.PI;
+  for (const k of [0, 1]) {
+    const ang = a + k * Math.PI / 2;
+    const u = V3(Math.cos(ang) * w / 2, 0, Math.sin(ang) * w / 2), v = V3(0, len / 2, 0);
+    const c = p.clone().add(V3(0, -len / 2 + 0.05, 0));
+    const nrm = V3(Math.sin(ang), 0.3, -Math.cos(ang)).normalize();
+    const b = acc.n;
+    acc.vert(c.clone().sub(u).sub(v), nrm, 0, 0); acc.vert(c.clone().add(u).sub(v), nrm, 1, 0);
+    acc.vert(c.clone().add(u).add(v), nrm, 1, 1); acc.vert(c.clone().sub(u).add(v), nrm, 0, 1);
+    acc.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+  }
+}
+
 // ---------------------------------------------------------------- build
 export async function buildVegetation(ctx, M, parent, site) {
   const G = -0.45;
@@ -372,29 +460,41 @@ export async function buildVegetation(ctx, M, parent, site) {
   const bgLeafMat = leafMaterial(atlas, 'veg.bgleaves', 0xffd890, 1.1);
   const shrubMat = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.8, vertexColors: true, name: 'veg.shrub' });
   // Spanish moss: soft blended grey veils (unlit so the hanging strands stay pale from both sides)
-  const mossMat = new THREE.MeshBasicMaterial({ map: mossTexture(), transparent: true, depthWrite: false, alphaTest: 0.02, side: THREE.DoubleSide, color: 0x8e8c7e, name: 'veg.moss' });
+  const mossMat = new THREE.MeshBasicMaterial({ map: mossTexture(), transparent: true, depthWrite: false, alphaTest: 0.02, side: THREE.DoubleSide, color: 0x74766a, opacity: 0.85, name: 'veg.moss' });
   const frondMat = new THREE.MeshStandardMaterial({ map: frondTexture(), alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.75, name: 'veg.frond' });
   const strapMat = new THREE.MeshStandardMaterial({ map: strapTexture(), alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.8, name: 'veg.strap' });
   const group = new THREE.Group(); group.name = 'vegetation'; parent.add(group);
+  // the big left trunk reads mid grey-brown in the photo (skylight off the lawn); lift it by its own bark texture
+  const trunkMat = M.bark.clone(); trunkMat.name = 'ext.trunk';
+  // (the neutral tone map's toe subtracts the darkest channel, so dark bark needs a bluish lift to stay grey)
+  trunkMat.color = new THREE.Color(0x8c8e94);
+  trunkMat.emissive = new THREE.Color().setRGB(0.2, 0.22, 0.34); trunkMat.emissiveMap = M.bark.map; trunkMat.emissiveIntensity = 1.0;
 
   const addTree = (t, name, lm, shadeOpts = {}) => {
     shadeCanopy(t.leaves, name.length * 31 + t.leaves.cards.length, shadeOpts);
     const b = new THREE.Mesh(t.bark.geometry(), M.bark); b.castShadow = true; b.receiveShadow = true; b.name = name + ':bark'; group.add(b);
+    if (t.trunk) { const tk = new THREE.Mesh(t.trunk.geometry(), shadeOpts.trunkMat ?? M.bark); tk.castShadow = true; tk.receiveShadow = true; tk.name = name + ':trunk'; group.add(tk); }
     const l = new THREE.Mesh(t.leaves.geometry(), lm); l.castShadow = true; l.receiveShadow = true; l.customDepthMaterial = lm.userData.depth; l.name = name + ':leaves'; group.add(l); skipInOverride(l);
     if (t.moss && t.moss.idx.length) { const m = new THREE.Mesh(t.moss.geometry(), mossMat); m.name = name + ':moss'; m.castShadow = false; m.renderOrder = 2; group.add(m); skipInOverride(m); }
   };
 
-  // left foreground live oak: trunk at the left edge of the frame, main limb arching right over the top
-  addTree(liveOak(101, V3(-6.9, G - 0.3, 17), {
-    trunkH: 4.3, trunkR: 0.58, lean: [0.35, 0],
+  // left foreground live oak, traced from the photo: a massive trunk at the left edge rising to ~7 m, then
+  // thick limbs: one arching right across the top of the frame, a lower one sagging over the roof, one
+  // continuing up out of frame, and limbs reaching back over the garage wing, out left and toward the camera
+  const PX = (pts) => pts.map(([x, y, z]) => px2w(x, y, z).toArray());
+  addTree(liveOak(101, V3(-7.07, G - 0.3, 17), {
+    trunkH: 6.45, trunkR: 0.62, lean: [0.2, 0], furrow: 0.14,
     limbs: [
-      { path: [[-5.3, 6.0, 16.6], [-3.0, 7.6, 16.0], [0.5, 8.6, 15.5], [4.5, 9.1, 15.0], [7.5, 9.5, 14.6]], r: 0.4, leafy: 0.7 },
-      { path: [[-7.6, 6.2, 17.4], [-8.6, 8.2, 18.0], [-9.6, 10.2, 18.6]], r: 0.4 },
-      { path: [[-6.2, 6.4, 14.5], [-5.6, 7.9, 11.5], [-4.6, 8.8, 8.5], [-3.2, 9.3, 5.5]], r: 0.34, leafy: 0.6 },
-      { path: [[-6.9, 5.6, 19.5], [-6.6, 6.8, 23], [-6.0, 7.4, 26]], r: 0.34 },
-      { path: [[-8.5, 5.0, 15.0], [-10.5, 6.2, 12.5], [-12.5, 7.0, 10.5]], r: 0.3 },
-    ], leafScale: 1.25, leafDensity: 0.35, moss: 0.04, bare: 0.2,
-  }), 'oakL', leafMat);
+      // two stems from the fork: a leaning one going straight up out of frame on the left, the main one up and right
+      { path: PX([[70, 230, 17.2], [55, 80, 17.4], [50, -100, 17.6]]), r: 0.42, leafy: 0.4 },
+      { path: PX([[140, 230, 17], [195, 140, 17], [240, 40, 17.2], [275, -100, 17.4]]), r: 0.46, leafy: 0.4 },
+      { path: PX([[190, 200, 16.9], [300, 135, 16.6], [420, 98, 16.2], [560, 82, 15.7], [700, 58, 15.2], [820, 22, 14.7], [950, -25, 14.2], [1080, -70, 13.8]]), r: 0.34, leafy: 0.7 },
+      { path: PX([[150, 260, 17], [290, 215, 16.8], [400, 168, 16.4], [520, 140, 15.9], [650, 148, 15.4], [770, 190, 14.9], [870, 245, 14.4]]), r: 0.25, leafy: 0.8 },
+      { path: [[-6.4, 6.6, 14.5], [-5.4, 8.6, 11], [-4.4, 9.6, 8]], r: 0.28, leafy: 0.6 },
+      { path: [[-8.5, 6.6, 16], [-10.5, 8.0, 14], [-12.5, 9.0, 12.5]], r: 0.26 },
+      { path: [[-7.0, 6.8, 19.5], [-6.6, 8.2, 22], [-6.2, 9.0, 24.5]], r: 0.26 },
+    ], leafScale: 1.25, leafDensity: 0.35, moss: 0.06, bare: 0.2,
+  }), 'oakL', leafMat, { trunkMat });
   // right live oak with Spanish moss beside the bedroom wing, limbs high over the east roof
   addTree(liveOak(202, V3(18.0, G - 0.3, 5.5), {
     trunkH: 5.6, trunkR: 0.5, lean: [-0.3, 0],
@@ -405,16 +505,34 @@ export async function buildVegetation(ctx, M, parent, site) {
       { path: [[16, 8, -2], [17.5, 10, -5], [18.5, 11, -8]], r: 0.3 },
       { path: [[14, 8.5, -2.5], [12.5, 10.5, -5], [11, 11.2, -7]], r: 0.3 },
     ], leafScale: 1.15, leafDensity: 0.4, moss: 0.2, bare: 0.3,
-  }), 'oakR', leafMat);
+  }), 'oakR', leafMat, { dark: 0.4 });
   // a tree just right of the frame whose limbs overhang the top-right corner
   addTree(liveOak(303, V3(18.0, G - 0.3, 21), {
     trunkH: 4.2, trunkR: 0.5,
     limbs: [
-      { path: [[15.5, 6.0, 20.5], [12, 7.2, 20], [9, 7.6, 19.5], [6.5, 7.9, 19.2]], r: 0.34 },
+      // the thick limb rising from the right edge to the top centre
+      { path: PX([[2000, 330, 20.5], [1789, 255, 20], [1640, 185, 19.5], [1480, 115, 19], [1330, 55, 18.5], [1180, -5, 18], [1040, -70, 17.5]]), r: 0.32 },
       { path: [[16, 6.5, 18], [14, 8.5, 15], [12.5, 9.8, 12]], r: 0.3 },
       { path: [[19, 6.5, 23], [20, 8, 26]], r: 0.3 },
-    ], leafScale: 1.1, leafDensity: 0.6, moss: 0.22, bare: 0.2,
-  }), 'oakTR', leafMat);
+    ], leafScale: 1.1, leafDensity: 0.35, moss: 0.22, bare: 0.2,
+  }), 'oakTR', leafMat, { dark: 0.4 });
+
+  // dense canopy fill where the photo has foliage across the top of the frame (traced coverage mask),
+  // plus heavier Spanish moss hanging from the right-hand limbs
+  {
+    const denseMat = leafMaterial(oakDenseAtlas(), 'veg.canopy', 0xf0e8b0, 1.0);
+    const acc = canopyFill(77);
+    shadeCanopy(acc, 4077, { dark: 0.45, glow: 0.6 });
+    const l = new THREE.Mesh(acc.geometry(), denseMat); l.castShadow = true; l.receiveShadow = true; l.customDepthMaterial = denseMat.userData.depth;
+    l.name = 'canopy:leaves'; group.add(l); skipInOverride(l);
+    const MR = rng(919), mo = new Acc();
+    const strand = (px, py, lpx, z) => mossStrand(mo, MR, px2w(px, py, z), lpx * wpx(z), (16 + MR() * 22) * wpx(z));
+    for (let i = 0; i < 40; i++) strand(1360 + MR() * 440, MR() * 200, 120 + MR() * 220, 13 + MR() * 6);
+    for (let i = 0; i < 4; i++) strand(1190 + MR() * 60, 200 + MR() * 70, 60 + MR() * 70, 14 + MR() * 2);
+    for (let i = 0; i < 4; i++) strand(300 + MR() * 50, 30 + MR() * 40, 70 + MR() * 60, 16);
+    const cm = mossMat.clone(); cm.color.set(0x66685e); cm.opacity = 0.75;
+    const m = new THREE.Mesh(mo.geometry(), cm); m.name = 'canopy:moss'; m.renderOrder = 2; group.add(m); skipInOverride(m);
+  }
 
   // background trees behind and beside the house (sunlit from behind: warmer leaves)
   const bgList = [

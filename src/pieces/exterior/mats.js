@@ -171,10 +171,10 @@ export function makeMaterials(ctx) {
   M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xc8d070, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
   M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x3c3228, roughness: 1, rough: null, name: 'ext.mulch' });
   // live-oak bark: grey-brown furrowed oak with moss and lichen (Poly Haven jolcham_oak_bark_01, 1k is 1:2)
-  M.bark = pbr(ctx, 'jolcham_oak_bark', { repeat: 1, color: 0xe8e4dc, roughness: 1, normalScale: 1.6, name: 'ext.bark' });
+  M.bark = pbr(ctx, 'jolcham_oak_bark', { repeat: 1, color: 0xa4a4a6, roughness: 1, normalScale: 1.6, name: 'ext.bark' });
   for (const t of [M.bark.map, M.bark.normalMap, M.bark.roughnessMap]) t.repeat.set(1 / 0.9, 1 / 1.8);
   // limbs are seen from below in shade: lift the bark by its own albedo so the grey-brown texture reads
-  M.bark.emissive = new THREE.Color(0x8a8278); M.bark.emissiveMap = M.bark.map; M.bark.emissiveIntensity = 1.0;
+  M.bark.emissive = new THREE.Color().setRGB(0.3, 0.31, 0.42); M.bark.emissiveMap = M.bark.map; M.bark.emissiveIntensity = 1.0;
   M.concrete = pbr(ctx, 'white_stucco', { repeat: 1.5, color: 0xb9b1a4, roughness: 0.95, normalScale: 0.5, name: 'ext.walk' });
 
   // glass: clear (global, seen from inside) and warm-lit (front windows, outside face only)

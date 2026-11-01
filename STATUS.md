@@ -1,4 +1,4 @@
-# Status: paused 2026-11-01 (5-hour usage ~85%, weekly 35%), after exterior r10/r11, great room r11, master r13
+# Status: paused 2026-11-01 (5-hour usage ~85%, weekly 35%), after exterior r11, great room r11, master r13
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -16,7 +16,7 @@
 ## Critic loop (the photo has won every blind A/B so far; latest round per piece, all pushed)
 | piece | latest (beat its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
 |---|---|---|
-| exterior | round 10: low warm key sun with leaf-shadow dapple (r7), cool blue-grey fine shingle roof, taller stone base, bronze trim (r9), readable ferns and flower clusters (r10). Round 11 (denser canopy, Opus): see the LOG | a dense layered live-oak canopy across the top (thick twisting grey-bark limbs, small sky gaps); fuller foundation beds (round 9's mounded shrubs); window interiors; harsh wall dapple |
+| exterior | round 10: low warm key sun with leaf-shadow dapple (r7), cool blue-grey fine shingle roof, taller stone base, bronze trim (r9), readable ferns and flower clusters (r10), dense photo-traced canopy and the inside-out trunk fix (r11, Opus) | bluer sky in the canopy gaps; rectangular moss streaks near the chimney; fuller foundation beds (round 9's mounded shrubs); hide the flat lawn plane and white wall edge at the far right; window interiors (fresh critic not run on r11) |
 | great_room | round 11: one continuous L sectional (r9, Opus), leather sheen with greyer shadows, draped throws (r11); warmer lower fill, darker cabinets, backsplash joints (r8) | the leather still reads orange and plastic (rounds 6–11); try the surround (darker floor and cabinets toward R) and tailored cushion edges/seams, not the hue. Round 10 (30% desaturation) was rejected as muddy |
 | master_suite | round 13: bedding rebuilt as layered cloth meshes (r11, Opus), continuous duvet, throw over its folds, pillows in rows (r12), 17 cm satin oak planks, lumbar (r13) | lighting: keep the left-wall sun patch, add contact shadows and corner falloff, warm white not peach; no sun on the bed (round 14 rejected for leaf-dappled blotches); then softer linen wrinkles, the right-edge sheer, the bench knit |
 | rest | QA pass done | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
@@ -28,7 +28,8 @@ renders X/Y in random order) are built inline; the answer keys were in the sessi
 ## Next steps (in order)
 1. Great room: darken the floor and cabinets toward the photo (walnut-brown cabinets, mid-brown oak), then tailored sectional cushions (crisp welted edges, flatter tops, seams). Leave the leather hue alone.
 2. Master suite: contact shadows and corner falloff with the left-wall sun kept; then smoother linen (fewer, larger folds) and the foot overhang.
-3. Exterior: whatever round 11's critics leave (canopy density if it lost), then fuller foundation shrubs and window interiors.
+3. Exterior: run a fresh blind critic on round 11 first; then sky colour in the canopy gaps, the moss streaks, fuller foundation shrubs, the far-right edge.
+   Check the other pieces' tube/lathe builders for the same inside-out winding that darkened the exterior trunks.
 4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), probably a shadow-map gap at the `w_wicS2` junction.
 5. Window views from the interior show the exterior's cut-out foliage; critics flag them in both interiors.
 

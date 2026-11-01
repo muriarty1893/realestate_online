@@ -451,3 +451,15 @@ flat light with only a thin sun sliver on the left wall.
 *Regression check (blind, round 13 vs round 14): round 13 closer* (its warm slab of window light on the left wall matches R; even duvet lighting; warm sunlit foreground floor). Nothing in round 14 to take back.
 Both: a lower, less crowded pillow stack; soft folds where the duvet hangs over the foot; a lighter, warmer floor at the back.
 *Orchestrator:* the left-wall sun patch is right and must stay; the photo's directional feel should come from the wall patch plus contact shadows, not from sun on the bed. Diff in `shots/master_suite/rejected/round_14.patch`.
+
+## Round 11, exterior (2026-11-01, Opus builder): the live-oak canopy
+Builder changes (veg.js, vegtex.js, mats.js): **the tube builder wound every trunk and limb inside out** (`a, b, a+1`), so every round so far showed each trunk's dark inner wall, crushed by AO (25,17,6 vs 112,99,83
+with AO off): that was the critics' "smooth dark blob". Fixed. The left trunk rebuilt (moved left, ~6.5 m S-curve, grooved greyer bark, forks into two stems; 72,54,28 vs the photo's 66,51,34); greyer bark with a slight
+blue lift in the darks (neutral tone mapping strips the weakest channel from darks); limbs traced from the photo via a photo-pixel + depth -> world mapping (the high arc across the top, a limb sagging over the roof,
+the thick limb from the right edge); a foliage map from the photo's top 456 px in 24 px cells drives ~1,000 extra leaf cards in depth layers, stopping at the roofline except a clump in front of the ridge and chimney;
+a twig-spray leaf texture with sky gaps; ~50 more, thinner, darker, see-through moss strands. 308k tris.
+*Fresh critic skipped (5-hour usage at 87%).*
+*Regression check (blind, round 10 vs round 11): round 11 closer* (dense canopy overlapping the roof, the massive bark-textured left trunk, a leafy mass on the right in place of bare trunks).
+Round 10 wins the sky: its clear blue gaps match R; round 11's few gaps look pale and washed out. Round 11's moss near the chimney renders as rectangular grey streaks (fix). Both: fuller foundation beds;
+hide the flat lawn plane and white wall edge at the far right.
+*Orchestrator:* other pieces with tube builders may have the same inward winding; worth a grep for `a, b, a + 1` patterns.

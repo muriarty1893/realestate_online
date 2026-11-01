@@ -225,3 +225,56 @@ export function strapTexture() {
   }
   return tex(c);
 }
+
+// dense live-oak clump for the canopy fill: an irregular union of sub-blobs packed with small
+// elliptic leaves (16-30 px in a 512 cell, ~4-6 cm on a 1 m card) on dark twigs, darker inside,
+// lighter at the top rim, with ~15% sunlit yellow-green leaves and small holes between blobs.
+function oakDense(g, ox, oy, S, R) {
+  g.save(); g.beginPath(); g.rect(ox + 2, oy + 2, S - 4, S - 4); g.clip();
+  const cx = ox + S / 2, cy = oy + S / 2;
+  // 3-5 sprays fanning out from the lower centre, leaf blobs strung along each: a ragged, open outline
+  const blobs = [], twigs = [];
+  const ns = 4 + Math.floor(R() * 3);
+  for (let i = 0; i < ns; i++) {
+    const a = -Math.PI / 2 + (i / (ns - 1) - 0.5) * 2.6 + (R() - 0.5) * 0.4, L = S * (0.26 + R() * 0.17);
+    const x0 = cx + (R() - 0.5) * S * 0.1, y0 = cy + S * 0.3;
+    const pts = [];
+    for (let t = 0.3; t <= 1.001; t += 0.14 + R() * 0.08) {
+      const bend = Math.sin(t * 2.2 + i) * S * 0.05;
+      pts.push([x0 + Math.cos(a) * L * t * 1.15 - Math.sin(a) * bend, y0 + Math.sin(a) * L * t * 1.15 + Math.cos(a) * bend]);
+    }
+    twigs.push([x0, y0, pts]);
+    for (const [x, y] of pts) blobs.push([x + (R() - 0.5) * S * 0.06, y + (R() - 0.5) * S * 0.06, S * (0.045 + R() * 0.06)]);
+  }
+  g.lineCap = 'round';
+  for (const [x0, y0, pts] of twigs) {
+    g.strokeStyle = hsl(28, 10, 14 + R() * 10, 0.9); g.lineWidth = 1.5 + R() * 2;
+    g.beginPath(); g.moveTo(x0, y0); for (const [x, y] of pts) g.lineTo(x, y); g.stroke();
+  }
+  const leaves = [];
+  for (const [x0, y0, r] of blobs) {
+    const n = Math.round((r * r) / 70);
+    for (let k = 0; k < n; k++) {
+      const a = R() * Math.PI * 2, q = Math.pow(R(), 0.9), d = q * r * 1.3;
+      const x = x0 + Math.cos(a) * d, y = y0 + Math.sin(a) * d * 0.85;
+      if (Math.hypot(x - cx, y - cy) > S * 0.47) continue;
+      leaves.push([x, y, q, (y0 - y) / r]);
+    }
+  }
+  leaves.sort((p, q) => p[2] - q[2]);   // inner leaves first, rim leaves drawn over them
+  for (const [x, y, q, lift] of leaves) {
+    let h = 72 + R() * 30, s = 12 + R() * 14, li = 24 + R() * 14 + q * 10 + Math.max(0, lift) * 9;
+    if (R() < 0.07 + 0.1 * q) { h = 58 + R() * 10; s = 26 + R() * 12; li = 42 + R() * 14; }
+    const l = 15 + R() * 10, rot = R() * Math.PI;
+    g.fillStyle = hsl(h, s, li);
+    g.beginPath(); g.ellipse(x, y, l / 2, l * 0.21, rot, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
+}
+export function oakDenseAtlas() {
+  const S = 512, c = canvas(S * 2, S * 4), g = c.getContext('2d');
+  const R = rng(5150);
+  for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) oakDense(g, i * S, j * S, S, R);
+  return tex(c);
+}
+export const DENSE = [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2], [0, 3], [1, 3]];

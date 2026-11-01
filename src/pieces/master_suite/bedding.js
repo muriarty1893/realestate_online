@@ -224,8 +224,8 @@ export function buildBedding(ctx, M, b, { W, L, mTop }) {
   // sleeping pillows leaning on them
   pil(0.92, 0.5, 0.2, M.pilSleepL, -0.47, yb + 0.21, 0.43, 0.42, 0.0, 4, { crumple: 0.1 });
   pil(0.92, 0.5, 0.2, M.pilSleepR, 0.47, yb + 0.21, 0.43, 0.44, 0.0, 5, { crumple: 0.1 });
-  // one accent square, slightly left of centre
-  pil(0.5, 0.5, 0.16, M.pilDecoL, -0.2, yb + 0.2, 0.63, 0.55, 0.04, 6, { crumple: 0.06 });
+  // one small muted lumbar pillow at front centre
+  pil(0.52, 0.26, 0.13, M.pilLumbar, 0.0, yb + 0.14, 0.66, 0.5, 0.0, 6, { crumple: 0.05 });
   return { duvTop };
 }
 

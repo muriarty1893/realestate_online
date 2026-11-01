@@ -18,7 +18,7 @@ export function makeMats(ctx) {
   // ---- floors
   const pf = plankFloorMaps();
   M.oakFloor = new THREE.MeshPhysicalMaterial({
-    map: pf.map, normalMap: pf.normalMap, color: 0xb4ada2, roughness: 0.9, clearcoat: 0, specularIntensity: 0.5,
+    map: pf.map, normalMap: pf.normalMap, color: 0xc0b8ac, roughness: 0.5, clearcoat: 0.12, clearcoatRoughness: 0.4, specularIntensity: 0.6,
     normalScale: new THREE.Vector2(0.55, 0.55), name: 'ms.oakFloor',
   });
   M.porcelain = std({

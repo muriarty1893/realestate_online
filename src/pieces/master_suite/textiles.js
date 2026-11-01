@@ -187,26 +187,26 @@ function canvasPix(draw, W, H) {
 }
 
 // Light natural oak boards with varied tone, butt joints and fine grain. Planks run along V (canvas +y). Tile = tileM metres.
-export function plankFloorMaps({ size = 2048, tileM = 5.6, seed = 31, base = [116, 108, 98] } = {}) {
+export function plankFloorMaps({ size = 2048, tileM = 2.4, seed = 31, base = [128, 121, 112] } = {}) {
   const W = size, H = size, R = rng(seed), pxPerM = W / tileM;
   const boards = [], cols = [];
-  { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.075 + R() * 0.05) * pxPerM); cols.push([x, w]); x += w; } }
+  { let x = 0; while (x < W - 2) { const w = Math.min(W - x, (0.16 + R() * 0.02) * pxPerM); cols.push([x, w]); x += w; } }
   cols.forEach(([cx, cw], c) => {
     let y = -R() * 1.6 * pxPerM;
     while (y < H) {
-      const len = (0.7 + R() * 1.9) * pxPerM;
-      boards.push({ cx, cw, y0: y, y1: Math.min(y + len, H + 4), tint: 0.8 + R() * 0.4, warm: (R() - 0.5) * 0.08, seed: Math.floor(R() * 1e6) });
+      const len = (0.6 + R() * 1.0) * pxPerM;
+      boards.push({ cx, cw, y0: y, y1: Math.min(y + len, H + 4), tint: 0.88 + R() * 0.26, warm: (R() - 0.5) * 0.06, seed: Math.floor(R() * 1e6) });
       y += len;
     }
   });
   const alb = canvasPix((g) => {
-    g.fillStyle = 'rgb(92,78,64)'; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgb(92,82,70)'; g.fillRect(0, 0, W, H);
     for (const b of boards) {
       const y0 = Math.max(0, b.y0), r = rng(b.seed);
       const bs = [base[0] * (1 + b.warm), base[1], base[2] * (1 - b.warm)];
-      paintGrain(g, b.cx + 0.5, y0, b.cw - 1, b.y1 - y0, r, { base: bs, tint: b.tint, streaks: 40, contrast: 1.6 });
+      paintGrain(g, b.cx + 0.5, y0, b.cw - 1, b.y1 - y0, r, { base: bs, tint: b.tint, streaks: 70, contrast: 1.3 });
     }
-    g.fillStyle = 'rgba(60,38,20,0.7)';
+    g.fillStyle = 'rgba(50,40,30,0.7)';
     for (const [cx] of cols) g.fillRect(cx - 1, 0, 2, H);
     for (const b of boards) if (b.y0 > 0) g.fillRect(b.cx, b.y0 - 1, b.cw, 2);
   }, W, H);

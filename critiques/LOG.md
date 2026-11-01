@@ -420,3 +420,13 @@ highlights along arm tops, seat fronts and back cushions, welt seams, creasing a
 Both: the sofa throw doesn't drape over the left arm; the chaise throw is a bulky block; dining chairs too white; range hood too thick; no creases or seams.
 *Orchestrator:* the per-patch saturation match lost to the look: desaturating the whole hide killed its warmth and sheen. The diff is in `shots/great_room/rejected/round_10.patch`.
 A next try should desaturate only the shadows/mids (keep warm, glossy highlights) and add sheen variation and crease/seam shading, not flatten the hide.
+
+## Round 13, master_suite (2026-11-01, Sonnet builder): floor and lumbar pillow
+Builder changes: procedural plank maps at 2.4 m per 2048 px tile (~850 px/m, was 366), 16–18 cm planks of 0.6–1.6 m with visible end seams, finer lower-contrast grain; roughness 0.9 -> 0.5 with a light clearcoat
+(0.12, r 0.4), specularIntensity 0.6, a lighter base; the square knit accent replaced by a 0.52 x 0.26 m muted lumbar. Shaded floor 90,60,19 -> 108,87,61 (photo 130,102,79); the sunlit floor is still too yellow-orange (179,135,78 vs 139,120,105).
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: **lighting**: flat, a uniform orange-yellow cast, the only sun one patch on the left wall; almost no contact shadows (bed, bench, floating nightstands).
+The photo: low sun from the right windows across the duvet, rug and floor, soft dark shadows under bench, bed base and nightstands, ceiling and corners falling off; walls warm white, not peach.
+Further: crumpled-paper wrinkle texture on duvet and pillows (should be smooth linen with a few large soft folds, thick pillow edges); cut-out window foliage; the smeared right-edge sheer;
+inconsistent floor tone (light orange front left vs dark red-brown right of the rug); the bench knit a flat tile pattern.
+*Regression check (blind, round 12 vs round 13): round 13 closer, narrowly* (the plain greige lumbar; the less red floor on the right). Both: harsher wrinkles than R's soft linen, no long overhang at the foot,
+stiff pleated curtains where R has light-passing sheers.

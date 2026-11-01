@@ -1,5 +1,6 @@
 // Master bedroom furnishings: bed, nightstands, lamps, bench, rug, art, curtains, barn door, fan, lights.
 import * as THREE from 'three';
+import { buildBedding, beddingMats, clothGeo } from './bedding.js';
 import { box, rbox, mesh, metreUV, pillowGeo, drapeGeo, curtainGeo, lathe, merge, rng, canvasTex, softShadow } from './util.js';
 
 export const R = { x0: -8.928, x1: -4.540, z0: -9.047, z1: -3.978 }; // mstr interior faces
@@ -7,6 +8,7 @@ export const BED = { x: -6.735, head: -8.937, W: 2.06, L: 2.3, hbW: 2.22, hbH: 1
 
 export function buildBedroom(ctx, M, group, P) {
   const g = new THREE.Group(); g.name = 'mstr:furniture'; group.add(g);
+  beddingMats(M);
   bed(ctx, M, g, P);
   nightstands(ctx, M, g, P);
   bench(ctx, M, g, P);
@@ -34,35 +36,8 @@ function bed(ctx, M, g, P) {
   // mattress
   const mT = 0.3, mTop = baseH + mT;
   b.add(rbox(W - 0.2, mT, L - 0.2, 0.06, M.sheet, 0, baseH + mT / 2, L / 2, { segs: 3 }));
-  // duvet: one thick continuous shape, broad soft undulations, rounded edges draping over the sides and foot
-  const duvTop = mTop + 0.045;
-  const duv = mesh(drapeGeo({ W: W - 0.02, L: L - 0.05, z0: 0.6, top: duvTop, side: 0.5, foot: 0.42, r: 0.14, segX: 120, segZ: 110, wrinkle: 0.006, fold: 0.035, foldFreq: 4.5, undul: 0.055, crumple: 0.011, seed: 2, floorY: 0.08 }), M.duvet);
-  b.add(duv);
-  // folded-back top edge showing the sheet
-  b.add(rbox(W + 0.0, 0.05, 0.28, 0.025, M.sheet, 0, duvTop + 0.012, 0.68, { segs: 4 }));
-  // cream blanket laid across the lower third, draping over both sides
-  const tW = W, tz0 = L - 0.8;
-  const thr = mesh(drapeGeo({ W: tW, L: L - 0.12, z0: tz0, top: duvTop + 0.12, side: 0.62, foot: 0.1, r: 0.12, segX: 110, segZ: 70, wrinkle: 0.004, fold: 0.07, foldFreq: 3.4, undul: 0.02, crumple: 0.003, seed: 5, sideMask: [-1.25, 1.0], floorY: 0.06, skew: 0.5 }), M.throwCream);
-  b.add(thr);
-  // pillows (euro shams, sleepers, decoratives)
-  const pil = (w, h, d, mat, x, y, z, tilt, yaw = 0, seed = 0) => {
-    const m = mesh(pillowGeo(w, h, d, { seed, puff: 1.0, pinch: 0.1, shape: 0.62, crumple: 0.16, sag: 0.06 }), mat);
-    m.position.set(x, y, z); m.rotation.set(-tilt, yaw, 0, 'YXZ');
-    b.add(m); return m;
-  };
-  const yb = mTop + 0.03;
-  // back row euro shams leaning into the headboard, overlapping
-  pil(0.7, 0.62, 0.34, M.pillowA, -0.66, yb + 0.28, 0.17, 0.3, 0.05, 1);
-  pil(0.7, 0.62, 0.34, M.pillowA, 0.0, yb + 0.29, 0.16, 0.27, -0.02, 2);
-  pil(0.7, 0.62, 0.34, M.pillowA, 0.66, yb + 0.28, 0.17, 0.31, -0.06, 3);
-  // sleeping pillows (lighter), overlapping in front, white one at the east end
-  pil(0.88, 0.5, 0.3, M.pillowC, -0.42, yb + 0.2, 0.38, 0.5, 0.06, 4);
-  pil(0.88, 0.5, 0.3, M.pillowC, 0.38, yb + 0.2, 0.38, 0.5, -0.05, 5);
-  pil(0.62, 0.46, 0.26, M.pillowW, 0.76, yb + 0.19, 0.34, 0.45, -0.12, 9);
-  // decoratives: two textured squares + lumbar
-  pil(0.48, 0.46, 0.24, M.pillowKnit, -0.5, yb + 0.19, 0.58, 0.55, 0.16, 6);
-  pil(0.48, 0.46, 0.24, M.pillowB, 0.47, yb + 0.19, 0.58, 0.55, -0.18, 7);
-  pil(0.58, 0.34, 0.2, M.pillowB, -0.03, yb + 0.14, 0.66, 0.6, 0.02, 8);
+  // layered bedding (duvet, turned-down band, throw, pillows): see bedding.js
+  buildBedding(ctx, M, b, { W, L, mTop });
   ctx.addCollider({ x0: BED.x - hbW / 2, z0: BED.head - 0.11, x1: BED.x + hbW / 2, z1: BED.head + baseL });
 }
 
@@ -130,10 +105,11 @@ function bench(ctx, M, g, P) {
   b.add(box(Lb - 2 * legT, 0.025, D - 0.08, M.oakSoft, 0, H - cushT - 0.0125, 0, { grain: 'x' }));
   b.add(rbox(Lb, cushT, D, 0.03, M.benchFab, 0, H - cushT / 2, 0, { segs: 4 }));
   // chunky knit throw draped over the east half, hanging toward the floor in front
-  const th = mesh(drapeGeo({ W: 0.62, L: D - 0.02, z0: -0.04, top: H + 0.06, side: 0.1, foot: 0.46, r: 0.06, segX: 60, segZ: 60, wrinkle: 0.01, fold: 0.02, foldFreq: 8, seed: 11, sideMask: [1, 1], floorY: 0.02 }), M.knit);
-  th.position.set(0.12, 0, -D / 2 + 0.01); th.rotation.y = 0.14;
-  const th2 = mesh(drapeGeo({ W: 0.5, L: 0.2, z0: 0, top: H + 0.075, side: 0.05, foot: 0.1, r: 0.04, segX: 30, segZ: 20, wrinkle: 0.015, fold: 0.02, foldFreq: 18, seed: 13, floorY: H }), M.knit);
-  th2.position.set(0.1, 0, -0.08); th2.rotation.y = 0.3;
+  const th = mesh(clothGeo({ x0: -0.16, x1: 0.42, z0: -D / 2 + 0.03, z1: D / 2 - 0.02, top: H + 0.03, r: 0.045,
+    hang: { w: 0.07, e: 0.12, h: 0.05, f: 0.52 }, density: 90, flare: 0.22, maxDrop: H + 0.02, floorY: 0.015, hem: 0.03, hemIn: 0.02,
+    field: (s, t, drop) => 0.02 * Math.sin(s * 8 + t * 4) * Math.sin(t * 6 - s * 3) + (drop > 0 ? 0.015 + 0.03 * Math.sin(drop * 9 + s * 5) * Math.min(1, drop * 4) : 0.012), foldAmp: 0.07, foldSeed: 13, foldScale: 10,
+    shade: (s, t, drop, disp) => { const band = s > 0.1 && s < 0.3 ? 1.0 : 0.8; return band * (1 - 0.25 * Math.min(1, drop / 0.45)) * (1 + Math.max(-0.2, Math.min(0.1, disp * 6))); } }), M.knit);
+  th.rotation.y = 0.1;
   b.add(th);
   P.bench = { z: zc, D };
   ctx.addCollider({ x0: BED.x - Lb / 2, z0: zc - D / 2, x1: BED.x + Lb / 2, z1: zc + D / 2 });

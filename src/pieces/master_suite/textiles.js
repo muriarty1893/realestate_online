@@ -72,7 +72,7 @@ export function rugMaps({ size = 2048, repeatM = 3.8, rows = 230, loops = 150, s
 }
 
 // Chunky hand knit: columns of V stitches. Tile = repeatM metres (4 x 5 stitches per tile).
-export function knitMaps({ size = 256, repeatM = 0.22, cols = 4, rows = 5, seed = 5 } = {}) {
+export function knitMaps({ size = 256, repeatM = 0.22, cols = 4, rows = 5, seed = 5, lo = 0.58, nStrength = 3.4 } = {}) {
   const W = size, H = size, R = rng(seed);
   const h = new Float32Array(W * H);
   const cw = W / cols, rh = H / rows;
@@ -81,9 +81,9 @@ export function knitMaps({ size = 256, repeatM = 0.22, cols = 4, rows = 5, seed 
     const jx = (R() - 0.5) * cw * 0.12, jy = (R() - 0.5) * rh * 0.14;
     stamp(h, W, H, c * cw + cw / 2 + side * cw * 0.21 + jx, r * rh + rh / 2 + jy, cw * (0.27 + R() * 0.04), rh * (0.6 + R() * 0.08), side * (0.45 + R() * 0.15), 0.8 + R() * 0.2);
   }
-  const nrm = heightToNormal(h, W, H, 3.4);
+  const nrm = heightToNormal(h, W, H, nStrength);
   const col = new Uint8ClampedArray(W * H * 4);
-  for (let i = 0; i < W * H; i++) { const sh = 0.58 + 0.42 * Math.pow(h[i], 0.7); col[i * 4] = 236 * sh; col[i * 4 + 1] = 224 * sh; col[i * 4 + 2] = 206 * sh; col[i * 4 + 3] = 255; }
+  for (let i = 0; i < W * H; i++) { const sh = lo + (1 - lo) * Math.pow(h[i], 0.7); col[i * 4] = 236 * sh; col[i * 4 + 1] = 224 * sh; col[i * 4 + 2] = 206 * sh; col[i * 4 + 3] = 255; }
   return { map: tex(col, W, H, true, repeatM), normalMap: tex(nrm, W, H, false, repeatM) };
 }
 

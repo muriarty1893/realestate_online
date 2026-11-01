@@ -73,7 +73,7 @@ export function makeMats(ctx) {
   });
   const fab = (color, size = 0.27, rough = 0.95, ns = 0.6, extra = {}) =>
     std({ ...linenDetail(size), color, roughness: rough, normalScale: new THREE.Vector2(ns, ns), ...extra });
-  M.upholstery = fab(0x9a8068, 0.22, 0.95, 0.7, { name: 'ms.upholstery' });     // bed frame / headboard (taupe)
+  M.upholstery = fab(0xb1a395, 0.22, 0.95, 0.7, { name: 'ms.upholstery' });     // bed frame / headboard (taupe)
   M.benchFab = fab(0xcbb498, 0.2, 0.95, 0.6, { name: 'ms.benchFab' });
   // bedding: slubby linen weave + baked soft creases, with fabric sheen (physical material)
   const bedLinen = (color, { tile = 1.1, crease, seed, ns = 1, rough = 0.94, sheen = 0.5 }) => {

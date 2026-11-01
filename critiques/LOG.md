@@ -367,3 +367,14 @@ the roof a flat grey with a tiny repeating pattern; low contrast, pinkish flat w
 *Regression check (blind, round 7 vs round 9): round 9 closer* (an even fine-grained roof, the taller lighter stone base, cleaner bed edges, more open lawn). Round 7's larger defined foreground ferns at the lower left are worth taking back,
 kept below the lawn line. Neither has the photo's tall palm-like plant left of the entry or full flower-filled beds.
 *Orchestrator:* the intermittent `requestfailed` lines are Chromium `net::ERR_ABORTED` on duplicate fetches; every load still resolved. `ctx.loadGLTF` now retries up to 3 times (with a warning) and shot.mjs hides ERR_ABORTED.
+
+## Round 11, master_suite (2026-11-01, Opus builder): bedding rebuilt as layered meshes
+Builder changes: new `master_suite/bedding.js`: a `clothGeo` sheet over a rounded box (wraps the edge, hangs, slight flare, radial corners, deepening vertical folds, curled hem), a crease field of hundreds of short folds,
+vertex-colour shading (bright near the pillows, darker toward the foot and down the sides); a light taupe-grey linen duvet with a true-scale linen normal map; a turned-down band; a pale greige throw down the east half
+with a folded second layer; nine lighter, varied pillows; the shared upholstery lightened (0x9a8068 -> 0xb1a395); the bench throw redrawn with the cloth function and a finer knit. 284k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the bed: the duvet looks like two slabs with a hard seam down the middle; the throw is a flat panel pasted over the right half; the edges fall stiffly.
+It should be one continuous duvet folded back below the pillows, a throw draped loosely across the lower third, soft folds hanging over the sides and foot. The pillows sit at random angles; they should stand in rows
+(euro shams, sleeping pillows, accents) against the headboard. Further: the right-edge curtain is smeared; jagged cut-out leaves in the window views; no contact shadows (bench, bed, nightstands, rug);
+the bench throw a stiff tent with a flat repeating knit; dark high-contrast planks at the right.
+*Regression check (blind, round 10 vs round 11): round 11 closer* (greige palette near the photo, rumpled linen, the throw down the right side hanging off the edge, lighter base, the bench throw's lower drape).
+Round 11's centre seam (two twin duvets) is its giveaway; round 10's duvet was one continuous surface.

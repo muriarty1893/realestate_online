@@ -430,3 +430,14 @@ Further: crumpled-paper wrinkle texture on duvet and pillows (should be smooth l
 inconsistent floor tone (light orange front left vs dark red-brown right of the rug); the bench knit a flat tile pattern.
 *Regression check (blind, round 12 vs round 13): round 13 closer, narrowly* (the plain greige lumbar; the less red floor on the right). Both: harsher wrinkles than R's soft linen, no long overhang at the foot,
 stiff pleated curtains where R has light-passing sheers.
+
+## Round 11, great_room (2026-11-01, Sonnet builder): leather sheen, throws, pillows
+Builder changes: the `hide()` shader (cache key `hide2`) pulls only shadows and mids ~35% toward grey-brown by lit luminance (smoothstep 0.008–0.06), keeping round 9's warm lit tones; a noise-varied warm sheen on
+grazing and upward faces; pillows with a deeper centre fold and dimple; a wider (0.62 m) stripe throw with longer hangs and a fringe; a thinner, softer cream knit on the chaise end with a thin edge roll. 308k tris.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: still the leather (sectional and armchairs, ~40% of the frame): one saturated orange-red with a smooth plastic sheen, inflated cushions with no seams or welts,
+the front arm a flat slab. The photo: lighter muted cognac with grain and sitting creases, piping and stitched seams, crisp tailored edges, highlights that vary across each panel.
+Further: stiff paper-cut throws and pillows; a grey-smudge rug and almost no floor showing; flat orange light with no window daylight; uniform orange cabinets; a fake green window backdrop.
+*Regression check (blind, round 9 vs round 11): round 11 closer, slightly* (the cream knit throw lies over a leather arm with leather visible around it, as in R; round 9's end reads as a cream ottoman).
+Both: leather too orange-red, puffy cushions, pillows unlike R's (striped and dark grey ones, the sphere on the left arm); pale rug and floor; cabinets too light (R: deeper walnut-brown); hood shape.
+*Orchestrator:* the leather has now been the biggest gap in rounds 6–11. Saturation by patch matches the photo within ~15%, yet every critic calls it orange; the remaining difference is likely the surround (pale floor/rug, light
+orange cabinets, flat light) and the cushion form (puffy, no tailored edges or seams). Next: darken the floor and cabinets toward R and make the cushions tailored (crisp welted edges, flatter tops), not the hue.

@@ -96,7 +96,8 @@ export function pillowGeo(w, h, d, { segs = 18, seed = 0, puff = 1 } = {}) {
     const fx = 1 - Math.pow(Math.abs(x), 3), fy = 1 - Math.pow(Math.abs(y), 3);
     let t = Math.max(0.05, Math.pow(Math.max(0, fx * fy), 0.6)) * puff;
     // soft crease across the top ("karate chop") and a slumped, flatter lower edge
-    const chop = Math.exp(-(x * x) / 0.05) * Math.max(0, y) * 0.32;
+    const chop = Math.exp(-(x * x) / 0.05) * Math.max(0, y) * 0.5;
+    t *= 1 - 0.22 * Math.exp(-(x * x + y * y) / 0.18);
     t *= 1 - chop;
     t *= 1 - 0.18 * Math.max(0, -y);
     const nn = 0.06 * Math.sin(x * 4.3 + seed) * Math.sin(y * 3.7 + seed * 2.1) + 0.035 * Math.sin(x * 9.1 + y * 7.3 + seed * 1.3);

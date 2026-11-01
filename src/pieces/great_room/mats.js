@@ -98,11 +98,22 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
   float hk = mix(0.64, 1.3, smoothstep(0.15, 0.85, hm)) * (1.0 + 0.08 * hup);
   vec3 hc = diffuseColor.rgb * hk;
   diffuseColor.rgb = mix(hc, vec3(dot(hc, vec3(0.2126, 0.7152, 0.0722))), 0.22 * smoothstep(0.45, 0.85, hm));`)
+        .replace('#include <opaque_fragment>', `
+  { // shadows and mid-tones drift to a greyer brown, lit tones stay warm; soft sheen on upward / grazing faces
+    float ol = dot(outgoingLight, vec3(0.2126, 0.7152, 0.0722));
+    float sh = 1.0 - smoothstep(0.008, 0.06, ol);
+    outgoingLight = mix(outgoingLight, vec3(ol) * vec3(1.06, 0.97, 0.88), 0.35 * sh);
+    vec3 hv = normalize(vViewPosition);
+    float gz = pow(1.0 - clamp(abs(dot(normalize(normal), hv)), 0.0, 1.0), 3.0);
+    float sheen = gz * (0.35 + 0.65 * hup) * (0.5 + 0.8 * hn3(vHideP * 6.0 + 2.0)) * smoothstep(0.1, 0.4, ol);
+    outgoingLight += vec3(0.20, 0.13, 0.07) * sheen * 2.2;
+  }
+#include <opaque_fragment>`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
   float hb = hn3(vHideP * vec3(2.2, 9.0, 2.2) + 11.0);
   roughnessFactor *= mix(1.08, 0.72, hup * smoothstep(0.3, 0.75, hb)) * (0.92 + 0.16 * hn3(vHideP * 14.0));`);
     };
-    m.customProgramCacheKey = () => 'hide1';
+    m.customProgramCacheKey = () => 'hide2';
     return m;
   };
   M.leather = leatherMat();

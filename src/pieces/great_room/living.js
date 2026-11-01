@@ -226,16 +226,16 @@ export async function buildLiving(ctx, M, group) {
   pill(M.leather, 0.44, 0.44, 0.33, 0.8, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
   // throws
   // striped throw over the back cushion by the arm, hanging onto the seat
-  const t1 = drapeThrow(M, M.throwStripe, { W: 0.46, front: 0.4, back: 0.16, top: 0.3, seed: 2, fold: 0.03 });
+  const t1 = drapeThrow(M, M.throwStripe, { W: 0.62, front: 0.46, back: 0.3, top: 0.3, r: 0.07, seed: 2, fold: 0.03, soft0: 0.03, seg: 40, fringe: M.knitFringe });
   t1.position.set(0.0, 0.875, 1.1); t1.rotation.y = Math.PI / 2; L.add(t1);
   // cream knit throw lying along the return's near arm, hanging off its front
   // draped across the arm's width: bar along the arm (z), hanging into the seat and down the outside
   // the round-7 chaise end is a 0.4 m padded arm, top 0.58 m: the knit rolls over its crown into the seat and down the outside
-  const t2 = drapeThrow(M, M.knit, { W: 0.74, front: 0.08, back: 0.34, top: 0.3, r: 0.1, seed: 5, fold: 0.03, soft0: 0.035, seg: 48, fringe: M.knitFringe });
+  const t2 = drapeThrow(M, M.knit, { W: 0.74, front: 0.08, back: 0.34, top: 0.22, r: 0.035, seed: 5, fold: 0.03, soft0: 0.05, seg: 48, fringe: M.knitFringe });
   // round 9: the end roll is 0.2 m wide, top 0.53
   t2.position.set(xB2 - 0.15, 0.57, cz + D / 2 - 0.17); t2.rotation.y = -Math.PI / 2 + 0.06; t2.rotation.z = 0.03; L.add(t2);
   // the throw's folded-over edge on the seat side: a soft knit roll
-  const roll = mesh(new THREE.CapsuleGeometry(0.03, 0.64, 6, 14), M.knit);
+  const roll = mesh(new THREE.CapsuleGeometry(0.012, 0.64, 4, 10), M.knit);
   roll.rotation.z = Math.PI / 2; roll.scale.set(1, 1, 0.8); roll.position.set(0, -0.02, 0.15 + 0.05 + 0.02); t2.add(roll);
 
   // club chairs (face north, toward the sectional)

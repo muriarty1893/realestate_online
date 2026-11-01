@@ -336,3 +336,13 @@ Further: flat saturated orange leather with uniform sheen (should be tan/cognac 
 the rug's hard striped border; a chunky plank coffee table (photo: thinner reclaimed top on trestle legs); a flat green dining window, no curtains or window-seat cushions.
 *Regression check (blind, round 7 vs round 8): round 7 closer, narrowly*, on the rug only (round 8's stripes look synthetic); every other area a tie (the lighting change is barely visible at this size).
 *Orchestrator:* reverted the rug hunk and kept the rest as round 8. Next: an Opus rebuild of the sectional's silhouette as one continuous L, plus a stronger lighting change than this round's.
+
+## Round 7, exterior (2026-11-01, Sonnet builder): directional light
+Builder changes: a low warm key sun (az 118, el 19, 0xffd4a0, 3.4) with shadowFocus [4,2,12] r 27; hemi 2.5 -> 0.85, env 0.9 -> 0.5; leaf cards cast alpha-tested shadows (MeshDepthMaterial with the foliage atlas);
+the env/sky glow keeps the old sun direction so the backlight stays; a warm mid-grey roof with per-tab/per-course variation and relief; yellow-gold window glow with a darker ceiling band and a lamp blob; darker, less red mulch. 377k tris.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the roof: shingles far too large and blotchy (patchy charcoal and light grey) with high-contrast dapple smeared across it; it should be small, even
+architectural shingles in a uniform mid-grey, faint soft canopy shadow at most, a crisp ridge line and hip cap. Further: windows are flat glowing panels (need interior hints, gradient, faint sky reflection);
+the foreground ferns fill the bottom quarter (should be clipped lawn both sides of the walk, low beds with pink and white flowers); the left oak trunk is a smooth dark silhouette (should be massive and furrowed);
+the right edge (x 1650–1750) shows a pale wall and a flat green plane instead of layered backlit trees; the stone water table is too thin and dark, the fascia near-black instead of bronze-brown.
+*Regression check (blind, round 6 vs round 7): round 7 closer, narrowly* (warm directional sun with depth, window colour, warmer pavers). Round 6 wins the roof (even soft grey; round 7's leaf shadow is camouflage-like)
+and the walls (round 7's sun patches wash out the stucco/batten contrast).

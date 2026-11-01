@@ -19,13 +19,13 @@ export const views = {
     pos: [4.6, 2.6, 36.0], target: [4.6, 2.6, 0], fov: 31.2, shift: [0.149, 0.097],
     preset: {
       base: 'golden',
-      sun: { az: 150, el: 9, color: 0xb4c0e0, intensity: 0.22 },
-      hemi: { sky: 0xd2dcec, ground: 0x6c6c52, intensity: 2.5 },
-      env: { intensity: 0.9 },
+      sun: { az: 118, el: 19, color: 0xffd4a0, intensity: 3.4 },
+      hemi: { sky: 0xd2dcec, ground: 0x6c6c52, intensity: 0.85 },
+      env: { intensity: 0.5 },
       sky: { top: 0x6ab0f8, horizon: 0xf2e2c4, bottom: 0x5a6040 },
       exposure: 1.2, interior: 1.4,
     },
-    lighting: { shadowFocus: { center: [2, 3, 6], radius: 30 } },
+    lighting: { shadowFocus: { center: [4, 2, 12], radius: 27 } },
     post: { ao: true, aoIntensity: 0.9, aoRadius: 0.7, bloom: 0.25, bloomThreshold: 0.85, bloomRadius: 0.45 },
     toneMapping: 'neutral',
   },
@@ -54,7 +54,7 @@ export async function build(ctx) {
   ctx.scene.add(root);
   installLensShift(ctx);
   const pv = views.front.preset;
-  installEnvSwap(ctx, makeGardenEnv(ctx.renderer, sunVector(pv.sun.az, pv.sun.el)));
+  installEnvSwap(ctx, makeGardenEnv(ctx.renderer, sunVector(150, 9)));
   addSkyGlow(ctx);
 
   // warm porch lights washing columns, ceiling, floor and steps

@@ -142,6 +142,7 @@ function leafMaterial(atlas, name, glowCol, glowK) {
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * uGlow * vGlow;');
   };
   m.customProgramCacheKey = () => 'leafmat-v1';
+  m.userData.depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: atlas, alphaTest: 0.5, side: THREE.DoubleSide });
   return m;
 }
 
@@ -379,7 +380,7 @@ export async function buildVegetation(ctx, M, parent, site) {
   const addTree = (t, name, lm, shadeOpts = {}) => {
     shadeCanopy(t.leaves, name.length * 31 + t.leaves.cards.length, shadeOpts);
     const b = new THREE.Mesh(t.bark.geometry(), M.bark); b.castShadow = true; b.receiveShadow = true; b.name = name + ':bark'; group.add(b);
-    const l = new THREE.Mesh(t.leaves.geometry(), lm); l.castShadow = true; l.receiveShadow = true; l.name = name + ':leaves'; group.add(l); skipInOverride(l);
+    const l = new THREE.Mesh(t.leaves.geometry(), lm); l.castShadow = true; l.receiveShadow = true; l.customDepthMaterial = lm.userData.depth; l.name = name + ':leaves'; group.add(l); skipInOverride(l);
     if (t.moss && t.moss.idx.length) { const m = new THREE.Mesh(t.moss.geometry(), mossMat); m.name = name + ':moss'; m.castShadow = false; m.renderOrder = 2; group.add(m); skipInOverride(m); }
   };
 

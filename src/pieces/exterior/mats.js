@@ -18,7 +18,7 @@ function glowTexture(seed, kind = 'room') {
   const R = rng(seed);
   return canvasTex(128, 256, (g, w, h) => {
     const grd = g.createLinearGradient(0, 0, 0, h);
-    if (kind === 'room') { grd.addColorStop(0, '#d8780a'); grd.addColorStop(0.35, '#ffb020'); grd.addColorStop(0.75, '#f9a518'); grd.addColorStop(1, '#c86a08'); }
+    if (kind === 'room') { grd.addColorStop(0, '#8a5a14'); grd.addColorStop(0.12, '#e0a228'); grd.addColorStop(0.4, '#ffcc3c'); grd.addColorStop(0.8, '#fcc030'); grd.addColorStop(1, '#c88618'); }
     else { grd.addColorStop(0, '#e8961e'); grd.addColorStop(0.5, '#ffc84a'); grd.addColorStop(1, '#d9862a'); }
     g.fillStyle = grd; g.fillRect(0, 0, w, h);
     // curtain folds at both sides
@@ -33,7 +33,7 @@ function glowTexture(seed, kind = 'room') {
     // a bright lamp blob and a darker piece of furniture
     const lx = w * (0.3 + R() * 0.4), ly = h * (0.3 + R() * 0.25);
     const rg = g.createRadialGradient(lx, ly, 2, lx, ly, w * 0.55);
-    rg.addColorStop(0, 'rgba(255,200,90,0.55)'); rg.addColorStop(1, 'rgba(255,190,80,0)');
+    rg.addColorStop(0, 'rgba(255,215,110,0.5)'); rg.addColorStop(1, 'rgba(255,190,80,0)');
     g.fillStyle = rg; g.fillRect(0, 0, w, h);
     g.fillStyle = 'rgba(120,70,25,0.16)';
     g.fillRect(w * R() * 0.5, h * (0.72 + R() * 0.1), w * (0.3 + R() * 0.4), h * 0.3);
@@ -101,8 +101,8 @@ function shingleTextures() {
       const off = (r % 2 ? 0.5 : 0) * tabW + (R() > 0.5 ? tabW / 3 : 0);
       for (let i = -1; i < 13; i++) {
         const x = i * tabW + off, t = R();
-        const v = 104 + t * 30;
-        g.fillStyle = `rgb(${v},${v},${v + 3})`;
+        const v = 84 + t * 30 + 14 * Math.sin(x * 0.011 + r * 0.9) + 8 * Math.sin(r * 2.3 + i);
+        g.fillStyle = `rgb(${v * 1.0 | 0},${v | 0},${v * 0.97 | 0})`;
         g.fillRect(x + 1.5, r * rowH, tabW - 3, rowH - 1);
         // granule speckle
         for (let k = 0; k < 60; k++) { const b = R() > 0.5 ? 200 : 20; g.fillStyle = `rgba(${b},${b},${b + 6},${R() * 0.22})`; g.fillRect(x + R() * tabW, r * rowH + R() * rowH, 2, 2); }
@@ -143,7 +143,7 @@ export function makeMaterials(ctx) {
   M.stoneCap = new THREE.MeshStandardMaterial({ color: 0x9d9184, roughness: 0.9, name: 'ext.stonecap' });
   const shg = shingleTextures();
   M.shingle = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.92, name: 'ext.shingle' });
-  M.shingle.color.setRGB(1.35, 1.25, 1.1);
+  M.shingle.color.setRGB(1.3, 1.3, 1.34);
   M.shingle.envMapIntensity = 0.35;
   M.ridgeCap = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.9, color: 0x9aa0ab, name: 'ext.ridgecap' });
   M.bronze = new THREE.MeshStandardMaterial({ color: 0x3b3128, roughness: 0.55, metalness: 0.25, name: 'ext.bronze' });
@@ -161,7 +161,7 @@ export function makeMaterials(ctx) {
   M.pavers = new THREE.MeshStandardMaterial({ color: 0xffe6c8, map: pav.color, normalMap: pav.normal, roughness: 0.88, name: 'ext.pavers' });
   M.brickStep = new THREE.MeshStandardMaterial({ map: pav.color, normalMap: pav.normal, roughness: 0.85, color: 0xd8b8a0, name: 'ext.bricksteps' });
   M.grass = pbr(ctx, 'Grass005', { repeat: 1.6, color: 0xc8d070, roughness: 1, diff: 'Grass005_1K-JPG_Color.jpg', nor: 'Grass005_1K-JPG_NormalGL.jpg', rough: 'Grass005_1K-JPG_Roughness.jpg', name: 'ext.grass' });
-  M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x4a3526, roughness: 1, rough: null, name: 'ext.mulch' });
+  M.mulch = pbr(ctx, 'forest_leaves_02', { repeat: 1.5, color: 0x2e2a24, roughness: 1, rough: null, name: 'ext.mulch' });
   // live-oak bark: grey-brown furrowed oak with moss and lichen (Poly Haven jolcham_oak_bark_01, 1k is 1:2)
   M.bark = pbr(ctx, 'jolcham_oak_bark', { repeat: 1, color: 0xe8e4dc, roughness: 1, normalScale: 1.6, name: 'ext.bark' });
   for (const t of [M.bark.map, M.bark.normalMap, M.bark.roughnessMap]) t.repeat.set(1 / 0.9, 1 / 1.8);

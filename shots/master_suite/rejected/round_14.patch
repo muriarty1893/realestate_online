@@ -1,0 +1,72 @@
+diff --git a/src/pieces/master_suite.js b/src/pieces/master_suite.js
+index 04f996d..20e5630 100644
+--- a/src/pieces/master_suite.js
++++ b/src/pieces/master_suite.js
+@@ -14,13 +14,13 @@ export const views = {
+     pos: [-4.948, 1.279, -4.225], target: [-7.846, 1.216, -8.299], fov: 65,
+     preset: {
+       base: 'golden',
+-      sun: { az: 70, el: 8, color: 0xffecd6, intensity: 11.0 },
+-      hemi: { sky: 0xfff8f0, ground: 0xd2b698, intensity: 0.5 },
++      sun: { az: 70, el: 8, color: 0xfff2e6, intensity: 0.8 },
++      hemi: { sky: 0xfffbf6, ground: 0xcfc2b2, intensity: 0.42 },
+       env: { intensity: 0.25 },
+-      exposure: 1.15, interior: 1.0,
++      exposure: 1.08, interior: 1.0,
+     },
+     lighting: { shadowFocus: { center: [-7.2, 1.2, -6.4], radius: 7.5 } },
+-    post: { ao: true, aoIntensity: 1.4, aoRadius: 0.7 },
++    post: { ao: true, aoIntensity: 1.8, aoRadius: 0.9 },
+     toneMapping: 'neutral',
+   },
+ };
+diff --git a/src/pieces/master_suite/bedroom.js b/src/pieces/master_suite/bedroom.js
+index 60ce655..06bfd9c 100644
+--- a/src/pieces/master_suite/bedroom.js
++++ b/src/pieces/master_suite/bedroom.js
+@@ -253,28 +253,17 @@ function entryDoor(ctx, M, g, P) {
+ // (the porch roof and both wings shade the slider), so a shadow-casting spot with a window gobo stands in
+ // for that beam. It is the piece's one shadow-casting light and is registered as an interior light.
+ function sunBeam(ctx, M, g, P) {
+-  const C = new THREE.Vector3(-8.928, 1.2, -7.82);           // patch centre on the west wall
+-  const az = THREE.MathUtils.degToRad(117), el = THREE.MathUtils.degToRad(8);
+-  const d = new THREE.Vector3(-Math.sin(az) * Math.cos(el), -Math.sin(el), Math.cos(az) * Math.cos(el)); // travel dir
+-  const pos = C.clone().addScaledVector(d, -4.4);
+-  const gobo = canvasTex(256, 256, (c, w, h) => {
+-    c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
+-    c.save(); c.translate(w / 2, h / 2); c.transform(1, 0, -0.18, 1, 0, 0);
+-    c.filter = 'blur(7px)'; c.fillStyle = '#fff';
+-    const pw = 0.36 * w, ph = 0.62 * h, bar = 0.045 * w;
+-    c.fillRect(-pw / 2, -ph / 2, pw, ph);
+-    c.fillStyle = '#000';
+-    c.fillRect(-bar / 2, -ph / 2, bar, ph);                     // meeting stile
+-    c.fillRect(-pw / 2, -bar / 2 - ph * 0.08, pw, bar);        // check rail
+-    c.restore();
+-  }, { srgb: true });
+-  gobo.wrapS = gobo.wrapT = THREE.ClampToEdgeWrapping;
+-  const sp = new THREE.SpotLight(0xffe8c4, 270, 9, 0.24, 0.0, 1.2);
++  // Real window-shaped patches: the spot sits outside the right-hand north window (win_mstr_n2) and is cut by the
++  // actual wall/window geometry, landing on the bed, rug and floor.
++  const W = new THREE.Vector3(-5.22, 1.6, -9.05), T = new THREE.Vector3(-7.3, 0.1, -5.2);
++  const d = T.clone().sub(W).normalize();
++  const pos = W.clone().addScaledVector(d, -1.6);
++  const C = T;
++  const sp = new THREE.SpotLight(0xfff0dc, 420, 14, 0.5, 0.0, 1.2);
+   sp.position.copy(pos); sp.target.position.copy(C);
+-  sp.map = gobo;
+   sp.castShadow = true;
+-  sp.shadow.mapSize.set(1024, 1024); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.radius = 9;
+-  sp.shadow.camera.near = 0.2; sp.shadow.camera.far = 9;
++  sp.shadow.mapSize.set(2048, 2048); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.radius = 5;
++  sp.shadow.camera.near = 0.5; sp.shadow.camera.far = 12;
+   g.add(sp, sp.target);
+   ctx.addInteriorLight(sp);
+ }
+@@ -293,7 +282,6 @@ function floorSun(ctx, M, g) {
+ }
+ 
+ function grounding(ctx, M, g, P) {
+-  floorSun(ctx, M, g);
+   const f = 0.021;                                      // just above the rug
+   const { W, L, hbW } = BED;
+   const bz = BED.head + (L + 0.12) / 2;

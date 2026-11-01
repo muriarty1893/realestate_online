@@ -441,3 +441,13 @@ Further: stiff paper-cut throws and pillows; a grey-smudge rug and almost no flo
 Both: leather too orange-red, puffy cushions, pillows unlike R's (striped and dark grey ones, the sphere on the left arm); pale rug and floor; cabinets too light (R: deeper walnut-brown); hood shape.
 *Orchestrator:* the leather has now been the biggest gap in rounds 6–11. Saturation by patch matches the photo within ~15%, yet every critic calls it orange; the remaining difference is likely the surround (pale floor/rug, light
 orange cabinets, flat light) and the cushion form (puffy, no tailored edges or seams). Next: darken the floor and cabinets toward R and make the cushions tailored (crisp welted edges, flatter tops), not the hue.
+
+## Round 14, master_suite (2026-11-01, Sonnet builder): lighting; **rejected, reverted to round 13**
+Builder changes: the shadow-casting spot moved 1.6 m outside the right-hand north window (`win_mstr_n2`) into the room (window-shaped patches across the duvet and rug); the fake `floorSun` removed; engine sun 11 -> 0.8
+and whiter; hemi 0xfffbf6/0xcfc2b2 at 0.42; exposure 1.15 -> 1.08; AO 1.8 / radius 0.9.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the duvet covered in blotchy, blown-out sun patches with leaf-shaped shadows (the spot is shadowed by the exterior trees), reading as a texture glitch;
+the photo's main sun is soft parallelograms on the left wall. Further: dark saturated contrasty floor with bright seams; dark smudgy AO halos around the ceiling fan blades; cut-out window foliage; streaky right-edge sheer;
+flat light with only a thin sun sliver on the left wall.
+*Regression check (blind, round 13 vs round 14): round 13 closer* (its warm slab of window light on the left wall matches R; even duvet lighting; warm sunlit foreground floor). Nothing in round 14 to take back.
+Both: a lower, less crowded pillow stack; soft folds where the duvet hangs over the foot; a lighter, warmer floor at the back.
+*Orchestrator:* the left-wall sun patch is right and must stay; the photo's directional feel should come from the wall patch plus contact shadows, not from sun on the bed. Diff in `shots/master_suite/rejected/round_14.patch`.

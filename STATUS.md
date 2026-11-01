@@ -1,4 +1,4 @@
-# Status: paused 2026-10-31 ~21:00 UTC (5-hour usage 86%, weekly 24%), after exterior r6, great room r7, master r10
+# Status: paused 2026-11-01 (5-hour usage ~85%, weekly 35%), after exterior r10/r11, great room r11, master r13
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -16,19 +16,28 @@
 ## Critic loop (the photo has won every blind A/B so far; latest round per piece, all pushed)
 | piece | latest (beat its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
 |---|---|---|
-| exterior | round 6 (Opus): layered backlit canopy, bark, grey moss, sunset glow, finer pavers | flat facade light (no eave/awning shade, no canopy dapple); flowers in the beds; darker warm-grey roof; yellower window glow |
-| great_room | round 7 (Opus): rebuilt sectional (`sofa.js`), worn cognac leather, chaise end | the sofa still reads as boxy next to flat lighting; add warm pendant and under-cabinet pools, contact shadows, contrast; cabinet grain |
-| master_suite | round 10: upholstered base, softer right-edge linen, finer oak and jute | the duvet (rounds 6–10 circled it); rebuild the bedding as separate layered meshes, Opus |
+| exterior | round 10: low warm key sun with leaf-shadow dapple (r7), cool blue-grey fine shingle roof, taller stone base, bronze trim (r9), readable ferns and flower clusters (r10). Round 11 (denser canopy, Opus): see the LOG | a dense layered live-oak canopy across the top (thick twisting grey-bark limbs, small sky gaps); fuller foundation beds (round 9's mounded shrubs); window interiors; harsh wall dapple |
+| great_room | round 11: one continuous L sectional (r9, Opus), leather sheen with greyer shadows, draped throws (r11); warmer lower fill, darker cabinets, backsplash joints (r8) | the leather still reads orange and plastic (rounds 6–11); try the surround (darker floor and cabinets toward R) and tailored cushion edges/seams, not the hue. Round 10 (30% desaturation) was rejected as muddy |
+| master_suite | round 13: bedding rebuilt as layered cloth meshes (r11, Opus), continuous duvet, throw over its folds, pillows in rows (r12), 17 cm satin oak planks, lumbar (r13) | lighting: keep the left-wall sun patch, add contact shadows and corner falloff, warm white not peach; no sun on the bed (round 14 rejected for leaf-dappled blotches); then softer linen wrinkles, the right-edge sheer, the bench knit |
 | rest | QA pass done | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
 
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
-as PNGs with metadata stripped, and each critic reads only those two files.
+as PNGs with metadata stripped, and each critic reads only those two files. Regression triples (photo R plus two
+renders X/Y in random order) are built inline; the answer keys were in the session scratchpad `keys/pairs.txt`.
 
 ## Next steps (in order)
-1. Great room: lighting pass (warm pendant and under-cabinet pools, contact shadows, corner falloff), then cabinet grain and backsplash joints.
-2. Exterior: directional low warm key light with canopy dapple and soft shade under the eaves and awnings; flowering accents; roof tone.
-3. Master suite: rebuild the bedding as layered meshes (Opus), the way the sofa rebuild worked.
+1. Great room: darken the floor and cabinets toward the photo (walnut-brown cabinets, mid-brown oak), then tailored sectional cushions (crisp welted edges, flatter tops, seams). Leave the leather hue alone.
+2. Master suite: contact shadows and corner falloff with the left-wall sun kept; then smoother linen (fewer, larger folds) and the foot overhang.
+3. Exterior: whatever round 11's critics leave (canopy density if it lost), then fuller foundation shrubs and window interiors.
 4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), probably a shadow-map gap at the `w_wicS2` junction.
+5. Window views from the interior show the exterior's cut-out foliage; critics flag them in both interiors.
+
+## Lessons from 2026-11-01
+- Pixel-matched colour can still lose: desaturating the whole leather to the photo's channel ratios made it "muddy" and lost its regression check. Match the look in context (surround, form, sheen), and verify with the blind check, not samples alone.
+- A builder can misdiagnose a critic: the master's "centre seam" was the throw's straight edge, not the duvet mesh.
+- Light through windows is shadowed by the exterior trees: a spot outside the master window put leaf dapple on the bed.
+- `ctx.loadGLTF` retries now; the `requestfailed (net::ERR_ABORTED)` lines were harmless duplicate-fetch aborts and are filtered.
+- Sending a short follow-up to the same builder (SendMessage) for a targeted fix worked well (exterior r9, master r12).
 
 ## Lessons from 2026-10-27
 - Builders regress about half the time. The regression check (photo plus two of our renders, blind) is worth its cost.

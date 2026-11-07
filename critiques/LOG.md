@@ -498,3 +498,13 @@ Further: a speckled, noisy, uniform mid-green canopy (needs clustered masses, ba
 an empty bright lawn plane, a white box wall and bare trunks at the right edge; a flat lawn and too little golden contrast.
 *Regression check (blind, round 11 vs round 12): round 12 closer, just* (cleaner pale-blue sky gaps above the roof and chimney). Round 11 had more moss, nearer R's amount, but as blocky streaks; R's are long silvery strands on the right.
 Both: hard leaf-dapple shadows on the walls (R has none), pale yellow-white window glow (R: deep amber), thin beds.
+
+## Round 13, exterior (2026-11-07, Sonnet builder): beds, facade dapple, windows (not committed as a round)
+Builder changes: foundation boxwood mounds ~1.5x bigger and denser with a second row, hostas and bloom mounds between (mulch hidden); palms by the steps ~1.5x; ~60 hostas and 30 bloom mounds per foreground bed;
+stucco/porch/board/batten materials mix the directional shadow term 70% back to unshadowed (no facade leaf dapple, softer eave/awning shade); deeper amber window gradients without the white ceiling hotspot. 335k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the windows: ~12 flat pale-peach gradient panels with nothing inside and no spill. The photo: deep saturated amber with rooms visible (ceilings, lamp hot spots, curtains, dark corners)
+and light spilling onto sills, trim, porch columns and steps. Further: moss as grey vertical smears in the sky around the chimney; flat fern cards, evenly stamped pink clusters and floating lily-pad leaves in the foreground;
+heavy dark-brown bargeboards outlining every gable (photo: light trim matching the siding, a thin dark roof edge); flat walls and roof; the bare wall stub and bright empty lawn at the right edge.
+*Regression check (blind, round 12 vs round 13): round 12 closer, narrowly* (its whiter grey-white walls and brighter amber windows; round 13's walls lean peach-yellow and its windows read dimmer peach-orange).
+Round 13 wins the light: its soft, even facade fits R's dusk; round 12's hard dapple fights the glowing windows. Beds a tie (both a thin mulch strip; the new mounds did not register).
+*Orchestrator:* kept in the working tree; sent back to the same builder to restore round 12's wall tone and do the windows properly.

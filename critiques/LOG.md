@@ -458,7 +458,10 @@ with AO off): that was the critics' "smooth dark blob". Fixed. The left trunk re
 blue lift in the darks (neutral tone mapping strips the weakest channel from darks); limbs traced from the photo via a photo-pixel + depth -> world mapping (the high arc across the top, a limb sagging over the roof,
 the thick limb from the right edge); a foliage map from the photo's top 456 px in 24 px cells drives ~1,000 extra leaf cards in depth layers, stopping at the roofline except a clump in front of the ridge and chimney;
 a twig-spray leaf texture with sky gaps; ~50 more, thinner, darker, see-through moss strands. 308k tris.
-*Fresh critic skipped (5-hour usage at 87%).*
+**Blind critic (run 2026-11-07): photo won (critic saw ours as B).** Biggest gap: still the canopy across the top third, now for its look: flat, speckled yellow-green cut-out leaves with jagged edges, a washed-out
+near-white sky behind them, the moss as stiff straight streaks (beside the chimney, top right). The photo: deeper green, dense, clear leaf clusters with soft depth and shadowed undersides, a blue dusk sky in the gaps,
+soft wispy moss clumps. Further: the right edge is an empty flat lawn to a hard horizon with bare trunks (should be closed in by layered trees and shrubs); flat cream window panels (amber, interior hints,
+reflection, no glare above the door); sparse beds with pink blobs on bare mulch; a smooth even roof and glossy blue-black awnings (should be bronze standing-seam); low contrast and slightly hazy overall.
 *Regression check (blind, round 10 vs round 11): round 11 closer* (dense canopy overlapping the roof, the massive bark-textured left trunk, a leafy mass on the right in place of bare trunks).
 Round 10 wins the sky: its clear blue gaps match R; round 11's few gaps look pale and washed out. Round 11's moss near the chimney renders as rectangular grey streaks (fix). Both: fuller foundation beds;
 hide the flat lawn plane and white wall edge at the far right.

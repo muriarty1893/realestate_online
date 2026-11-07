@@ -34,7 +34,7 @@ export function makeMats() {
   M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.5,
     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
-    color: col(0.36, 0.45, 0.68), roughness: 0.72, envMapIntensity: 0.6, clearcoat: 0.08, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
+    color: col(0.29, 0.335, 0.47), roughness: 0.6, envMapIntensity: 0.7, clearcoat: 0.16, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
   });
 
   // ---------------- rough-sawn beam wood
@@ -48,9 +48,9 @@ export function makeMats() {
   // ---------------- cabinet wood (warm medium-brown shaker, cherry/hickory look)
   M.cab = std({
     map: tex('oak_veneer_01_diff_1k.jpg', { srgb: true, tile: 0.55 }),
-    color: col(1.0, 0.62, 0.34), roughness: 0.48,
+    color: col(0.68, 0.42, 0.23), roughness: 0.48,
   });
-  M.cabDark = std({ map: M.cab.map, color: col(0.8, 0.5, 0.3), roughness: 0.55 });
+  M.cabDark = std({ map: M.cab.map, color: col(0.52, 0.32, 0.19), roughness: 0.55 });
 
   // ---------------- dark leathered granite
   M.granite = std({
@@ -153,7 +153,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
   const linenN = tex('rough_linen_nor_gl_1k.jpg', { tile: 0.25 });
   M.linen = std({ color: 0xd8ccb6, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.6, 0.6), side: THREE.DoubleSide });
   M.curtain = std({ color: 0xd6c7ad, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5), side: THREE.DoubleSide, emissive: 0x5a4a35, emissiveIntensity: 0.25 });
-  M.chairFabric = std({ color: 0xd9d0bd, roughness: 0.92, normalMap: linenN, normalScale: new THREE.Vector2(0.9, 0.9) });
+  M.chairFabric = std({ color: 0xbfb199, roughness: 0.92, normalMap: linenN, normalScale: new THREE.Vector2(0.9, 0.9) });
   M.cream = std({ color: 0xc4b498, roughness: 0.95, normalMap: linenN, normalScale: new THREE.Vector2(0.5, 0.5) });
   const knitN = tex('knitted_fleece_nor_gl_1k.jpg', { tile: 0.22 });
   const knitMap = knitTex(); knitMap.repeat.set(1 / 0.34, 1 / 0.34);
@@ -170,7 +170,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
   M.throwStripe = std({ map: throwTex(), roughness: 0.98, bumpMap: knitMap, bumpScale: 1.5, side: THREE.DoubleSide });
 
   // ---------------- rug: large distressed gray/beige vintage rug
-  M.rug = std({ map: rugTex(7), color: col(0.42, 0.395, 0.38), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.4, 0.4) });
+  M.rug = std({ map: rugTex(7), color: col(0.32, 0.32, 0.34), roughness: 1.0, normalMap: tex('poly_wool_herringbone_nor_gl_1k.jpg', { tile: 0.3 }), normalScale: new THREE.Vector2(0.4, 0.4) });
 
   // ---------------- fireplace plaster / stone
   M.plasterStone = std({
@@ -227,7 +227,7 @@ function rugTex(seed = 7, palette) {
     const R = rng(seed);
     g.fillStyle = palette ? palette[0] : '#9b9892'; g.fillRect(0, 0, w, h);
     // cloudy vintage wash: large soft blobs (blue-grey, cream, brown-grey), then smaller ones
-    const pal = palette || ['#c4c0b6', '#7a8590', '#ddd5c4', '#6a6662', '#a3998a', '#98a3ad', '#e2dac9', '#5a5753', '#8e8a84', '#b0a08c'];
+    const pal = palette || ['#c4c2bc', '#6f7d8c', '#d8d3c8', '#5f6064', '#a39f98', '#8a9aab', '#dcd8cc', '#4a4c50', '#8e8c88', '#b3aa9c'];
     for (const [n, r0, r1, a] of [[260, 70, 190, 'aa'], [900, 20, 90, 'aa'], [900, 6, 28, '88']]) {
       for (let i = 0; i < n; i++) {
         const x = R() * w, y = R() * h, r = r0 + R() * (r1 - r0);
@@ -236,6 +236,16 @@ function rugTex(seed = 7, palette) {
         gr.addColorStop(0, c + a); gr.addColorStop(1, c + '00');
         g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, r * (1 + R() * 1.6), r, R() * 3, 0, 7); g.fill();
       }
+    }
+    if (!palette) { // faded grey-blue lattice medallions (Oushak-style), then a worn border
+      g.filter = 'blur(3px)'; g.strokeStyle = 'rgba(70,84,100,0.16)'; g.lineWidth = 8;
+      for (let cy = 0; cy < 4; cy++) for (let cx = 0; cx < 4; cx++) {
+        const x = 128 + cx * 256, y = 128 + cy * 256 + (cx % 2) * 0;
+        for (const k of [118, 86, 54]) { g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k, y); g.lineTo(x, y + k); g.lineTo(x - k, y); g.closePath(); g.stroke(); }
+        g.fillStyle = 'rgba(60,72,88,0.14)'; g.beginPath(); g.arc(x, y, 18, 0, 7); g.fill();
+      }
+      g.strokeStyle = 'rgba(60,66,76,0.22)'; g.lineWidth = 22; g.strokeRect(20, 20, w - 40, h - 40);
+      g.lineWidth = 6; g.strokeRect(62, 62, w - 124, h - 124); g.filter = 'none';
     }
     // faint worn border bands
     g.strokeStyle = 'rgba(95,92,90,0.12)'; g.lineWidth = 8; g.strokeRect(40, 40, w - 80, h - 80);

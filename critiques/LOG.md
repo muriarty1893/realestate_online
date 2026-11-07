@@ -479,3 +479,12 @@ dark, oversized, skewed planks at the right; a flat repeated rug texture; a knit
 *Regression check (blind, round 13 vs round 15): tie* (no visible difference at the critic's resolution). Kept, since its changes point the way both critics ask (fewer, softer creases).
 *Orchestrator:* the wrinkle problem is in the geometry and normal maps together; parameter cuts were too small to see. Next: an Opus pass on the bedding's surface (few large folds, thickness, weight) and the pillow
 height (headboard visible above them); and the measured exposure gap (walls 15–20% too bright, sun patch whiter).
+
+## Round 12, great_room (2026-11-07, Sonnet builder): the surround
+Builder changes (mats.js): floor tint darker, roughness 0.72 -> 0.6, clearcoat 0.08 -> 0.16, env 0.6 -> 0.7; cabinets (1.0,.62,.34) -> (.68,.42,.23), cabDark -> (.52,.32,.19); a cooler grey-blue rug (base 0.42 -> 0.32) with
+a faint lattice, medallions and border, mottling kept; dining chair fabric 0xd9d0bd -> 0xbfb199. Floor at the left edge barely moved (161,145,127 -> 167,152,135; photo 150,132,113).
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the leather sectional again (uniform saturated orange, plastic, blobby cushions, no seams/piping/creases, even sheen). Further: the floor reads as grey concrete with the rug
+blending into it (should be warm mid-brown planks with a pale distressed rug with a visible edge); slab-like throws and pillows; flat light with weak contact shadows; flat-board bar stools and an unveined counter; a blurry green
+dining window and crowded chairs.
+*Regression check (blind, round 11 vs round 12): round 12 closer, by a very small margin* (the cooler silver-grey distressed rug). Round 11's lighter rug value was nearer R. Neither does the floor: both too pale and grey
+next to R's mid-brown planks; the rug should stand out against a darker, warmer floor.

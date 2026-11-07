@@ -1,4 +1,4 @@
-# Status: paused 2026-11-01 (5-hour usage 88%, weekly 35%), after exterior r11, great room r11, master r13
+# Status: paused 2026-11-07 (5-hour usage 88%, weekly 59%), after exterior r12, great room r12 (r13 in flight), master r15
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -14,24 +14,29 @@
   - rest: all 11 views, furnished
 
 ## Critic loop (the photo has won every blind A/B so far; latest round per piece, all pushed)
-| piece | latest (beat its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
+| piece | latest (beat or tied its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
 |---|---|---|
-| exterior | round 10: low warm key sun with leaf-shadow dapple (r7), cool blue-grey fine shingle roof, taller stone base, bronze trim (r9), readable ferns and flower clusters (r10), dense photo-traced canopy and the inside-out trunk fix (r11, Opus) | bluer sky in the canopy gaps; rectangular moss streaks near the chimney; fuller foundation beds (round 9's mounded shrubs); hide the flat lawn plane and white wall edge at the far right; window interiors (fresh critic not run on r11) |
-| great_room | round 11: one continuous L sectional (r9, Opus), leather sheen with greyer shadows, draped throws (r11); warmer lower fill, darker cabinets, backsplash joints (r8) | the leather still reads orange and plastic (rounds 6–11); try the surround (darker floor and cabinets toward R) and tailored cushion edges/seams, not the hue. Round 10 (30% desaturation) was rejected as muddy |
-| master_suite | round 13: bedding rebuilt as layered cloth meshes (r11, Opus), continuous duvet, throw over its folds, pillows in rows (r12), 17 cm satin oak planks, lumbar (r13) | lighting: keep the left-wall sun patch, add contact shadows and corner falloff, warm white not peach; no sun on the bed (round 14 rejected for leaf-dappled blotches); then softer linen wrinkles, the right-edge sheer, the bench knit |
+| exterior | round 12: dense photo-traced canopy and the inside-out trunk fix (r11, Opus), blue sky in the canopy gaps, softer olive leaves, ribbon moss (r12) | the beds (volume, varied species and heights, a palm by the entry, mulch hidden); windows (deep amber with rooms behind; round 14's glow won its area, port it from `shots/exterior/rejected/round_13_14.patch`); moss streaks by the chimney; the empty right edge. Rounds 13–14 rejected (wall tone, trim) |
+| great_room | round 12: continuous L sectional (r9), leather sheen (r11), darker walnut cabinets, grey distressed rug (r12) | the leather (seven rounds): the armchair crop (`shots/great_room/armchair_ours_vs_photo.png`) shows the cause: boxy recliner form, a pale suede-looking seat top, matte blotchy finish; the photo's are slim club chairs on tapered legs with glossy highlights. Round 13 (Opus) was building that rebuild at the pause; see below |
+| master_suite | round 15: layered cloth bedding (r11–12), 17 cm satin oak planks (r13), calmer wrinkles and falloff decals (r15, a tie with r13) | lighting (warm low sun raking across the room; but not on the bed: round 14 rejected), the bench knit, the right-edge sheer, the floor's orange left / dark right. Round 16 rejected (dim, plastic duvet); port only its lower pillow stack (`shots/master_suite/rejected/round_16.patch`) |
 | rest | QA pass done | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
 
 The full critiques are in `critiques/LOG.md`. Blind pairs are built with random A/B order at the photo's size,
 as PNGs with metadata stripped, and each critic reads only those two files. Regression triples (photo R plus two
-renders X/Y in random order) are built inline; the answer keys were in the session scratchpad `keys/pairs.txt`.
+renders X/Y in random order) are built inline; the answer keys are in the session scratchpad `keys/pairs.txt`.
 
 ## Next steps (in order)
-1. Great room: darken the floor and cabinets toward the photo (walnut-brown cabinets, mid-brown oak), then tailored sectional cushions (crisp welted edges, flatter tops, seams). Leave the leather hue alone.
-2. Master suite: contact shadows and corner falloff with the left-wall sun kept; then smoother linen (fewer, larger folds) and the foot overhang.
-3. Exterior: run a fresh blind critic on round 11 first; then sky colour in the canopy gaps, the moss streaks, fuller foundation shrubs, the far-right edge.
-   Check the other pieces' tube/lathe builders for the same inside-out winding that darkened the exterior trunks.
-4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), probably a shadow-map gap at the `w_wicS2` junction.
-5. Window views from the interior show the exterior's cut-out foliage; critics flag them in both interiors.
+1. Great room round 13 (club-chair rebuild, glossy leather): judge it if it finished (critic plus regression vs round 12); its state is noted under "At the pause" below.
+2. Master suite: port round 16's lower pillow stack onto round 15 (small, Sonnet); keep round 15's exposure and warmth.
+3. Exterior: port round 14's window glow onto round 12 (small, Sonnet); then the beds (an Opus rebuild may be needed: three Sonnet rounds of bed tweaks did not register at critic size).
+4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), where `w_wicS2` butts into it with no overlap (x 664 px), right where the master's fake sun light is aimed.
+5. Window views from the interiors show the exterior's cut-out foliage; critics flag them in both interiors.
+
+## Lessons from 2026-11-07
+- Matching sampled numbers lost twice more (great room r10 earlier, master r16 now): lowering exposure to the photo's sampled wall values made the room "dim and muddy". The photo reads bright and warm; judge by the blind check.
+- Critics contradict each other on details (exterior walls whiter vs creamier; dark gable trim "cartoonish" vs "matches R"). Trust signals repeated across rounds and critics; port single-area wins instead of whole rounds.
+- Looking at a matched crop myself (the armchair) found the real cause of a seven-round complaint in one step. Do this before briefing a builder on a gap that keeps recurring.
+- Bed and planting changes made at full resolution often don't register at critic size; builders should check at ~900 px wide.
 
 ## Lessons from 2026-11-01
 - Pixel-matched colour can still lose: desaturating the whole leather to the photo's channel ratios made it "muddy" and lost its regression check. Match the look in context (surround, form, sheen), and verify with the blind check, not samples alone.

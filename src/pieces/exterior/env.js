@@ -56,6 +56,19 @@ export function installEnvSwap(ctx, envTex) {
 // of the engine's sky dome. Additive, behind everything, follows the camera; shown with the exterior
 // views and in walk mode, hidden for the interior pieces' views.
 export function addSkyGlow(ctx, dir = [0.62, 0.06, -0.78]) {
+  // opaque blue dusk sky painted over the engine's dome above the horizon haze (the dome's near-white
+  // zenith washed out the gaps in the canopy)
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(390, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, transparent: true, fog: false,
+    vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: `varying vec3 vP; void main(){ float h = normalize(vP).y;
+      vec3 c = mix(vec3(0.50, 0.66, 0.80), vec3(0.30, 0.52, 0.86), smoothstep(0.05, 0.4, h));
+      gl_FragColor = vec4(c, smoothstep(0.03, 0.14, h)); }`,
+  }));
+  sky.name = 'ext.skypaint'; sky.renderOrder = -9.5; sky.frustumCulled = false;
+  ctx.scene.add(sky);
+  ctx.onUpdate(() => sky.position.copy(ctx.camera.position));
+  addEventListener('viewchange', (e) => { const v = e.detail; sky.visible = !v || v.piece === 'exterior'; });
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, transparent: true, blending: THREE.AdditiveBlending, fog: false,
     uniforms: { gdir: { value: new THREE.Vector3(...dir).normalize() } },

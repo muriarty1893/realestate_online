@@ -488,3 +488,13 @@ blending into it (should be warm mid-brown planks with a pale distressed rug wit
 dining window and crowded chairs.
 *Regression check (blind, round 11 vs round 12): round 12 closer, by a very small margin* (the cooler silver-grey distressed rug). Round 11's lighter rug value was nearer R. Neither does the floor: both too pale and grey
 next to R's mid-brown planks; the rug should stand out against a darker, warmer floor.
+
+## Round 12, exterior (2026-11-07, Sonnet builder): canopy look and sky
+Builder changes: an opaque blue sky layer over the dome above the horizon (`addSkyGlow` in env.js), fading at low angles so the warm glow stays; more olive, less saturated leaves, a lightly blurred atlas,
+`alphaToCoverage` with a soft alpha edge (4x MSAA), brighter, bluer shadow layers in `shadeCanopy` (affects every tree); moss as tapered, curved ribbons with a soft strand texture, lighter warmer grey, fewer by the chimney. 309k tris.
+**Blind critic: photo won (critic saw ours as B).** Biggest gap: the planting beds in the lower third: thin, low, dark foundation shrubs with bare mulch strips; sparse fern cards, pixel-dot pink flowers and floating taro leaves in the foreground.
+The photo: full layered beds hiding the mulch, mounded shrubs to about sill height against the stone, a palm or tall fern clump by the entry, a dense fern-and-hosta foreground border with small natural flower clusters.
+Further: a speckled, noisy, uniform mid-green canopy (needs clustered masses, backlit edges, depth falloff) and smeary moss streaks by the chimney; a flat even roof; pale washed-out cream windows (deep amber, interior hints);
+an empty bright lawn plane, a white box wall and bare trunks at the right edge; a flat lawn and too little golden contrast.
+*Regression check (blind, round 11 vs round 12): round 12 closer, just* (cleaner pale-blue sky gaps above the roof and chimney). Round 11 had more moss, nearer R's amount, but as blocky streaks; R's are long silvery strands on the right.
+Both: hard leaf-dapple shadows on the walls (R has none), pale yellow-white window glow (R: deep amber), thin beds.

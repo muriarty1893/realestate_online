@@ -165,28 +165,18 @@ export const ATLAS = { oak: [[0, 0], [1, 0], [0, 1]], bg: [[1, 1]], box: [[0, 2]
 export const atlasUV = (cell) => ({ u0: cell[0] / 2, u1: (cell[0] + 1) / 2, v0: 1 - (cell[1] + 1) / 4, v1: 1 - cell[1] / 4 });
 
 export function mossTexture() {
-  // Spanish moss beard: 3-5 locks of different lengths hang from a tuft at the top; each lock is a bundle
-  // of hair-thin wavy grey strands that narrows to a ragged tip. Drawn for alpha blending (soft veil).
-  const W = 256, H = 1024, c = canvas(W, H), g = c.getContext('2d');
+  // Spanish moss: a few wispy locks hanging from a tuft; many hair-thin wavy strands, soft and tapering.
+  const W = 128, H = 512, c = canvas(W, H), g = c.getContext('2d');
   const R = rng(77);
-  g.lineCap = 'round';
-  const locks = 3 + Math.floor(R() * 3);
-  for (let l = 0; l < locks; l++) {
-    const x0 = W * (0.3 + R() * 0.4), len = H * (0.35 + R() * 0.6), wid = W * (0.12 + R() * 0.14);
-    const bend = (R() - 0.5) * W * 0.25, tipX = x0 + bend;
-    for (let i = 0; i < 90; i++) {
-      const off = (R() - 0.5) * wid, sl = len * (0.5 + R() * 0.5);
-      const li = 60 + R() * 26, a0 = 0.3 + R() * 0.5, w = 0.8 + R() * 1.4, ph = R() * 6.28;
-      const steps = 26;
-      let px = x0 + off, py = H * 0.01 + R() * H * 0.04;
-      for (let k = 1; k <= steps; k++) {
-        const t = k / steps, taper = 1 - 0.75 * t;
-        const nx = x0 + off * taper + bend * t * t + Math.sin(t * 9 + ph) * 3, ny = H * 0.02 + sl * t;
-        g.strokeStyle = hsl(60 + R() * 20, 5 + R() * 6, li, a0 * Math.min(1, t * 5 + 0.4) * (1 - t * 0.7));
-        g.lineWidth = w * (1 - t * 0.4);
-        g.beginPath(); g.moveTo(px, py); g.lineTo(nx, ny); g.stroke();
-        px = nx; py = ny;
-      }
+  g.lineCap = 'round'; g.filter = 'blur(1.1px)';
+  for (let i = 0; i < 70; i++) {
+    const x0 = W * (0.5 + (R() - 0.5) * 0.5), sl = H * (0.45 + R() * 0.55), ph = R() * 6.28, dr = (R() - 0.5) * W * 0.3;
+    let px = x0, py = 4;
+    for (let k = 1; k <= 20; k++) {
+      const t = k / 20, nx = x0 + (dr + (x0 - W / 2) * 0.3) * t + Math.sin(t * 7 + ph) * 3 * t, ny = 4 + sl * t;
+      g.strokeStyle = hsl(65 + R() * 20, 6, 52 + R() * 14, 0.5 * (1 - t) * Math.min(1, t * 8 + 0.3));
+      g.lineWidth = 2.2 * (1 - t * 0.8) + 0.4;
+      g.beginPath(); g.moveTo(px, py); g.lineTo(nx, ny); g.stroke(); px = nx; py = ny;
     }
   }
   return tex(c);
@@ -263,7 +253,7 @@ function oakDense(g, ox, oy, S, R) {
   }
   leaves.sort((p, q) => p[2] - q[2]);   // inner leaves first, rim leaves drawn over them
   for (const [x, y, q, lift] of leaves) {
-    let h = 72 + R() * 30, s = 12 + R() * 14, li = 24 + R() * 14 + q * 10 + Math.max(0, lift) * 9;
+    let h = 76 + R() * 28, s = 9 + R() * 11, li = 24 + R() * 14 + q * 10 + Math.max(0, lift) * 9;
     if (R() < 0.07 + 0.1 * q) { h = 58 + R() * 10; s = 26 + R() * 12; li = 42 + R() * 14; }
     const l = 15 + R() * 10, rot = R() * Math.PI;
     g.fillStyle = hsl(h, s, li);
@@ -275,6 +265,7 @@ export function oakDenseAtlas() {
   const S = 512, c = canvas(S * 2, S * 4), g = c.getContext('2d');
   const R = rng(5150);
   for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) oakDense(g, i * S, j * S, S, R);
-  return tex(c);
+  const c2 = canvas(S * 2, S * 4), g2 = c2.getContext('2d'); g2.filter = 'blur(0.9px)'; g2.drawImage(c, 0, 0);
+  return tex(c2);
 }
 export const DENSE = [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2], [0, 3], [1, 3]];

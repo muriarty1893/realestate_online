@@ -88,7 +88,7 @@ function randomCardAxes(R, size, tiltUp = 0.4) {
 // Per-card occlusion and translucency from the card cloud itself: cards with many cards above them sit
 // in the canopy's shade (darker, cooler); cards in thin, sparse foliage let the low sun through
 // (warm yellow-green glow). Written into the vertex colour (tint * shade) and the `glow` attribute.
-function shadeCanopy(acc, seed, { dark = 0.22, warm = [1.0, 0.95, 0.7], cool = [0.64, 0.68, 0.52], glow = 1 } = {}) {
+function shadeCanopy(acc, seed, { dark = 0.34, warm = [1.0, 0.97, 0.80], cool = [0.68, 0.72, 0.70], glow = 0.7 } = {}) {
   const R = rng(seed), C = acc.cards, N = C.length / 4, cell = 1.3, grid = new Map();
   const key = (x, y, z) => `${Math.floor(x / cell)},${Math.floor(y / cell)},${Math.floor(z / cell)}`;
   for (let i = 0; i < N; i++) { const k = key(C[i * 4], C[i * 4 + 1], C[i * 4 + 2]); (grid.get(k) ?? grid.set(k, []).get(k)).push(i); }
@@ -125,7 +125,7 @@ function shadeCanopy(acc, seed, { dark = 0.22, warm = [1.0, 0.95, 0.7], cool = [
 // undersides seen from below fall into shade), mip-aware alpha so fine leaves don't thin out at a
 // distance, and a warm transmitted-light glow (`glow` attribute) scaled by the leaf's own albedo.
 function leafMaterial(atlas, name, glowCol, glowK) {
-  const m = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, vertexColors: true, name });
+  const m = new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, vertexColors: true, alphaToCoverage: true, name });
   const uGlow = { value: new THREE.Color(glowCol).multiplyScalar(glowK) };
   m.userData.uGlow = uGlow;
   m.onBeforeCompile = (sh) => {
@@ -138,12 +138,14 @@ function leafMaterial(atlas, name, glowCol, glowK) {
           vec2 dx = dFdx(vMapUv * sz), dy = dFdy(vMapUv * sz);
           float lod = 0.5 * log2(max(max(dot(dx, dx), dot(dy, dy)), 1e-6));
           diffuseColor.a *= 1.0 + max(lod, 0.0) * 0.28;
-          if (diffuseColor.a < alphaTest) discard;
+          float aw = max(fwidth(diffuseColor.a), 0.02);
+          diffuseColor.a = clamp((diffuseColor.a - alphaTest) / aw + 0.5, 0.0, 1.0);
+          if (diffuseColor.a < 0.003) discard;
         }`)
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * uGlow * vGlow;');
   };
-  m.customProgramCacheKey = () => 'leafmat-v1';
+  m.customProgramCacheKey = () => 'leafmat-v2';
   m.userData.depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: atlas, alphaTest: 0.5, side: THREE.DoubleSide });
   return m;
 }
@@ -437,18 +439,20 @@ function canopyFill(seed, { k = 0.62 } = {}) {
   });
   return acc;
 }
-// Spanish moss strand pair (two crossed blended cards) hanging from p
+// Spanish moss strand: two crossed ribbons that taper to a point and hang with a curve and sway
 function mossStrand(acc, R, p, len, w) {
-  const a = R() * Math.PI;
+  const a = R() * Math.PI, N = 5, bend = (R() - 0.5) * 0.35 * len, sway = (R() - 0.5) * 0.15 * len;
   for (const k of [0, 1]) {
-    const ang = a + k * Math.PI / 2;
-    const u = V3(Math.cos(ang) * w / 2, 0, Math.sin(ang) * w / 2), v = V3(0, len / 2, 0);
-    const c = p.clone().add(V3(0, -len / 2 + 0.05, 0));
-    const nrm = V3(Math.sin(ang), 0.3, -Math.cos(ang)).normalize();
-    const b = acc.n;
-    acc.vert(c.clone().sub(u).sub(v), nrm, 0, 0); acc.vert(c.clone().add(u).sub(v), nrm, 1, 0);
-    acc.vert(c.clone().add(u).add(v), nrm, 1, 1); acc.vert(c.clone().sub(u).add(v), nrm, 0, 1);
-    acc.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+    const ang = a + k * Math.PI / 2, ax = Math.cos(ang), az = Math.sin(ang);
+    const nrm = V3(az, 0.3, -ax).normalize();
+    const b0 = acc.n;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N, hw = (w / 2) * (1 - 0.82 * t * t) * (0.7 + 0.3 * Math.sin(t * 3.1 + a));
+      const dx = bend * t * t + sway * Math.sin(t * 5 + a * 3), c = p.clone().add(V3(dx * ax, -len * t, dx * az));
+      acc.vert(c.clone().add(V3(-ax * hw, 0, -az * hw)), nrm, 0, 1 - t);
+      acc.vert(c.clone().add(V3(ax * hw, 0, az * hw)), nrm, 1, 1 - t);
+    }
+    for (let i = 0; i < N; i++) { const q = b0 + i * 2; acc.idx.push(q, q + 1, q + 3, q, q + 3, q + 2); }
   }
 }
 
@@ -520,17 +524,17 @@ export async function buildVegetation(ctx, M, parent, site) {
   // dense canopy fill where the photo has foliage across the top of the frame (traced coverage mask),
   // plus heavier Spanish moss hanging from the right-hand limbs
   {
-    const denseMat = leafMaterial(oakDenseAtlas(), 'veg.canopy', 0xf0e8b0, 1.0);
+    const denseMat = leafMaterial(oakDenseAtlas(), 'veg.canopy', 0xd8dca8, 1.0);
     const acc = canopyFill(77);
-    shadeCanopy(acc, 4077, { dark: 0.45, glow: 0.6 });
+    shadeCanopy(acc, 4077, { dark: 0.62, glow: 0.35, warm: [1.0, 0.96, 0.78], cool: [0.70, 0.73, 0.74] });
     const l = new THREE.Mesh(acc.geometry(), denseMat); l.castShadow = true; l.receiveShadow = true; l.customDepthMaterial = denseMat.userData.depth;
     l.name = 'canopy:leaves'; group.add(l); skipInOverride(l);
     const MR = rng(919), mo = new Acc();
     const strand = (px, py, lpx, z) => mossStrand(mo, MR, px2w(px, py, z), lpx * wpx(z), (16 + MR() * 22) * wpx(z));
     for (let i = 0; i < 40; i++) strand(1360 + MR() * 440, MR() * 200, 120 + MR() * 220, 13 + MR() * 6);
-    for (let i = 0; i < 4; i++) strand(1190 + MR() * 60, 200 + MR() * 70, 60 + MR() * 70, 14 + MR() * 2);
+    for (let i = 0; i < 2; i++) strand(1190 + MR() * 60, 215 + MR() * 50, 40 + MR() * 40, 14 + MR() * 2);
     for (let i = 0; i < 4; i++) strand(300 + MR() * 50, 30 + MR() * 40, 70 + MR() * 60, 16);
-    const cm = mossMat.clone(); cm.color.set(0x66685e); cm.opacity = 0.75;
+    const cm = mossMat.clone(); cm.color.set(0x8c8c76); cm.opacity = 0.7;
     const m = new THREE.Mesh(mo.geometry(), cm); m.name = 'canopy:moss'; m.renderOrder = 2; group.add(m); skipInOverride(m);
   }
 
@@ -543,7 +547,7 @@ export async function buildVegetation(ctx, M, parent, site) {
     // low, dense shrub masses filling the lawn gap right of the bedroom wing (dark round shrubs in the photo)
     [15.9, 6.5, 4.2, 4.6], [16.8, 2.5, 5.0, 5.0],
   ];
-  bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat, { dark: 0.35, glow: 2.6, cool: [0.62, 0.66, 0.52] }));
+  bgList.forEach(([x, z, h, w], i) => addTree(bgTree(500 + i, V3(x, G, z), { h, w, cards: 520 }), 'bg' + i, bgLeafMat, { dark: 0.35, glow: 2.6, cool: [0.66, 0.70, 0.66] }));
 
   // ---------------- foundation planting: real Poly Haven plants (instanced), low and layered
   const sagos = [], flowers = [], blooms = [];

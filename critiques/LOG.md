@@ -519,3 +519,13 @@ flat saturated orange windows; noisy speckled canopy, moss like rain or smoke; b
 *Regression check (blind, round 12 vs round 14): round 12 closer* (warmer cream walls, dark rake trim, more visible stone base). Round 14's saturated golden window glow won its area: port it alone onto round 12.
 *Orchestrator:* critics contradicted each other across rounds 13–14 (whiter walls vs cream walls; dark gable trim "cartoonish" vs "matches R"). The stable signals across all exterior critics: the beds (volume, variety, height),
 the windows (amber, interior), the moss streaks, the empty right edge. Combined diff in `shots/exterior/rejected/round_13_14.patch`; it also holds round 13's soft-facade shadow mix and bigger foundation mounds.
+
+## Round 16, master_suite (2026-11-07, Opus builder): bedding surface, pillows, exposure; **rejected, reverted to round 15**
+Builder changes: the small-crease fields removed (9 long gentle folds plus a low-frequency puff; soft vertical folds over the sides and foot; a thicker rolled hem); crease-free linen normal maps; continuous edge shading;
+a 2.2 cm thick greige throw with 8 soft folds under the turned-down band; plumper pillows and a **lower stack** (back row 0.62 x 0.5 m; the headboard shows above and beside them); exposure 1.15 -> 1.02, hemi 0.4 -> 0.3,
+rug 0xf2eadc -> 0xc8bfb2, a whiter sun patch (0xf6f7ff at 380). Measured: sun patch 253,247,244 (photo 247,247,243), wall above the barn door 207 -> 175 (photo 149).
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: dim, flat grey-beige light; the only sun a blown-out white wall patch; the photo has warm low sun raking across the side wall, the left of the bed, the throw,
+the bench and the rug and floor in soft stripes. Further: a smooth plastic-looking mauve duvet with a white fur-like blob (the throw); cut-out window views; the smeared right-edge curtain; a darker tan repeating rug; orange floor at the left, dark tiled boards at the right, a flat knit throw.
+*Regression check (blind, round 15 vs round 16): round 15 closer* (brighter, warmer, cream rug, golden sun patch, linen-like wrinkles, a folded-blanket throw). Round 16's **lower pillow stack with the headboard showing** won its area: port it alone.
+*Orchestrator:* the second time a pixel-matched exposure/colour change lost (after great room round 10): the photo reads bright and warm even where its samples are darker, so keep round 15's exposure and warmth.
+Smoothing the duvet fully made it plastic; round 15's wrinkles are "a bit busy" but read as linen. Diff in `shots/master_suite/rejected/round_16.patch`.

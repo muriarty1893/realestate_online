@@ -292,6 +292,36 @@ function floorSun(ctx, M, g) {
   g.add(m);
 }
 
+// Soft gradient decals on the walls: darker toward the ceiling junction, the NW corner and the wall bases.
+function gradDecal(g, { x, y, z, w, h, orient, dir, opacity, color = '104,66,34' }) {
+  const tex = canvasTex(8, 128, (c, W, H) => {
+    const horiz = dir === 'left' || dir === 'right';
+    const gr = horiz ? c.createLinearGradient(0, 0, W, 0) : c.createLinearGradient(0, 0, 0, H);
+    const a = (t) => `rgba(${color},${opacity * t})`;
+    const rev = dir === 'down' || dir === 'right';      // 'up': opaque at the top / left
+    for (let i = 0; i <= 8; i++) { const t = i / 8; gr.addColorStop(t, a(Math.pow(1 - (rev ? 1 - t : t), 2) * (rev ? 1 : 1))); }
+    c.clearRect(0, 0, W, H); c.fillStyle = gr; c.fillRect(0, 0, W, H);
+  });
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: true, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  m.renderOrder = 1; m.castShadow = false; m.receiveShadow = false; m.name = 'falloff';
+  if (orient === 'wallW') m.rotation.y = Math.PI / 2;
+  m.position.set(x, y, z); g.add(m);
+}
+function falloff(g) {
+  const e = 0.004, H = 3.05;
+  // ceiling junction: dark at the top, fading down 0.55 m (above the window heads at 2.44 m)
+  gradDecal(g, { x: (R.x0 + R.x1) / 2, y: H - 0.275, z: R.z0 + e, w: R.x1 - R.x0, h: 0.55, orient: 'wallN', dir: 'up', opacity: 0.3 });
+  gradDecal(g, { x: R.x0 + e, y: H - 0.275, z: (R.z0 + R.z1) / 2, w: R.z1 - R.z0, h: 0.55, orient: 'wallW', dir: 'up', opacity: 0.3 });
+  // wall bases
+  gradDecal(g, { x: (R.x0 + R.x1) / 2, y: 0.2, z: R.z0 + e, w: R.x1 - R.x0, h: 0.4, orient: 'wallN', dir: 'down', opacity: 0.2 });
+  gradDecal(g, { x: R.x0 + e, y: 0.2, z: (R.z0 + R.z1) / 2, w: R.z1 - R.z0, h: 0.4, orient: 'wallW', dir: 'down', opacity: 0.2 });
+  // NW vertical corner (wallN local -x is the corner; wallW local +x is the corner)
+  gradDecal(g, { x: R.x0 + 0.3, y: 1.4, z: R.z0 + e, w: 0.6, h: 2.8, orient: 'wallN', dir: 'left', opacity: 0.24 });
+  gradDecal(g, { x: R.x0 + e, y: 1.4, z: R.z0 + 0.3, w: 0.6, h: 2.8, orient: 'wallW', dir: 'right', opacity: 0.24 });
+}
+
 function grounding(ctx, M, g, P) {
   floorSun(ctx, M, g);
   const f = 0.021;                                      // just above the rug
@@ -330,8 +360,9 @@ function grounding(ctx, M, g, P) {
   // headboard against the wall
   softShadow(g, { x: BED.x, y: 0.6, z: R.z0 + 0.003, w: hbW + 0.25, d: 1.35, orient: 'wallN', blur: 0.13, r: 0.05, opacity: 0.32 });
 
+  falloff(g);
   // warm bounce light: no shadow, high in the room so walls and ceiling glow evenly like the photo
-  const bounce = new THREE.HemisphereLight(0xfff6ea, 0xe6d6bf, 0.4);
+  const bounce = new THREE.HemisphereLight(0xfffaf3, 0xece0cc, 0.4);
   g.add(bounce); ctx.addInteriorLight(bounce);
   const glow = new THREE.PointLight(0xffeedc, 0.8, 9, 1.6);
   glow.position.set(BED.x + 0.2, 2.2, -6.3); glow.castShadow = false;

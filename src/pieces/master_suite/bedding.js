@@ -164,7 +164,7 @@ export function buildBedding(ctx, M, b, { W, L, mTop }) {
   };
 
   // 1. duvet: light linen, many small soft creases, hanging (not bulging) over the sides and foot
-  const fine = creaseField(31, 420, { x0: -1.4, x1: 1.4, z0: 0, z1: 2.8 }, { len: [0.1, 0.4], width: [0.012, 0.022], amp: [0.002, 0.005], dir: 0.6, spread: 2.6 });
+  const fine = creaseField(31, 160, { x0: -1.4, x1: 1.4, z0: 0, z1: 2.8 }, { len: [0.1, 0.4], width: [0.012, 0.022], amp: [0.001, 0.003], dir: 0.6, spread: 2.6 });
   const broad = creaseField(32, 110, { x0: -1.3, x1: 1.3, z0: 0.3, z1: 2.7 }, { len: [0.3, 1.0], width: [0.025, 0.05], amp: [0.009, 0.02], dir: 0.35, spread: 1.4 });
   const duvField = (s, t, drop) => {
     const loft = 0.006 * fbm(s * 2.2, t * 2.2, 7);                // soft puffy undulation
@@ -203,7 +203,7 @@ export function buildBedding(ctx, M, b, { W, L, mTop }) {
   b.add(band);
 
   // 3. pale throw laid loosely over the east half, following the duvet's own folds, spilling down the east side
-  const thrCr = creaseField(51, 240, { x0: -0.8, x1: 1.6, z0: 0.8, z1: 2.3 }, { len: [0.15, 0.6], width: [0.01, 0.025], amp: [0.002, 0.007], dir: 0.15, spread: 0.9 });
+  const thrCr = creaseField(51, 110, { x0: -0.8, x1: 1.6, z0: 0.8, z1: 2.3 }, { len: [0.15, 0.6], width: [0.01, 0.025], amp: [0.002, 0.007], dir: 0.15, spread: 0.9 });
   const thrShade = shadeFn(0.004);
   const thr = mesh(overlayGeo(duvP, { map: thrMap, nu: 150, nv: 110, sizeU: 1.8, sizeV: 1.1, thick: 0.014,
     lift: (s, t, q) => Math.max(0, thrCr(s, t) + 0.004) + 0.006 * (fbm(s * 3, t * 3, 52) * 0.5 + 0.5),
@@ -234,12 +234,12 @@ export function beddingMats(M) {
   const tint = (src, hex, extra = {}) => { const m = src.clone(); m.color = new THREE.Color(hex); if (m.sheenColor) m.sheenColor = m.color.clone().lerp(new THREE.Color(0xffffff), 0.4); Object.assign(m, extra); return m; };
   // fine washed-linen weave at true scale (~1.5 mm threads), no baked creases (the geometry carries them)
   // small crisp creases live in the normal map (1.3 m tile); the mesh carries the medium and broad folds
-  const fineLinen = linenMaps({ size: 1024, repeatM: 1.3, pitch: 2, seed: 61, crease: { n: 420, dir: 0.5, spread: 1.4, seed: 71, amount: 1.0 }, creaseStrength: 5, slub: 0.3 });
+  const fineLinen = linenMaps({ size: 1024, repeatM: 1.3, pitch: 2, seed: 61, crease: { n: 180, dir: 0.5, spread: 1.4, seed: 71, amount: 1.0 }, creaseStrength: 3, slub: 0.3 });
   const throwWeave = linenMaps({ size: 1024, repeatM: 0.5, pitch: 5, seed: 62, crease: null, slub: 1.2 });
   const withMaps = (m, lm, ns) => { m.map = lm.map; m.normalMap = lm.normalMap; m.normalScale = new THREE.Vector2(ns, ns); return m; };
   M.bedDuvet = tint(M.duvet, 0xd9cbbd, { name: 'ms.bedDuvet' });
   M.bedBand = tint(M.duvet, 0xdfd2c4, { name: 'ms.bedBand' });
-  withMaps(M.bedDuvet, fineLinen, 0.8); withMaps(M.bedBand, fineLinen, 0.8);
+  withMaps(M.bedDuvet, fineLinen, 0.5); withMaps(M.bedBand, fineLinen, 0.5);
   for (const m of [M.bedDuvet, M.bedBand]) m.vertexColors = true;
   M.bedThrow = withMaps(tint(M.throwCream, 0xf4eee5, { name: 'ms.bedThrow' }), throwWeave, 0.9);
   M.bedThrow.vertexColors = true;

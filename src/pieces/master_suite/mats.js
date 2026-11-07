@@ -34,9 +34,9 @@ export function makeMats(ctx) {
   });
 
   // ---- paint
-  M.wallMstr = std({ color: 0xf3ebdf, roughness: 0.93, name: 'ms.wallMstr' });
+  M.wallMstr = std({ color: 0xf4eee6, roughness: 0.93, name: 'ms.wallMstr' });
   M.wallBath = std({ color: 0xf1ede5, roughness: 0.9, name: 'ms.wallBath' });
-  M.ceiling = std({ color: 0xfaf4ea, roughness: 0.96, emissive: new THREE.Color(0xfff0dc), emissiveIntensity: 0.1, name: 'ms.ceiling' });
+  M.ceiling = std({ color: 0xfaf4ea, roughness: 0.96, emissive: new THREE.Color(0xfff0dc), emissiveIntensity: 0.06, name: 'ms.ceiling' });
   M.trimWhite = std({ color: 0xf4f1ea, roughness: 0.5, name: 'ms.trim' });
 
   // ---- wood

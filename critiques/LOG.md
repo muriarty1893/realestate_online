@@ -466,3 +466,16 @@ reflection, no glare above the door); sparse beds with pink blobs on bare mulch;
 Round 10 wins the sky: its clear blue gaps match R; round 11's few gaps look pale and washed out. Round 11's moss near the chimney renders as rectangular grey streaks (fix). Both: fuller foundation beds;
 hide the flat lawn plane and white wall edge at the far right.
 *Orchestrator:* other pieces with tube builders may have the same inward winding; worth a grep for `a, b, a + 1` patterns.
+
+## Round 15, master_suite (2026-11-07, Sonnet builder): falloff, white balance, calmer wrinkles
+Builder changes: warm gradient falloff decals (0.55 m ceiling band, 0.4 m base band, a 0.6 m NW corner strip clear of the sun patch); wall 0xf3ebdf -> 0xf4eee6, ceiling emissive 0.1 -> 0.06, whiter hemi;
+duvet fine creases 420 -> 160 (smaller), throw creases 240 -> 110, normal-map creases 420 -> 180 at strength 5 -> 3, linen normal scale 0.8 -> 0.5. Contact-shadow decals already existed (kept).
+Finding: our walls and ceiling are 15–20% brighter than the photo's (left wall 197,178,152 vs 157,129,98; ceiling 193,172,145 vs 161,135,105), the photo's walls are *more* saturated (R/B 1.47 vs 1.34),
+and our sun patch is cream (252,233,209) where the photo's is near white (249,250,245): the "peach" read is the cream patch, the glowing ceiling and the warm floor, not the paint.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the bedding still reads stamped crumpled paper/foil with no weight; the throw smeared flat. It should be thick soft linen with a few large gentle folds,
+a heavy drape over the right side, a layered throw folded across the lower third, plump pillows with rounded edges. Further: hazy flat low-contrast light (photo: warm low sun across duvet, rug and lower-left floor, real
+shadows under bench, bed, nightstands); the smeared right-edge sheer; cut-out window views; the headboard almost hidden by pillows stacked above it (photo: a tall headboard standing clear behind them);
+dark, oversized, skewed planks at the right; a flat repeated rug texture; a knit throw with no thickness.
+*Regression check (blind, round 13 vs round 15): tie* (no visible difference at the critic's resolution). Kept, since its changes point the way both critics ask (fewer, softer creases).
+*Orchestrator:* the wrinkle problem is in the geometry and normal maps together; parameter cuts were too small to see. Next: an Opus pass on the bedding's surface (few large folds, thickness, weight) and the pillow
+height (headboard visible above them); and the measured exposure gap (walls 15–20% too bright, sun patch whiter).

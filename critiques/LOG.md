@@ -508,3 +508,14 @@ heavy dark-brown bargeboards outlining every gable (photo: light trim matching t
 *Regression check (blind, round 12 vs round 13): round 12 closer, narrowly* (its whiter grey-white walls and brighter amber windows; round 13's walls lean peach-yellow and its windows read dimmer peach-orange).
 Round 13 wins the light: its soft, even facade fits R's dusk; round 12's hard dapple fights the glowing windows. Beds a tie (both a thin mulch strip; the new mounds did not register).
 *Orchestrator:* kept in the working tree; sent back to the same builder to restore round 12's wall tone and do the windows properly.
+
+## Round 14, exterior (2026-11-07, same Sonnet builder on round 13's tree); **rounds 13–14 rejected, reverted to round 12**
+Builder changes on top of round 13: the sun's colour on the walls desaturated 65% and cooler albedos (stucco 0xe2dfd8, board 0xe4e0d4, batten 0xe8e5da); a rebuilt amber room glow texture (ceiling band, hot spot, lamp, curtains,
+furniture silhouettes, vignette), six glow materials at different brightness, no blue tint/env on the glass; one warm point light below each lit front window (5 lights); light cream rake trim (`M.rakeTrim`);
+two sky-hanging moss strands by the chimney removed. 335k tris.
+**Blind critic: photo won (critic saw ours as A).** Biggest gap: the planting again: one low even carpet of identical fern fronds, flat dark leaf cards at bottom right, pasted pink clusters, no volume. The photo: layered beds with rounded shrubs,
+a small palm, spiky grasses, ferns, white/pink/red annuals at different heights, mulch edges, plants partly hiding the stone. Further: flat bright white walls and hard dark shadow bands on the lawn (midday look);
+flat saturated orange windows; noisy speckled canopy, moss like rain or smoke; bright white fascia and flat black awnings (photo: dark bronze fascia, standing-seam awnings with highlights); uniform roof.
+*Regression check (blind, round 12 vs round 14): round 12 closer* (warmer cream walls, dark rake trim, more visible stone base). Round 14's saturated golden window glow won its area: port it alone onto round 12.
+*Orchestrator:* critics contradicted each other across rounds 13–14 (whiter walls vs cream walls; dark gable trim "cartoonish" vs "matches R"). The stable signals across all exterior critics: the beds (volume, variety, height),
+the windows (amber, interior), the moss streaks, the empty right edge. Combined diff in `shots/exterior/rejected/round_13_14.patch`; it also holds round 13's soft-facade shadow mix and bigger foundation mounds.

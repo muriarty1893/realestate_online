@@ -1,0 +1,182 @@
+diff --git a/src/pieces/exterior/mats.js b/src/pieces/exterior/mats.js
+index 4c3d6fa..cf82374 100644
+--- a/src/pieces/exterior/mats.js
++++ b/src/pieces/exterior/mats.js
+@@ -17,36 +17,35 @@ function pbr(ctx, dir, { repeat = 1, color = 0xffffff, roughness = 1, normalScal
+ function glowTexture(seed, kind = 'room') {
+   const R = rng(seed);
+   return canvasTex(128, 256, (g, w, h) => {
++    // deep amber room: darker ceiling band and corners, a lamp hot spot, curtain edges, furniture silhouettes
+     const grd = g.createLinearGradient(0, 0, 0, h);
+-    if (kind === 'room') { grd.addColorStop(0, '#8a5a14'); grd.addColorStop(0.12, '#e0a228'); grd.addColorStop(0.4, '#ffcc3c'); grd.addColorStop(0.8, '#fcc030'); grd.addColorStop(1, '#c88618'); }
+-    else { grd.addColorStop(0, '#e8961e'); grd.addColorStop(0.5, '#ffc84a'); grd.addColorStop(1, '#d9862a'); }
++    grd.addColorStop(0, '#c0670c'); grd.addColorStop(0.16, '#f08e10'); grd.addColorStop(0.45, '#ffb81e'); grd.addColorStop(0.85, '#ffa818'); grd.addColorStop(1, '#b0600c');
+     g.fillStyle = grd; g.fillRect(0, 0, w, h);
+-    // curtain folds at both sides
++    const lx = w * (0.25 + R() * 0.5), ly = h * (0.28 + R() * 0.3);
++    const rg = g.createRadialGradient(lx, ly, 1, lx, ly, w * 0.5);
++    rg.addColorStop(0, 'rgba(255,214,110,0.95)'); rg.addColorStop(0.4, 'rgba(255,170,40,0.5)'); rg.addColorStop(1, 'rgba(255,140,20,0)');
++    g.fillStyle = rg; g.fillRect(0, 0, w, h);
++    // ceiling fixture glow
++    const cg = g.createRadialGradient(w * (0.3 + R() * 0.4), h * 0.05, 1, w * 0.5, h * 0.05, w * 0.45);
++    cg.addColorStop(0, 'rgba(255,200,100,0.7)'); cg.addColorStop(1, 'rgba(255,150,30,0)');
++    g.fillStyle = cg; g.fillRect(0, 0, w, h * 0.3);
++    g.fillStyle = 'rgba(70,30,5,0.3)'; g.fillRect(0, h * 0.19, w, 3);
++    // curtains
+     for (const side of [0, 1]) {
+-      const cw = w * (0.12 + R() * 0.12);
++      const cw = w * (0.1 + R() * 0.12);
+       for (let i = 0; i < 6; i++) {
+         const x = side ? w - cw + (i / 6) * cw : (i / 6) * cw;
+-        g.fillStyle = `rgba(${160 + R() * 40},${80 + R() * 30},${10 + R() * 20},${0.12 + R() * 0.14})`;
+-        g.fillRect(x, 0, cw / 9, h);
++        g.fillStyle = `rgba(${90 + R() * 40},${40 + R() * 20},5,${0.25 + R() * 0.2})`;
++        g.fillRect(x, 0, cw / 7, h);
+       }
+     }
+-    // a bright lamp blob and a darker piece of furniture
+-    const lx = w * (0.3 + R() * 0.4), ly = h * (0.3 + R() * 0.25);
+-    const rg = g.createRadialGradient(lx, ly, 2, lx, ly, w * 0.55);
+-    rg.addColorStop(0, 'rgba(255,215,110,0.5)'); rg.addColorStop(1, 'rgba(255,190,80,0)');
+-    g.fillStyle = rg; g.fillRect(0, 0, w, h);
+-    // ceiling light fixture glow + ceiling line, window-top gradient
+-    const cg = g.createRadialGradient(w * 0.5, h * 0.04, 1, w * 0.5, h * 0.04, w * 0.5);
+-    cg.addColorStop(0, 'rgba(255,245,200,0.75)'); cg.addColorStop(1, 'rgba(255,230,150,0)');
+-    g.fillStyle = cg; g.fillRect(0, 0, w, h * 0.3);
+-    g.fillStyle = 'rgba(90,50,10,0.22)'; g.fillRect(0, h * 0.2, w, 3);
+-    // faint sky reflection: diagonal pale blue streak on the upper glass
+-    g.save(); g.fillStyle = 'rgba(150,185,225,0.17)';
+-    g.beginPath(); g.moveTo(0, 0); g.lineTo(w * 0.75, 0); g.lineTo(0, h * 0.5); g.closePath(); g.fill(); g.restore();
+-    const vg = g.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, 'rgba(120,160,210,0.18)'); vg.addColorStop(0.35, 'rgba(120,160,210,0)');
++    // furniture and a picture frame
++    g.fillStyle = 'rgba(60,25,4,0.5)'; g.fillRect(w * R() * 0.5, h * (0.72 + R() * 0.1), w * (0.3 + R() * 0.4), h * 0.3);
++    g.fillStyle = 'rgba(90,40,6,0.4)'; g.fillRect(w * (0.55 + R() * 0.2), h * (0.3 + R() * 0.1), w * 0.18, h * 0.14);
++    // corner vignette for depth
++    const vg = g.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, h * 0.75);
++    vg.addColorStop(0, 'rgba(60,25,0,0)'); vg.addColorStop(1, 'rgba(60,25,0,0.3)');
+     g.fillStyle = vg; g.fillRect(0, 0, w, h);
+-    g.fillStyle = 'rgba(120,70,25,0.2)';
+-    g.fillRect(w * R() * 0.5, h * (0.72 + R() * 0.1), w * (0.3 + R() * 0.4), h * 0.3);
+   });
+ }
+ 
+@@ -142,11 +141,11 @@ function seamTextures() {
+ 
+ export function makeMaterials(ctx) {
+   const M = {};
+-  M.stucco = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xe6ded0, roughness: 1, normalScale: 0.8, name: 'ext.stucco' });
++  M.stucco = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xe2dfd8, roughness: 1, normalScale: 0.8, name: 'ext.stucco' });
+   M.porchWall = pbr(ctx, 'white_stucco', { repeat: 2.2, color: 0xe0d9cc, roughness: 0.95, normalScale: 0.3, name: 'ext.porchwall' });
+   const board = battenBoardTextures();
+-  M.board = new THREE.MeshStandardMaterial({ color: 0xe3dac3, map: board, roughness: 0.82, name: 'ext.board' });
+-  M.batten = new THREE.MeshStandardMaterial({ color: 0xe9e0ca, roughness: 0.8, name: 'ext.batten' });
++  M.board = new THREE.MeshStandardMaterial({ color: 0xe4e0d4, map: board, roughness: 0.82, name: 'ext.board' });
++  M.batten = new THREE.MeshStandardMaterial({ color: 0xe8e5da, roughness: 0.8, name: 'ext.batten' });
+   M.stone = pbr(ctx, 'castle_wall_slates', { repeat: 1.6, color: 0xd2cabe, roughness: 1, normalScale: 1.6, name: 'ext.stone' });
+   M.stoneCap = new THREE.MeshStandardMaterial({ color: 0x9d9184, roughness: 0.9, name: 'ext.stonecap' });
+   const shg = shingleTextures();
+@@ -154,6 +153,7 @@ export function makeMaterials(ctx) {
+   M.shingle.color.setRGB(0.92, 1.0, 1.06);
+   M.shingle.envMapIntensity = 0.35;
+   M.ridgeCap = new THREE.MeshStandardMaterial({ map: shg.color, normalMap: shg.normal, roughness: 0.9, color: 0xb4b2ac, name: 'ext.ridgecap' });
++  M.rakeTrim = new THREE.MeshStandardMaterial({ color: 0xe4e0d4, roughness: 0.7, name: 'ext.raketrim' });
+   M.bronze = new THREE.MeshStandardMaterial({ color: 0x4a3b30, roughness: 0.55, metalness: 0.25, name: 'ext.bronze' });
+   M.bronzeMatte = new THREE.MeshStandardMaterial({ color: 0x40362d, roughness: 0.75, metalness: 0.1, name: 'ext.bronze.matte' });
+   M.soffit = new THREE.MeshStandardMaterial({ color: 0x5a4a3e, roughness: 0.8, name: 'ext.soffit' });
+@@ -182,9 +182,18 @@ export function makeMaterials(ctx) {
+   M.glow = [];
+   for (let i = 0; i < 6; i++) {
+     const t = glowTexture(31 + i * 17, i === 5 ? 'foyer' : 'room');
+-    const m = new THREE.MeshStandardMaterial({ color: 0x3a5a86, roughness: 0.04, metalness: 0.0, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 1.3, envMapIntensity: 1.6, name: 'ext.glow' + i });
+-    m.userData.glowBase = 1.3;
++    const m = new THREE.MeshStandardMaterial({ color: 0x100a06, roughness: 0.15, metalness: 0.0, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 1.3, envMapIntensity: 0.15, name: 'ext.glow' + i });
++    m.userData.glowBase = [1.9, 1.6, 2.1, 1.7, 2.0, 1.9][i];
+     M.glow.push(m);
+   }
++  // soft facade light: leaf dapple on walls is washed out (photo walls get even dusk light)
++  for (const m of [M.stucco, M.porchWall, M.board, M.batten]) {
++    m.onBeforeCompile = (sh) => {
++      sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_begin>',
++        THREE.ShaderChunk.lights_fragment_begin.replace(/directLight\.color \*= \( directLight\.visible && receiveShadow \) \? getShadow\(([^;]*?)\) : 1\.0;/g,
++          'directLight.color *= ( directLight.visible && receiveShadow ) ? mix( getShadow($1), 1.0, 0.7 ) : 1.0; directLight.color = mix( directLight.color, vec3( dot( directLight.color, vec3( 0.3, 0.6, 0.1 ) ) ) * vec3( 0.97, 0.98, 1.0 ), 0.65 );'));
++    };
++    m.customProgramCacheKey = () => 'softwall';
++  }
+   return M;
+ }
+diff --git a/src/pieces/exterior/openings.js b/src/pieces/exterior/openings.js
+index 80211af..413ff63 100644
+--- a/src/pieces/exterior/openings.js
++++ b/src/pieces/exterior/openings.js
+@@ -96,6 +96,11 @@ export function buildOpenings(ctx, M, parent) {
+     o._frame = frameFor(o);
+     geo.xf = o._frame.m;
+     windowUnit(geo, M, M.glow[s.glow], o, { units: s.units, cols: s.cols, sillFt: s.sill, headFt: s.head });
++    if (s.glow !== 0) { // warm spill onto the sill, stone and shrubs below each lit window
++      const l = new THREE.PointLight(0xff9a2a, 1.6, 3.2, 2);
++      l.position.set(0, s.sill * FT - 0.1, 0.8).applyMatrix4(o._frame.m);
++      ctx.scene.add(l); ctx.addInteriorLight(l);
++    }
+   }
+   // entry door (double, wood with glass lites) + sidelights
+   const d = ctx.opening('door_entry');
+diff --git a/src/pieces/exterior/roof.js b/src/pieces/exterior/roof.js
+index e4db5ab..73be565 100644
+--- a/src/pieces/exterior/roof.js
++++ b/src/pieces/exterior/roof.js
+@@ -126,7 +126,7 @@ function rakeTrim(geo, M, r, blk, FH) {
+   const c1 = r.p1.clone().addScaledVector(o, t / 2).addScaledVector(perp, 0.03 - FH / 2);
+   // extend slightly at both ends
+   c0.addScaledVector(dir, -0.02); c1.addScaledVector(dir, 0.02);
+-  geo.beam(M.bronze, c0, c1, t, FH, perp);
++  geo.beam(M.rakeTrim, c0, c1, t, FH, perp);
+   // sloped soffit under the rake overhang (from the rake board back to the gable wall)
+   const back = (q) => q.clone().addScaledVector(o, -(Math.abs((q.x - r.aw) * o.x + (q.z - r.aw) * o.z) > 0 ? 0 : 0));
+   const d0 = r.p0.clone().addScaledVector(perp, 0.03 - FH + 0.005), d1 = r.p1.clone().addScaledVector(perp, 0.03 - FH + 0.005);
+diff --git a/src/pieces/exterior/veg.js b/src/pieces/exterior/veg.js
+index e9a25c1..5cc2eb4 100644
+--- a/src/pieces/exterior/veg.js
++++ b/src/pieces/exterior/veg.js
+@@ -532,8 +532,7 @@ export async function buildVegetation(ctx, M, parent, site) {
+     const MR = rng(919), mo = new Acc();
+     const strand = (px, py, lpx, z) => mossStrand(mo, MR, px2w(px, py, z), lpx * wpx(z), (16 + MR() * 22) * wpx(z));
+     for (let i = 0; i < 40; i++) strand(1360 + MR() * 440, MR() * 200, 120 + MR() * 220, 13 + MR() * 6);
+-    for (let i = 0; i < 2; i++) strand(1190 + MR() * 60, 215 + MR() * 50, 40 + MR() * 40, 14 + MR() * 2);
+-    for (let i = 0; i < 4; i++) strand(300 + MR() * 50, 30 + MR() * 40, 70 + MR() * 60, 16);
++        for (let i = 0; i < 4; i++) strand(300 + MR() * 50, 30 + MR() * 40, 70 + MR() * 60, 16);
+     const cm = mossMat.clone(); cm.color.set(0x8c8c76); cm.opacity = 0.7;
+     const m = new THREE.Mesh(mo.geometry(), cm); m.name = 'canopy:moss'; m.renderOrder = 2; group.add(m); skipInOverride(m);
+   }
+@@ -580,7 +579,7 @@ export async function buildVegetation(ctx, M, parent, site) {
+     if (R() < 0.3) add('shrub1', x, z, U(0.8, 1.1)); else add('periw', x, z, U(2.2, 3));
+   }
+   // palms by the steps and left of the dining bay, big fan palm
+-  sagos.push({ p: [2.3, G, 9.1], s: [0.9, 0.9, 0.9], rot: 0.3 }, { p: [6.9, G, 9.2], s: [0.9, 0.9, 0.9], rot: 1.2 });
++  sagos.push({ p: [2.0, G, 9.3], s: [1.4, 1.5, 1.4], rot: 0.3 }, { p: [7.2, G, 9.3], s: [1.4, 1.5, 1.4], rot: 1.2 });
+   sagos.push({ p: [-2.1, G, 7.4], s: [1.6, 1.7, 1.6], rot: 0.7 }, { p: [1.0, G, 8.4], s: [1.9, 2.1, 1.9], rot: 2.0 });
+   // flowers bordering the walk near the steps
+   for (const sx of [-1, 1]) for (let i = 0; i < 8; i++) add(i % 2 ? 'shrub1' : 'periw', 4.58 + sx * (1.5 + R() * 2.4), 9.6 + R() * 2.0, i % 2 ? 1 : 2.4);
+@@ -615,11 +614,18 @@ export async function buildVegetation(ctx, M, parent, site) {
+ 
+   // dense, low boxwood-like mounds hugging the stone band (below the sills), blooming mounds and strap clumps in the beds
+   const boxes = [], straps = [];
+-  for (let x = -12.7; x < 13.2; x += U(0.45, 0.75)) {
+-    if (onWalk(x, 0.35) || R() < 0.1) continue;
+-    const h = U(0.75, 1.15);
+-    boxes.push({ p: [x, G - 0.02, front(x) + U(0.45, 0.8)], s: [U(0.9, 1.3), h, U(0.9, 1.3)], rot: R() * 6.28 });
+-    if (R() < 0.5) boxes.push({ p: [x + U(-0.3, 0.3), G - 0.02, front(x) + U(1.2, 1.7)], s: [U(0.7, 1), h * 0.7, U(0.7, 1)], rot: R() * 6.28 });
++  for (let x = -12.7; x < 13.2; x += U(0.32, 0.5)) {
++    if (onWalk(x, 0.35) || R() < 0.05) continue;
++    const h = U(0.9, 1.3);
++    boxes.push({ p: [x, G - 0.02, front(x) + U(0.5, 0.85)], s: [U(1.3, 1.8), h, U(1.3, 1.8)], rot: R() * 6.28 });
++    boxes.push({ p: [x + U(-0.3, 0.3), G - 0.02, front(x) + U(1.4, 1.9)], s: [U(1.1, 1.5), h * 0.7, U(1.1, 1.5)], rot: R() * 6.28 });
++    if (R() < 0.6) straps.push({ p: [x + U(-0.3, 0.3), G, front(x) + U(2.0, 2.5)], s: [U(1.2, 1.7), U(1.2, 1.7), U(1.2, 1.7)], rot: R() * 6.28 });
++    if (R() < 0.35) blooms.push({ p: [x + U(-0.3, 0.3), G, front(x) + U(1.6, 2.2)], s: [U(1.0, 1.4), U(0.8, 1.1), U(1.0, 1.4)], rot: R() * 6.28 });
++  }
++  // foreground borders: hosta clumps and mounds filling the mulch
++  for (const bed of [bedL, bedR]) {
++    scatter(bed, 60, R, (x, z) => straps.push({ p: [x, G, z], s: [U(1.4, 2.2), U(1.4, 2.2), U(1.4, 2.2)], rot: R() * 6.28 }), (x, z) => !onWalk(x, 0.4));
++    scatter(bed, 30, R, (x, z) => blooms.push({ p: [x, G, z], s: [U(1.0, 1.5), U(0.8, 1.2), U(1.0, 1.5)], rot: R() * 6.28 }), (x, z) => !onWalk(x, 0.4));
+   }
+   for (const sx of [-1, 1]) for (let i = 0; i < 9; i++) boxes.push({ p: [4.58 + sx * (1.0 + i * 0.28 + U(0, .15)), G - 0.02, 9.9 + U(0, 1)], s: [0.8, 0.7, 0.8], rot: R() * 6.28 });
+   for (const bed of [bedE]) {

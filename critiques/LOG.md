@@ -529,3 +529,12 @@ the bench and the rug and floor in soft stripes. Further: a smooth plastic-looki
 *Regression check (blind, round 15 vs round 16): round 15 closer* (brighter, warmer, cream rug, golden sun patch, linen-like wrinkles, a folded-blanket throw). Round 16's **lower pillow stack with the headboard showing** won its area: port it alone.
 *Orchestrator:* the second time a pixel-matched exposure/colour change lost (after great room round 10): the photo reads bright and warm even where its samples are darker, so keep round 15's exposure and warmth.
 Smoothing the duvet fully made it plastic; round 15's wrinkles are "a bit busy" but read as linen. Diff in `shots/master_suite/rejected/round_16.patch`.
+
+## Round 13, great_room (2026-11-07, Opus builder): glossy caramel leather, club armchairs; **pending (not yet judged; usage limit)**
+Builder changes (mats.js, sofa.js, living.js): the sofa/chair shader keeps only the Poly Haven texture's luminance detail and takes colour from the material, set to the photo's caramel (sofa seat 151,105,70 vs photo 152,101,64;
+arm front 120,81,52 vs 115,75,55; chair back ~117,71,42 vs 130,88,62, round 12 was 98,47,18); the pale "worn" seat tops removed (a baked worn-edge band plus grazing reflections of the cream walls); warm, weaker grazing
+reflections, mottling ±6%, lower roughness and a light clearcoat, a fine wrinkle bump that darkens creases, richer brown darks; the armchairs rebuilt as the photo's mid-century club chairs (track arms with welts,
+a reclined pillow back, one crowned seat cushion, tapered dark legs raising the body 16 cm; 0.80 x 0.86 x 0.80 m), positioned by overlay; a darker, greyer floor with less grazing reflection
+(left edge 124,108,99 vs photo 119,117,110). 331k tris. Not done: sectional cushion form; floor slightly red-brown; faint plank lines; a dotted bright artifact on the seat welts.
+*Orchestrator:* stopped at the 88% usage guard before its critics. The diff is in `shots/great_room/pending/round_13.patch` with its shots; the working tree is round 12. Next session: `git apply` it,
+re-shoot, and run the blind critic and the regression check against round 12.

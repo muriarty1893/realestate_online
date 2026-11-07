@@ -1,4 +1,4 @@
-# Status: paused 2026-11-07 (5-hour usage 88%, weekly 59%), after exterior r12, great room r12 (r13 in flight), master r15
+# Status: paused 2026-11-07 (5-hour usage 88%, weekly 59%), after exterior r12, great room r12 (r13 pending), master r15
 
 ## Done
 - The plan is traced into `src/plan.js` at 28.2 px/ft. That scale checks out against 7 labelled rooms. The
@@ -17,7 +17,7 @@
 | piece | latest (beat or tied its predecessor in a blind regression check) | biggest gap left (critiques/LOG.md has all of them) |
 |---|---|---|
 | exterior | round 12: dense photo-traced canopy and the inside-out trunk fix (r11, Opus), blue sky in the canopy gaps, softer olive leaves, ribbon moss (r12) | the beds (volume, varied species and heights, a palm by the entry, mulch hidden); windows (deep amber with rooms behind; round 14's glow won its area, port it from `shots/exterior/rejected/round_13_14.patch`); moss streaks by the chimney; the empty right edge. Rounds 13–14 rejected (wall tone, trim) |
-| great_room | round 12: continuous L sectional (r9), leather sheen (r11), darker walnut cabinets, grey distressed rug (r12) | the leather (seven rounds): the armchair crop (`shots/great_room/armchair_ours_vs_photo.png`) shows the cause: boxy recliner form, a pale suede-looking seat top, matte blotchy finish; the photo's are slim club chairs on tapered legs with glossy highlights. Round 13 (Opus) was building that rebuild at the pause; see below |
+| great_room | round 12: continuous L sectional (r9), leather sheen (r11), darker walnut cabinets, grey distressed rug (r12) | the leather (seven rounds): the armchair crop (`shots/great_room/armchair_ours_vs_photo.png`) shows the cause: boxy recliner form, a pale suede-looking seat top, matte blotchy finish; the photo's are slim club chairs on tapered legs with glossy highlights. Round 13 (Opus) rebuilt both and waits, unjudged, in `shots/great_room/pending/` |
 | master_suite | round 15: layered cloth bedding (r11–12), 17 cm satin oak planks (r13), calmer wrinkles and falloff decals (r15, a tie with r13) | lighting (warm low sun raking across the room; but not on the bed: round 14 rejected), the bench knit, the right-edge sheer, the floor's orange left / dark right. Round 16 rejected (dim, plastic duvet); port only its lower pillow stack (`shots/master_suite/rejected/round_16.patch`) |
 | rest | QA pass done | garage is the weakest view (flat concrete, no car); stiff towels and shower curtains |
 
@@ -26,7 +26,7 @@ as PNGs with metadata stripped, and each critic reads only those two files. Regr
 renders X/Y in random order) are built inline; the answer keys are in the session scratchpad `keys/pairs.txt`.
 
 ## Next steps (in order)
-1. Great room round 13 (club-chair rebuild, glossy leather): judge it if it finished (critic plus regression vs round 12); its state is noted under "At the pause" below.
+1. Great room round 13 (club-chair rebuild, glossy caramel leather) finished but is unjudged: `git apply shots/great_room/pending/round_13.patch`, re-shoot, then run the blind critic and the regression check against round 12.
 2. Master suite: port round 16's lower pillow stack onto round 15 (small, Sonnet); keep round 15's exposure and warmth.
 3. Exterior: port round 14's window glow onto round 12 (small, Sonnet); then the beds (an Opus rebuild may be needed: three Sonnet rounds of bed tweaks did not register at critic size).
 4. Shell: a 2 px light leak on wall `w_x664a` at (-8.93, 2.26, -7.82), where `w_wicS2` butts into it with no overlap (x 664 px), right where the master's fake sun light is aimed.

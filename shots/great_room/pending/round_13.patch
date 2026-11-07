@@ -1,0 +1,235 @@
+diff --git a/src/pieces/great_room/living.js b/src/pieces/great_room/living.js
+index f57ece6..a0daf48 100644
+--- a/src/pieces/great_room/living.js
++++ b/src/pieces/great_room/living.js
+@@ -218,12 +218,12 @@ export async function buildLiving(ctx, M, group) {
+     p.position.set(x, y - 0.06, z); p.rotation.set(rx, ry, rz, 'YXZ'); L.add(p); return p;
+   };
+   // west section A: south end (by the arm) leather pillow + knit ball; corner group
+-  pill(M.leather, 0.5, 0.5, 0.27, 0.8, 1.2, Math.PI / 2 - 0.25, -0.3, 0.04);
++  pill(M.pillowLeather, 0.5, 0.5, 0.27, 0.8, 1.2, Math.PI / 2 - 0.25, -0.3, 0.04);
+   const ball = mesh(new THREE.SphereGeometry(0.13, 24, 18), M.knitBall); ball.position.set(0.47, 0.63, 0.98); ball.scale.set(1, 0.92, 1); L.add(ball);
+   pill(M.pillowStripe, 0.5, 0.5, 0.29, 0.79, -0.36, Math.PI / 2 + 0.3, -0.3, -0.06);
+   pill(M.pillowGray, 0.42, 0.42, 0.45, 0.71, -0.52, Math.PI / 2 + 0.5, -0.4);
+-  pill(M.leather, 0.5, 0.5, 0.3, 0.81, -0.78, Math.PI / 2 + 0.75, -0.28, 0.05);
+-  pill(M.leather, 0.44, 0.44, 0.33, 0.8, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
++  pill(M.pillowLeather, 0.5, 0.5, 0.3, 0.81, -0.78, Math.PI / 2 + 0.75, -0.28, 0.05);
++  pill(M.pillowLeather, 0.44, 0.44, 0.33, 0.8, -1.0, Math.PI / 2 + 0.85, -0.3, 0.1);
+   // throws
+   // striped throw over the back cushion by the arm, hanging onto the seat
+   const t1 = drapeThrow(M, M.throwStripe, { W: 0.62, front: 0.46, back: 0.3, top: 0.3, r: 0.07, seed: 2, fold: 0.03, soft0: 0.03, seg: 40, fringe: M.knitFringe });
+@@ -240,10 +240,10 @@ export async function buildLiving(ctx, M, group) {
+ 
+   // club chairs (face north, toward the sectional)
+   const ch = clubChair(M);
+-  const c1 = ch; c1.position.set(2.33, 0, 2.3); c1.rotation.y = Math.PI + 0.2; L.add(c1);
+-  const c2 = ch.clone(); c2.position.set(0.95, 0, 2.95); c2.rotation.y = Math.PI - 0.38; L.add(c2);
+-  ctx.addCollider({ x0: 1.88, z0: 1.85, x1: 2.78, z1: 2.75 });
+-  ctx.addCollider({ x0: 0.5, z0: 2.5, x1: 1.4, z1: 3.4 });
++  const c1 = ch; c1.position.set(2.42, 0, 2.33); c1.rotation.y = Math.PI + 0.2; L.add(c1);
++  const c2 = ch.clone(); c2.position.set(1.07, 0, 2.66); c2.rotation.y = Math.PI - 0.38; L.add(c2);
++  ctx.addCollider({ x0: 1.97, z0: 1.88, x1: 2.87, z1: 2.78 });
++  ctx.addCollider({ x0: 0.62, z0: 2.21, x1: 1.52, z1: 3.11 });
+ 
+   // coffee table + decor
+   const ct = coffeeTable(M); ct.position.set(1.91, 0, 0.33); ct.rotation.y = Math.PI / 2; L.add(ct);
+diff --git a/src/pieces/great_room/mats.js b/src/pieces/great_room/mats.js
+index 763aa23..367062a 100644
+--- a/src/pieces/great_room/mats.js
++++ b/src/pieces/great_room/mats.js
+@@ -31,10 +31,10 @@ export function makeMats() {
+   M.doorInt = std({ color: 0xf0ede5, roughness: 0.45 });
+ 
+   // ---------------- floor: medium-brown wood plank
+-  M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.5,
++  M.floor = new THREE.MeshPhysicalMaterial({ specularIntensity: 0.3,   // round 13: grazing reflections of the bright walls were greying the floor
+     map: tex('wood_floor_diff_2k.jpg', { srgb: true, tile: 2.0 }),
+     normalMap: tex('wood_floor_nor_gl_1k.jpg', { tile: 2.0 }),
+-    color: col(0.29, 0.335, 0.47), roughness: 0.6, envMapIntensity: 0.7, clearcoat: 0.16, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
++    color: col(0.215, 0.26, 0.38), roughness: 0.6, envMapIntensity: 0.55, clearcoat: 0.06, clearcoatRoughness: 0.5, normalScale: new THREE.Vector2(0.9, 0.9),
+   });
+ 
+   // ---------------- rough-sawn beam wood
+@@ -119,8 +119,73 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
+   M.leather = leatherMat();
+   M.leatherSide = leatherMat({ side: THREE.DoubleSide });
+   M.leatherDark = leatherMat({ color: new THREE.Color(1.5, 1.18, 0.64) });
+-  M.sofaLeather = hide(leatherMat({ vertexColors: true, color: new THREE.Color(1.74, 1.35, 0.62), specularColor: new THREE.Color(1.0, 0.88, 0.72), normalScale: new THREE.Vector2(0.48, 0.48) }));           // upholstery blocks carry baked under-cushion shade
+-  M.leatherPipe = leatherMat({ color: new THREE.Color(1.1, 0.86, 0.5), clearcoat: 0.25 });
++  // round 13: smooth, glossy aniline leather (sofa + club chairs). No pale worn patches and only faint mottling;
++  // fine creases from a world-space ridged-noise bump (normal + clearcoat normal) that also darkens the crease
++  // valleys; low roughness + clearcoat so cushion tops and arm fronts bloom under the area lights; darks stay brown.
++  const glossHide = (m) => {
++    m.onBeforeCompile = (sh) => {
++      sh.vertexShader = sh.vertexShader
++        .replace('#include <common>', '#include <common>\nvarying vec3 vHideP; varying vec3 vHideN;')
++        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvHideP = (modelMatrix * vec4(transformed, 1.0)).xyz; vHideN = normalize(mat3(modelMatrix) * objectNormal);');
++      sh.fragmentShader = sh.fragmentShader
++        .replace('#include <common>', `#include <common>
++varying vec3 vHideP; varying vec3 vHideN;
++float hh3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
++float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
++  return mix(mix(mix(hh3(i), hh3(i + vec3(1, 0, 0)), f.x), mix(hh3(i + vec3(0, 1, 0)), hh3(i + vec3(1, 1, 0)), f.x), f.y),
++             mix(mix(hh3(i + vec3(0, 0, 1)), hh3(i + vec3(1, 0, 1)), f.x), mix(hh3(i + vec3(0, 1, 1)), hh3(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
++// crease depth: thin valleys along the iso-lines of value noise (ridged), two scales
++float hwr(vec3 q) { float a = 1.0 - abs(2.0 * hn3(q) - 1.0); float b = 1.0 - abs(2.0 * hn3(q * 2.3 + 17.0) - 1.0);
++  a *= a; a *= a; b *= b; b *= b; return a + 0.5 * b; }`)
++        .replace('#include <map_fragment>', `#include <map_fragment>
++  // the Poly Haven albedo is a very saturated rust (81,45,16): keep only its value detail and take the hue from
++  // material.color (linear albedo), matched to the photo's tan-cognac
++  diffuseColor.rgb = diffuse * mix(1.0, dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722)) / 0.0364, 0.6);
++  float hm = 0.6 * hn3(vHideP * 2.3 + 7.0) + 0.4 * hn3(vHideP * 7.1);
++  diffuseColor.rgb *= 0.94 + 0.12 * hm;
++  vec3 wq = vHideP * 44.0;
++  float wAmp = 0.35 + 0.65 * smoothstep(0.3, 0.75, hn3(vHideP * 3.3 + 5.0));
++  float wd0 = hwr(wq);
++  vec3 wG = vec3(hwr(wq + vec3(0.12, 0, 0)), hwr(wq + vec3(0, 0.12, 0)), hwr(wq + vec3(0, 0, 0.12))) - wd0;
++  wG *= wAmp / 0.12;
++  diffuseColor.rgb *= 1.0 - 0.08 * wd0 * wAmp;`)
++        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
++  roughnessFactor = roughnessFactor * (0.85 + 0.3 * hn3(vHideP * 4.0 + 11.0)) + 0.18 * wd0 * wAmp;`)
++        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
++  { vec3 nW = normalize(normal * mat3(viewMatrix)); vec3 gT = wG - dot(wG, nW) * nW;
++    normal = normalize(mat3(viewMatrix) * normalize(nW + WRINKLE * gT)); }`)
++        .replace('#include <clearcoat_normal_fragment_maps>', `#include <clearcoat_normal_fragment_maps>
++  { vec3 nW = normalize(clearcoatNormal * mat3(viewMatrix)); vec3 gT = wG - dot(wG, nW) * nW;
++    clearcoatNormal = normalize(mat3(viewMatrix) * normalize(nW + 0.5 * WRINKLE * gT)); }`)
++        .replace('#include <aomap_fragment>', `#include <aomap_fragment>
++  { // warm, patchy specular: grazing env reflections of the cream walls were washing the tops pale grey
++    vec3 tintS = vec3(1.0, 0.8, 0.6);
++    float hv = 0.5 + 1.0 * smoothstep(0.25, 0.8, hn3(vHideP * 2.6 + 1.0));
++    float nvS = clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0);
++    float envS = ENVSPEC * (1.0 - 0.7 * pow(1.0 - nvS, 2.0));   // grazing env reflections damped
++    reflectedLight.indirectSpecular *= tintS * envS;
++    reflectedLight.directSpecular *= tintS * hv;
++  #ifdef USE_CLEARCOAT
++    clearcoatSpecularIndirect *= envS * 0.6;
++    clearcoatSpecularDirect *= hv;
++  #endif
++  }`)
++        .replace('#include <opaque_fragment>', `
++  { float ol = dot(outgoingLight, vec3(0.2126, 0.7152, 0.0722));
++    float sh = 1.0 - smoothstep(0.004, 0.025, ol);
++    outgoingLight = mix(outgoingLight, vec3(ol) * vec3(1.12, 0.96, 0.8), 0.15 * sh); }
++#include <opaque_fragment>`);
++      sh.fragmentShader = '#define WRINKLE 0.011\n#define ENVSPEC 0.6\n' + sh.fragmentShader;
++    };
++    m.customProgramCacheKey = () => 'glossHide1';
++    return m;
++  };
++  M.sofaLeather = glossHide(leatherMat({ vertexColors: true, color: new THREE.Color(0.235, 0.106, 0.04), specularColor: new THREE.Color(1.0, 0.82, 0.64), normalScale: new THREE.Vector2(0.22, 0.22),
++    roughness: 0.4, specularIntensity: 1.0, envMapIntensity: 0.45, clearcoat: 0.35, clearcoatRoughness: 0.3 }));           // upholstery blocks carry baked under-cushion shade
++  // the chairs sit at the edge of the living fill light: a lighter hide so they read as the photo's (same leather)
++  M.chairLeather = Object.assign(M.sofaLeather.clone(), { color: new THREE.Color(0.33, 0.155, 0.085), clearcoat: 0.35,
++    onBeforeCompile: M.sofaLeather.onBeforeCompile, customProgramCacheKey: M.sofaLeather.customProgramCacheKey });
++  M.leatherPipe = glossHide(leatherMat({ color: new THREE.Color(0.14, 0.062, 0.03), specularColor: new THREE.Color(1.0, 0.82, 0.64), roughness: 0.45, clearcoat: 0.2 }));   // welts: a touch darker than the hide
+   hide(M.leather); hide(M.leatherDark);
+ 
+   // ---------------- reclaimed wood (coffee table)
+@@ -165,7 +230,7 @@ float hn3(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f)
+   M.knitBall = std({ map: kb, bumpMap: kb, bumpScale: 4.0, color: 0xddd6c9, roughness: 1.0 });
+   M.pillowWhite = std({ color: 0xcdc4b3, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
+   M.pillowGray = std({ color: 0x55565a, roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
+-  M.pillowLeather = M.leather;
++  M.pillowLeather = glossHide(leatherMat({ color: new THREE.Color(0.24, 0.108, 0.045), specularColor: new THREE.Color(1.0, 0.82, 0.64), normalScale: new THREE.Vector2(0.25, 0.25), roughness: 0.36, specularIntensity: 1.0, clearcoat: 0.4, clearcoatRoughness: 0.28 }));
+   M.pillowStripe = std({ map: stripeTex(), roughness: 0.97, normalMap: linenN, normalScale: new THREE.Vector2(1.2, 1.2) });
+   M.throwStripe = std({ map: throwTex(), roughness: 0.98, bumpMap: knitMap, bumpScale: 1.5, side: THREE.DoubleSide });
+ 
+diff --git a/src/pieces/great_room/sofa.js b/src/pieces/great_room/sofa.js
+index d10b648..7e92742 100644
+--- a/src/pieces/great_room/sofa.js
++++ b/src/pieces/great_room/sofa.js
+@@ -60,10 +60,9 @@ export function upholsteryGeo(w, h, d, { r = 0.025, crown = 0, crownB = 0, bulge
+     if (ndu < -0.5) c *= 0.55;
+     c *= side + (1 - side) * Math.max(0, ndu);
+     // worn, lighter top edges (rounded band between the top and a side face)
+-    const edge = Math.max(0, ndu) * (1 - Math.abs(ndu)) * 4;
+-    c *= 1 + wear * Math.min(1, edge);
+-    // shade desaturates (bluer multiplier in the dark) so creases and undersides go brown, not rust
+-    col[v * 3] = c; col[v * 3 + 1] = Math.pow(c, 0.92) * 0.98; col[v * 3 + 2] = Math.pow(c, 0.8) * 0.95;
++    // (round 13: the lighter worn edge band is gone; it read as a pale, different material on the seat tops)
++    // round 13: shade deepens toward a richer brown (the photo's darks are more saturated than its lit tones)
++    col[v * 3] = c; col[v * 3 + 1] = Math.pow(c, 1.12); col[v * 3 + 2] = Math.pow(c, 1.35);
+     pos.setXYZ(v, X, Y, Z);
+   }
+   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+@@ -110,7 +109,7 @@ const at = (o, x, y, z) => { o.position.set(x, y, z); return o; };
+ // all one height and press into each other (slight overlap), so their seams are soft creases, not gaps.
+ const S = { foot: 0.06, baseTop: 0.24, seatTop: 0.45, railTop: 0.72, backT: 0.115, armW: 0.17, armTop: 0.62, gap: 0.008, lean: 0.2, press: 0.012, backH: 0.38, backTk: 0.165 };
+ 
+-const SIDE = 0.58;   // sofa sides stay closer to their tops in tone (photo); the chairs keep 0.42
++const SIDE = 0.45;   // sofa sides stay closer to their tops in tone (photo); the chairs keep 0.42
+ const frame = (M, w, h, d, opt = {}) => block(M, w, h, d, { r: 0.032, bulge: 0.006, m: [6, 6, 4], shade: 0.42, ...opt });
+ // rounded block spanning world box [x0,x1]x[y0,y1]x[z0,z1]
+ const blockAt = (M, x0, y0, z0, x1, y1, z1, opt, pipe) => at(block(M, x1 - x0, y1 - y0, z1 - z0, opt, pipe), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+@@ -192,41 +191,36 @@ export function buildSectional(M, { D = 1.0, cx = -0.3, cz = -1.55, zA1 = 1.64,
+   return g;
+ }
+ 
+-// --------------------------------------------------------------- club chair (faces +z), round 3-5 proportions
+-export function clubChair(M, { W = 0.84, D = 0.9, H = 0.82, seatH = 0.47, armH = 0.63, armW = 0.13, legH = 0.14 } = {}) {
+-  const g = new THREE.Group(), G = S.gap;
++// --------------------------------------------------------------- club chair (faces +z), round 13
++// Mid-century club chair after the photo: square track arms (small edge radius, welted tops), a tight back pillow
++// over a full-width back, one plump crowned seat cushion over a short apron, raised ~16 cm on tapered dark legs.
++export function clubChair(M, { W = 0.8, D = 0.86, H = 0.8, seatH = 0.45, armH = 0.62, armW = 0.135, legH = 0.16 } = {}) {
++  const g = new THREE.Group(), G = S.gap, CS = 0.37;
+   for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+-    const l = mesh(new THREE.CylinderGeometry(0.018, 0.011, legH, 10), M.legWood);
+-    l.position.set(x * (W / 2 - 0.05), legH / 2, z * (D / 2 - 0.06)); l.rotation.z = -x * 0.08; l.rotation.x = z * 0.08; g.add(l);
++    const l = mesh(new THREE.CylinderGeometry(0.019, 0.01, legH + 0.01, 12), M.legWood);
++    l.position.set(x * (W / 2 - 0.05), legH / 2, z * (D / 2 - 0.06)); l.rotation.z = -x * 0.1; l.rotation.x = z * 0.1; g.add(l);
+   }
+-  g.add(contactShadow(W + 0.28, D + 0.28, 0, 0, { opacity: 0.8 }));
+-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(contactShadow(0.16, 0.16, x * (W / 2 - 0.05), z * (D / 2 - 0.06), { y: 0.0145 }));
+-  const y0 = legH, deck = 0.15, bt = 0.17;
+-  const iw = W - 2 * (armW + G);
+-  // deck between the arms, crisp outer back, track arms
+-  g.add(at(frame(M, iw, deck, D - bt - G, { r: 0.02 }), 0, y0 + deck / 2, (bt + G) / 2));
+-  g.add(at(frame(M, W, H - y0, bt, { r: 0.05, crown: 0.01, m: [8, 6, 2] }), 0, y0 + (H - y0) / 2, -D / 2 + bt / 2));
+-  for (const s of [-1, 1]) g.add(at(frame(M, armW, armH - y0, D - bt - G, { r: 0.05, crown: 0.01, m: [3, 6, 8] }), s * (W / 2 - armW / 2), y0 + (armH - y0) / 2, (bt + G) / 2));
+-  // single seat cushion
+-  const sh = seatH - (y0 + deck), lean = 0.12, zb = -D / 2 + bt + 0.03;
+-  const sc = block(M, iw - G, sh, D - bt - 0.035, { r: 0.026, crown: 0.012, bulge: 0.005, wrinkle: 0.0015, seed: 5, m: [8, 2, 8], shade: 0.4 }, [1, -1]);
+-  g.add(at(sc, 0, y0 + deck + sh / 2 + 0.002, (zb + D / 2) / 2 + 0.0));
+-  // back cushion leaning on the back
+-  const BH = 0.36, BT = 0.15;
+-  const bc = block(M, iw - G, BT, BH, { r: 0.03, crown: 0.022, bulge: 0.006, wrinkle: 0.002, seed: 9, m: [8, 2, 8], shade: 0.15, up: [0, Math.sin(lean), -Math.cos(lean)] }, [1]);
+-  bc.rotation.x = Math.PI / 2 - lean;
+-  const sl = Math.sin(lean), cl = Math.cos(lean);
+-  bc.position.set(0, seatH + 0.006 + (BT / 2) * sl + (BH / 2) * cl, -D / 2 + bt + 0.005 + (BT / 2) * cl - (BH / 2) * sl + 0.04);
+-  g.add(bc);
+-  // no clearcoat on the chairs: at their grazing view angle it mirrors the bright windows as a grey wash
+-  M.chairLeather = M.chairLeather || Object.assign(M.sofaLeather.clone(), { clearcoat: 0, envMapIntensity: 0.4, specularIntensity: 0.35, color: new THREE.Color(1.9, 1.6, 1.12),
+-    onBeforeCompile: M.sofaLeather.onBeforeCompile, customProgramCacheKey: M.sofaLeather.customProgramCacheKey });
+-  // lift the baked side/underside shade on the chairs: the photo's chair sides stay close to their tops in tone
+-  g.traverse((o) => {
+-    if (o.material !== M.sofaLeather) return;
+-    o.material = M.chairLeather;
+-    const c = o.geometry.attributes.color;
+-    if (c) for (let i = 0; i < c.array.length; i++) c.array[i] = Math.pow(c.array[i], 0.62);
+-  });
++  g.add(contactShadow(W + 0.2, D + 0.2, 0, 0, { opacity: 0.42 }));
++  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(contactShadow(0.12, 0.12, x * (W / 2 - 0.04), z * (D / 2 - 0.05), { y: 0.0145, opacity: 0.8 }));
++  const y0 = legH, deckTop = 0.27, bt = 0.15, iw = W - 2 * armW;
++  // track arms: full depth, crisp square profile, welt round the top
++  for (const s of [-1, 1]) g.add(at(block(M, armW, armH - y0, D, { r: 0.026, crown: 0.006, bulge: 0.004, m: [4, 8, 12], k: 4, shade: 0.4, side: CS }, [1]), s * (W / 2 - armW / 2), y0 + (armH - y0) / 2, 0));
++  // full-width back (3 mm inside the arms' outer faces), welted top
++  const bH = H - 0.12 - y0;   // hidden behind the pillow, which forms the whole visible back
++  g.add(at(block(M, W - 0.008, bH, bt, { r: 0.04, crown: 0.012, bulge: 0.004, m: [10, 8, 3], k: 4, shade: 0.4, side: CS }, [1]), 0, y0 + bH / 2, -D / 2 + bt / 2));
++  // short apron between the arms under the seat
++  const ad = D - bt - 0.008;
++  g.add(at(block(M, iw + 0.004, deckTop - y0, ad, { r: 0.018, bulge: 0.003, m: [8, 3, 6], shade: 0.35, side: CS }), 0, (y0 + deckTop) / 2, -D / 2 + bt + ad / 2 - 0.004));
++  // tight back pillow, leaning on the back
++  const lean = 0.2, BT = 0.12, BH = H - seatH + 0.03, sl = Math.sin(lean), cl = Math.cos(lean);
++  const bp = block(M, W - 0.03, BT, BH, { r: 0.06, crown: 0.03, crownB: 0.004, bulge: 0.012, wrinkle: 0.0015, seed: 9, m: [12, 2, 12], k: 4, shade: 0.25, side: CS, up: [0, sl, -cl] }, [1]);
++  bp.rotation.x = Math.PI / 2 - lean;
++  const by = seatH - 0.03, bz = -D / 2 + bt + 0.004 + (seatH - 0.03 - y0) * 0;
++  bp.position.set(0, by + (BT / 2) * sl + (BH / 2) * cl, bz + (BT / 2) * cl - (BH / 2) * sl + (H - by) * sl * 0.55);
++  g.add(bp);
++  // one plump seat cushion: crowned top, welted top and bottom edges, a soft sitting dip
++  const zb = bz + BT * 0.75, zf = D / 2 + 0.006, sh = seatH - 0.012 - deckTop;
++  g.add(at(block(M, iw - G, sh, zf - zb, { r: 0.045, crown: 0.03, bulge: 0.016, wrinkle: 0.0015, sag: 0.012, crease: 0.006, seed: 5, m: [14, 3, 12], k: 5, shade: 0.45, side: CS }, [1]), 0, deckTop + sh / 2 + 0.002, (zb + zf) / 2));
++  g.traverse((o) => { if (o.material === M.sofaLeather) o.material = M.chairLeather; });
+   return g;
+ }
